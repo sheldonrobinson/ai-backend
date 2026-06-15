@@ -70,4 +70,12 @@ else
     fi
 fi
 
+echo "Setting up local-mcp configuration..."
+if command -v npx &> /dev/null; then
+    export LMCP_REF="67df72f4"
+    npx -y local-mcp@latest setup || echo "local-mcp setup failed, but continuing..."
+else
+    echo "npx not found, skipping local-mcp setup."
+fi
+
 echo "Installation completed successfully."

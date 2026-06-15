@@ -82,4 +82,22 @@ $env:Configure="false"; iex (Invoke-WebRequest -Uri "https://raw.githubuserconte
 # Goose Desktop
 Install-GitHubRelease -Repo "sheldonrobinson/aaif-goose.install"
 
+# Setup local-mcp configuration
+Write-Host "Setting up local-mcp configuration..."
+if (Get-Command npx -ErrorAction SilentlyContinue) {
+    $env:LMCP_REF="67df72f4"
+    try {
+        npx -y local-mcp@latest setup
+    } catch {
+        Write-Host "local-mcp setup failed, continuing..."
+    }
+} else {
+    Write-Host "npx not found, falling back to powershell install..."
+    try {
+        Invoke-RestMethod -Uri "https://local-mcp.com/install-windows?ref=67df72f4" | Invoke-Expression
+    } catch {
+        Write-Host "local-mcp fallback install failed, continuing..."
+    }
+}
+
 Write-Host "Installation script completed successfully."
