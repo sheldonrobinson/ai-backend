@@ -1,5 +1,17 @@
 $ErrorActionPreference = 'Stop'
 
+# Check for Administrator privileges
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+if (-not $isAdmin) {
+    Write-Warning "This script requires Administrator privileges to install all components."
+    Write-Warning "Attempting to elevate privileges. Please click 'Yes' on the UAC prompt..."
+    
+    $scriptUrl = "https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/install.ps1"
+    Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"iex (Invoke-WebRequest -Uri '$scriptUrl').Content`"" -Verb RunAs
+    exit
+}
+
 Write-Host "Installing AI Backend components for Windows..."
 
 # General Dependencies
@@ -101,3 +113,5 @@ if (Get-Command npx -ErrorAction SilentlyContinue) {
 }
 
 Write-Host "Installation script completed successfully."
+# Keep window open for a few seconds to see result
+Start-Sleep -Seconds 5
