@@ -42,15 +42,44 @@ if ($hasNvidia) {
 Write-Host "Installing llamacpp via winget..."
 winget install ggml.llamacpp --accept-package-agreements --accept-source-agreements
 
-# agentgateway & mcpjungle
-Write-Host "Please download agentgateway manually from https://github.com/sheldonrobinson/agentgateway.install/releases"
-Write-Host "Please download mcpjungle manually from https://github.com/sheldonrobinson/mcpjungle.install/releases"
+# Helper to automatically fetch and install the latest GitHub release assets
+function Install-GitHubRelease {
+    param(
+        [string]$Repo,
+        [string]$Match = "\.(exe|msi)$"
+    )
+    Write-Host "Fetching latest release for $Repo..."
+    $apiUrl = "https://api.github.com/repos/$Repo/releases/latest"
+    try {
+        $release = Invoke-RestMethod -Uri $apiUrl -ErrorAction Stop
+        $asset = $release.assets | Where-Object { $_.name -match $Match } | Select-Object -First 1
+        if ($asset) {
+            $downloadUrl = $asset.browser_download_url
+            $fileName = "$env:TEMP\$($asset.name)"
+            Write-Host "Downloading $($asset.name)..."
+            Invoke-WebRequest -Uri $downloadUrl -OutFile $fileName
+            Write-Host "Installing $($asset.name)..."
+            Start-Process -FilePath $fileName -ArgumentList "/quiet", "/passive", "/norestart" -Wait -NoNewWindow
+            Write-Host "Successfully installed $($asset.name)"
+        } else {
+            Write-Host "No installable asset matching '$Match' found for $Repo."
+        }
+    } catch {
+        Write-Host "Failed to fetch or install release for $Repo. Error: $_"
+    }
+}
+
+# agentgateway
+Install-GitHubRelease -Repo "sheldonrobinson/agentgateway.install"
+
+# mcpjungle
+Install-GitHubRelease -Repo "sheldonrobinson/mcpjungle.install"
 
 # goose-cli
 Write-Host "Installing goose-cli..."
 $env:Configure="false"; iex (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaif-goose/goose/main/download_cli.ps1").Content
 
 # Goose Desktop
-Write-Host "Please download Goose Desktop manually from https://github.com/sheldonrobinson/aaif-goose.install/releases"
+Install-GitHubRelease -Repo "sheldonrobinson/aaif-goose.install"
 
 Write-Host "Installation script completed successfully."
