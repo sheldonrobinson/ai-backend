@@ -3,29 +3,29 @@ $ErrorActionPreference = 'Stop'
 Write-Host "Installing AI Backend components for Windows..."
 
 # General Dependencies
-winget install Chocolatey.Chocolatey --accept-package-agreements --accept-source-agreements
+winget install Chocolatey.Chocolatey --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
 choco install visualstudio2026buildtools 118.6.1 -y
-winget install Microsoft.VCRedist.2015+.x64 --accept-package-agreements --accept-source-agreements
+winget install Microsoft.VCRedist.2015+.x64 --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
 choco install make -y
-winget install KhronosGroup.VulkanRT --accept-package-agreements --accept-source-agreements
-winget install Python.Python.3.14 --accept-package-agreements --accept-source-agreements
-winget install pnpm.pnpm --accept-package-agreements --accept-source-agreements
+winget install KhronosGroup.VulkanRT --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
+winget install Python.Python.3.14 --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
+winget install pnpm.pnpm --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
 
 # pipx
-python -m pip install --user pipx
+python -m pip install --quiet --user pipx
 pipx.exe ensurepath
 
 # Sugar
 pipx install sugarai
 
 # Build tools & VCS
-winget install OpenJS.NodeJS.LTS --accept-package-agreements --accept-source-agreements
-winget install JernejSimoncic.Wget --accept-package-agreements --accept-source-agreements
-winget install Ninja-build.Ninja --accept-package-agreements --accept-source-agreements
-winget install Git.Git --accept-package-agreements --accept-source-agreements
-winget install GitHub.GitLFS --accept-package-agreements --accept-source-agreements
-winget install Kitware.CMake --accept-package-agreements --accept-source-agreements
-winget install Xmake-io.Xmake --accept-package-agreements --accept-source-agreements
+winget install OpenJS.NodeJS.LTS --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
+winget install JernejSimoncic.Wget --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
+winget install Ninja-build.Ninja --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
+winget install Git.Git --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
+winget install GitHub.GitLFS --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
+winget install Kitware.CMake --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
+winget install Xmake-io.Xmake --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
 
 Write-Host "Determining best ggml-backend..."
 $hasNvidia = Get-WmiObject Win32_VideoController | Where-Object { $_.Name -match "NVIDIA" }
@@ -40,7 +40,7 @@ if ($hasNvidia) {
 
 # llamacpp
 Write-Host "Installing llamacpp via winget..."
-winget install ggml.llamacpp --accept-package-agreements --accept-source-agreements
+winget install ggml.llamacpp --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
 
 # Helper to automatically fetch and install the latest GitHub release assets
 function Install-GitHubRelease {
