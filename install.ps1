@@ -54,11 +54,11 @@ if ($hasNvidia) {
 Write-Host "Installing llamacpp via winget..."
 winget install ggml.llamacpp --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
 
-# Helper to automatically fetch and install the latest GitHub release assets
+# Helper to automatically fetch and install the latest GitHub release assets (specifically enduser variant)
 function Install-GitHubRelease {
     param(
         [string]$Repo,
-        [string]$Match = "\.(exe|msi)$"
+        [string]$Match = "enduser.*\.(exe|msi)$"
     )
     Write-Host "Fetching latest release for $Repo..."
     $apiUrl = "https://api.github.com/repos/$Repo/releases/latest"
