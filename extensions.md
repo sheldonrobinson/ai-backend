@@ -139,4 +139,116 @@ Browse and install extensions directly to your Goose Agent with a single click.
         <div class="cmd-preview">npx skills add https://agents.stackoverflow.com/ --skill sofa --yes --agent cline goose</div>
         <a href="goose://extension?name=Stack%20Overflow%20for%20Agents&cmd=npx%20skills%20add%20https%3A//agents.stackoverflow.com/%20--skill%20sofa%20--yes%20--agent%20cline%20goose" class="install-btn">➕ Install with Goose</a>
     </div>
+    
+    <div class="card">
+        <span class="tag">Finance & Operations</span>
+        <h3>TradingView</h3>
+        <p>AI-powered trading toolkit for Claude and MCP clients. Backtesting + Live Sentiment + Yahoo Finance + 30+ Technical Analysis Tools — all in one MCP server.</p>
+        <div class="cmd-preview">uvx --from tradingview-mcp-server tradingview-mcp</div>
+        <a href="goose://extension?name=TradingView&cmd=uvx%20--from%20tradingview-mcp-server%20tradingview-mcp" class="install-btn">➕ Install with Goose</a>
+    </div>
+    
+    <div class="card">
+        <span class="tag">Media & Productivity</span>
+        <h3>Bluesky Social</h3>
+        <p>A full-featured Bluesky MCP server that adds search, feeds, trends, follower graph tools, thread retrieval, and rich content/engagement management for agentic workflows.</p>
+        <div class="cmd-preview">npx -y @semihberkay/bluesky-mcp</div>
+        <a href="goose://extension?name=Bluesky%20Social&cmd=npx%20-y%20%40semihberkay/bluesky-mcp" class="install-btn">➕ Install with Goose</a>
+    </div>
+    
+    <div class="card">
+        <span class="tag">Media & Productivity</span>
+        <h3>Mastodon Social</h3>
+        <p>A minimal Mastodon MCP server providing basic posting, timeline access, and simple social interactions for agentic clients.</p>
+        <div class="cmd-preview">uvx --from mastodon-mcp-server mastodon-mcp</div>
+        <a href="goose://extension?name=Mastodon%20Social&cmd=uvx%20--from%20mastodon-mcp-server%20mastodon-mcp" class="install-btn">➕ Install with Goose</a>
+    </div>
+    
+    <div class="card">
+        <span class="tag">Media & Productivity</span>
+        <h3>LinkedIn Newsletter</h3>
+        <p>A minimal LinkedIn MCP server that exposes basic profile lookup and posting capabilities for lightweight agent automation.</p>
+        <div class="cmd-preview">uvx ldraney-linkedin-mcp</div>
+        <a href="goose://extension?name=LinkedIn%20Newsletter&cmd=uvx%20ldraney-linkedin-mcp" class="install-btn">➕ Install with Goose</a>
+    </div>
+    
+    <div class="card">
+        <span class="tag">Media & Productivity</span>
+        <h3>LinkedIn</h3>
+        <p>A minimal LinkedIn MCP server that enables agents to authenticate, fetch profiles, and perform basic LinkedIn interactions programmatically.</p>
+        <div class="cmd-preview">uvx linkedin-scraper-mcp@latest --transport stdio</div>
+        <a href="goose://extension?name=LinkedIn&cmd=uvx%20linkedin-scraper-mcp%40latest%20--transport%20stdio" class="install-btn">➕ Install with Goose</a>
+    </div>
+    
+    <div class="card">
+        <span class="tag">Media & Productivity</span>
+        <h3>LinkedIn Jobs and Network</h3>
+        <p>A lightweight MCP server that exposes LinkedIn search and profile-scraping capabilities to agentic clients.</p>
+        <div class="cmd-preview">npx -y @pegasusheavy/linkedin-mcp</div>
+        <a href="goose://extension?name=LinkedIn%20Jobs%20and%20Network&cmd=npx%20-y%20%40pegasusheavy/linkedin-mcp" class="install-btn">➕ Install with Goose</a>
+    </div>
+    
+    <div class="card">
+        <span class="tag">Development & Engineering</span>
+        <h3>Git Server</h3>
+        <p>MCP Git Server designed to interact with Git repositories, particularly useful for tasks such as repository management, branch operations, commit handling, and more.</p>
+        <div class="cmd-preview">uvx mcp-server-git</div>
+        <a href="goose://extension?name=Git%20Server&cmd=uvx%20mcp-server-git" class="install-btn">➕ Install with Goose</a>
+    </div>
+    
+    <div class="card">
+        <span class="tag">Media & Productivity</span>
+        <h3>Excel</h3>
+        <p>A Model Context Protocol server for Excel file manipulation</p>
+        <div class="cmd-preview">uvx excel-mcp-server stdio</div>
+        <a href="goose://extension?name=Excel&cmd=uvx%20excel-mcp-server%20stdio" class="install-btn">➕ Install with Goose</a>
+    </div>
+    
+    <div class="card">
+        <span class="tag">Legal Services</span>
+        <h3>Judicial Research Agent</h3>
+        <p>An MCP server that lets AI agents search and retrieve 3M+ U.S. court decisions and EU legislation via CourtListener and EUR-Lex for legal research.</p>
+        <div class="cmd-preview">uvx --from legal-court-mcp-server legal-court-server</div>
+        <a href="goose://extension?name=Judicial%20Research%20Agent&cmd=uvx%20--from%20legal-court-mcp-server%20legal-court-server" class="install-btn">➕ Install with Goose</a>
+    </div>
+    
+    <div class="card">
+        <span class="tag">Finance & Operations</span>
+        <h3>Real Estate Assistant</h3>
+        <p>An MCP server that gives AI agents unified access to U.S. real-estate data, including property records, valuations, and market insights for analysis and automation.</p>
+        <div class="cmd-preview">uvx --from real-estate-data-mcp-server real-estate-server</div>
+        <a href="goose://extension?name=Real%20Estate%20Assistant&cmd=uvx%20--from%20real-estate-data-mcp-server%20real-estate-server" class="install-btn">➕ Install with Goose</a>
+    </div>
+    
+    <div class="card">
+        <span class="tag">Finance & Operations</span>
+        <h3>Job Market Analyst</h3>
+        <p>An MCP server providing global labor-market data, including unemployment rates, wages, sector employment, and occupation outlooks using official BLS (US) and Eurostat (EU) APIs.</p>
+        <div class="cmd-preview">uvx --from labor-market-mcp-server labor-market-server</div>
+        <a href="goose://extension?name=Job%20Market%20Analyst&cmd=uvx%20--from%20labor-market-mcp-server%20labor-market-server" class="install-btn">➕ Install with Goose</a>
+    </div>
+    
+    <div class="card">
+        <span class="tag">Search & Research</span>
+        <h3>Crossref Research Assistant</h3>
+        <p>An MCP server that lets AI agents query Crossref for academic metadata, including DOIs, authors, journals, citations, and publication records for research automation.</p>
+        <div class="cmd-preview">uvx --from crossref-academic-mcp-server crossref-server</div>
+        <a href="goose://extension?name=Crossref%20Research%20Assistant&cmd=uvx%20--from%20crossref-academic-mcp-server%20crossref-server" class="install-btn">➕ Install with Goose</a>
+    </div>
+    
+    <div class="card">
+        <span class="tag">Supply Chain & Logistics</span>
+        <h3>Supply-Chain Agent</h3>
+        <p>A lightweight MCP server providing structured access to logistics workflows—shipments, tracking, routing, and supply-chain operations—for AI agents and automation.</p>
+        <div class="cmd-preview">uvx logistics_ai_mcp</div>
+        <a href="goose://extension?name=Supply-Chain%20Agent&cmd=uvx%20logistics_ai_mcp" class="install-btn">➕ Install with Goose</a>
+    </div>
+    
+    <div class="card">
+        <span class="tag">Search & Research</span>
+        <h3>Open WebSearch</h3>
+        <p>A Multi-engine MCP server, CLI, and local daemon, that can also be paired with skill-guided agent workflows for live web search and content retrieval.</p>
+        <div class="cmd-preview">npx -y open-websearch@latest mcp</div>
+        <a href="goose://extension?name=Open%20WebSearch&cmd=npx%20-y%20open-websearch%40latest%20mcp" class="install-btn">➕ Install with Goose</a>
+    </div>
     </div>
