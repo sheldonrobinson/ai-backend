@@ -112,6 +112,45 @@ if (Get-Command npx -ErrorAction SilentlyContinue) {
     }
 }
 
+# Copy start script into Program Files and create shortcuts for easy launch
+$InstallDir = "$env:ProgramFiles\AI-Backend"
+New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
+$sourceScript = Join-Path $PSScriptRoot 'tools\start-all.ps1'
+$destScript = Join-Path $InstallDir 'start-all.ps1'
+if (Test-Path $sourceScript) {
+    Copy-Item -Path $sourceScript -Destination $destScript -Force
+    Write-Host "Copied start script to $destScript"
+} else {
+    Write-Warning "Start script $sourceScript not found in installer package. You can manually place start-all.ps1 in $InstallDir."
+}
+
+# Create Start Menu and Desktop shortcuts (All Users)
+try {
+    $wsh = New-Object -ComObject WScript.Shell
+
+    $startMenuShortcut = Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs\AI Backend.lnk'
+    $sc = $wsh.CreateShortcut($startMenuShortcut)
+    $sc.TargetPath = Join-Path $env:SystemRoot 'system32\WindowsPowerShell\v1.0\powershell.exe'
+    $sc.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$destScript`""
+    $sc.WorkingDirectory = $InstallDir
+    $sc.IconLocation = "shell32.dll,16801"
+    $sc.Save()
+    Write-Host "Created Start Menu shortcut: $startMenuShortcut"
+
+    $publicDesktop = Join-Path $env:Public 'Desktop'
+    $desktopShortcut = Join-Path $publicDesktop 'AI Backend.lnk'
+    $sc2 = $wsh.CreateShortcut($desktopShortcut)
+    $sc2.TargetPath = $sc.TargetPath
+    $sc2.Arguments = $sc.Arguments
+    $sc2.WorkingDirectory = $sc.WorkingDirectory
+    $sc2.IconLocation = $sc.IconLocation
+    $sc2.Save()
+    Write-Host "Created Desktop shortcut: $desktopShortcut"
+} catch {
+    Write-Warning "Failed to create shortcuts: $_"
+}
+
 Write-Host "Installation script completed successfully."
 # Keep window open for a few seconds to see result
 Start-Sleep -Seconds 5
+
