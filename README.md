@@ -15,27 +15,27 @@ Whether you're in **financial services**, **legal**, **supply-chain & logistics*
 Quick start (Windows)
 
 1. Open PowerShell as your normal user and run the installer (elevated steps may be requested by installer for system packages):
-
+```
    powershell -NoProfile -ExecutionPolicy Bypass -Command "iex (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/install.ps1')"
-
+```
 2. After install, use Start Menu or Desktop shortcut "AI Backend" to start components (hidden by default). To show consoles run the start script with -Visible.
 
 Quick start (Linux / macOS)
 
 1. Run the installer:
-
+```
    bash -c "$(curl -fsSL https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/install.sh)"
-
+```
 2. Start services (background, logs in ~/.local/state/ai-backend-logs):
-
+```
    ~/.local/share/Konnek/AI-Backend/start-all.sh
-
+```
    To show terminals: ~/.local/share/Konnek/AI-Backend/start-all.sh --visible
 
 Logs
 
-- Windows: %TEMP%\AI-Backend-Logs
-- Linux/macOS: ${XDG_STATE_HOME:-$HOME/.local/state}/ai-backend-logs
+- Windows: `%TEMP%\AI-Backend-Logs`
+- Linux/macOS: `${XDG_STATE_HOME:-$HOME/.local/state}/ai-backend-logs`
 
 Uninstall
 
