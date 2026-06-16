@@ -181,10 +181,10 @@ echo "--port 9000 --sqlite-db-path $MCP_DB" > "$MCP_ARGS_FILE"
 # Also export a convenience variable for start scripts
 for profile in "$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.zshrc"; do
   if [ -f "$profile" ]; then
-    grep -qxF "export MCPJUNGLE_ARGS='--port 9000 --sqlite-db-path $MCP_DB'" "$profile" || echo "export MCPJUNGLE_ARGS='--port 9000 --sqlite-db-path $MCP_DB'" >> "$profile"
+    grep -qxF "export MCPJUNGLE_ARGS='--sqlite-db-path $MCP_DB'" "$profile" || echo "export MCPJUNGLE_ARGS='--sqlite-db-path $MCP_DB'" >> "$profile"
   fi
 done
-export MCPJUNGLE_ARGS="--port 9000 --sqlite-db-path $MCP_DB"
+export MCPJUNGLE_ARGS="--sqlite-db-path $MCP_DB"
 
 
 echo "Installation completed successfully."
