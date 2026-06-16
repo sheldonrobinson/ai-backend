@@ -16,7 +16,7 @@ Write-Host "Installing AI Backend components for Windows..."
 
 # General Dependencies
 winget install Chocolatey.Chocolatey --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
-choco install visualstudio2026buildtools 118.6.1 -y
+winget install Microsoft.VisualStudio.BuildTools --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
 winget install Microsoft.VCRedist.2015+.x64 --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
 choco install make -y
 winget install KhronosGroup.VulkanRT --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
@@ -38,6 +38,7 @@ winget install Git.Git --accept-package-agreements --accept-source-agreements --
 winget install GitHub.GitLFS --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
 winget install Kitware.CMake --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
 winget install Xmake-io.Xmake --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
+winget install alirezagsm.trayy --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
 
 Write-Host "Determining best ggml-backend..."
 $hasNvidia = Get-WmiObject Win32_VideoController | Where-Object { $_.Name -match "NVIDIA" }
