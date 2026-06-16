@@ -78,4 +78,39 @@ else
     echo "npx not found, skipping local-mcp setup."
 fi
 
+# Post-install configuration for Llama.C++
+echo "Configuring Llama.C++ post-install..."
+# Ensure user config directory
+mkdir -p "$HOME/.konnek/llamacpp"
+
+# Create a models.ini with example entries if it does not exist
+MODELS_INI="$HOME/.konnek/llamacpp/models.ini"
+if [ ! -f "$MODELS_INI" ]; then
+  cat > "$MODELS_INI" <<'EOF'
+# Llama.C++ models configuration
+# Define models as key=value pairs: name=/absolute/path/to/ggml-model.bin
+# Example:
+# gpt4all=/home/user/.local/share/llama/models/gpt4all.bin
+
+# Add your models below
+
+EOF
+  echo "Created $MODELS_INI"
+else
+  echo "$MODELS_INI already exists; leaving unchanged."
+fi
+
+# Set LLAMA_ARG_HOST=localhost in common user shell profiles if not present
+for profile in "$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.zshrc"; do
+  if [ -f "$profile" ]; then
+    if ! grep -q '^export LLAMA_ARG_HOST=localhost$' "$profile"; then
+      echo "export LLAMA_ARG_HOST=localhost" >> "$profile"
+      echo "Added LLAMA_ARG_HOST to $profile"
+    fi
+  fi
+done
+
+# Also export for current session
+export LLAMA_ARG_HOST=localhost
+
 echo "Installation completed successfully."
