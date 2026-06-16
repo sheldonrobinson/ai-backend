@@ -1,14 +1,20 @@
 <#
 Start-All.ps1
-Starts Llama.C++ HTTP server, agentgateway, and MCPJungle in separate console windows.
-Place this script in Program Files\AI-Backend and run elevated.
+Starts Llama.C++ HTTP server, agentgateway, and MCPJungle.
+Default behavior runs components hidden/background. Use -Visible to open console windows.
+Installs to %LOCALAPPDATA%\Programs\Konnek\AI-Backend when provided by installer.
 #>
-param()
+param(
+    [switch]$Visible
+)
 
 $ErrorActionPreference = 'Stop'
 
+# By default run hidden/background. Use -Visible to open consoles.
+$Hidden = -not $Visible
+
 # Configurable values
-$InstallDir = "$env:ProgramFiles\AI-Backend"
+$InstallDir = Join-Path $env:LOCALAPPDATA 'Programs\Konnek\AI-Backend'
 $LogDir = Join-Path $env:TEMP "AI-Backend-Logs"
 New-Item -Path $LogDir -ItemType Directory -Force | Out-Null
 
@@ -50,10 +56,23 @@ function Start-Component {
     }
 
     $cmd = "`"$exe`" $Args"
-    # Open a new cmd window and run the command so output is visible and persists
-    $psiArgs = "/k `"$exe`" $Args"
-    Start-Process -FilePath "cmd.exe" -ArgumentList $psiArgs -WorkingDirectory $WorkingDir -WindowStyle Normal
-    Write-Host "$Name started (executable: $exe)"
+    if ($Hidden) {
+        # Start hidden/background
+        try {
+            Start-Process -FilePath $exe -ArgumentList $Args -WorkingDirectory $WorkingDir -WindowStyle Hidden -ErrorAction Stop
+            Write-Host "$Name started (hidden) (executable: $exe)"
+        } catch {
+            # Fallback to launching via cmd hidden
+            $psiArgs = "/c `"$exe`" $Args"
+            Start-Process -FilePath "cmd.exe" -ArgumentList $psiArgs -WorkingDirectory $WorkingDir -WindowStyle Hidden
+            Write-Host "$Name started (hidden via cmd) (executable: $exe)"
+        }
+    } else {
+        # Open a new cmd window and run the command so output is visible and persists
+        $psiArgs = "/k `"$exe`" $Args"
+        Start-Process -FilePath "cmd.exe" -ArgumentList $psiArgs -WorkingDirectory $WorkingDir -WindowStyle Normal
+        Write-Host "$Name started (visible) (executable: $exe)"
+    }
 }
 
 # Default component configurations (adjust ports/args below if needed)

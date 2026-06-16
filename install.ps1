@@ -124,6 +124,14 @@ if (Test-Path $sourceScript) {
     Write-Warning "Start script $sourceScript not found in installer package. You can manually place start-all.ps1 in $InstallDir."
 }
 
+# Copy uninstall script as well if present
+$sourceUninstall = Join-Path $PSScriptRoot 'tools\uninstall.ps1'
+$destUninstall = Join-Path $InstallDir 'uninstall.ps1'
+if (Test-Path $sourceUninstall) {
+    Copy-Item -Path $sourceUninstall -Destination $destUninstall -Force
+    Write-Host "Copied uninstall script to $destUninstall"
+}
+
 # Create Start Menu and Desktop shortcuts (Current User)
 try {
     $wsh = New-Object -ComObject WScript.Shell
@@ -148,6 +156,19 @@ try {
     $sc2.IconLocation = $sc.IconLocation
     $sc2.Save()
     Write-Host "Created Desktop shortcut: $desktopShortcut"
+
+    # Create Startup shortcut to auto-run the start script on login (hidden by default)
+    $startupDir = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Startup'
+    New-Item -ItemType Directory -Path $startupDir -Force | Out-Null
+    $startupShortcut = Join-Path $startupDir 'AI Backend.lnk'
+    $sc3 = $wsh.CreateShortcut($startupShortcut)
+    $sc3.TargetPath = $sc.TargetPath
+    # do not pass -Visible; default start-all.ps1 runs hidden
+    $sc3.Arguments = $sc.Arguments
+    $sc3.WorkingDirectory = $sc.WorkingDirectory
+    $sc3.IconLocation = $sc.IconLocation
+    $sc3.Save()
+    Write-Host "Created Startup shortcut: $startupShortcut"
 } catch {
     Write-Warning "Failed to create shortcuts: $_"
 }
