@@ -248,22 +248,8 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <a href="goose://extension?cmd=uvx&id=germany&name=Germany&description=German%20public%20data%3A%20traffic%2C%20DWD%20weather%20%26%20warnings%2C%20Bundestag%2C%20energy%2C%20pollen%20and%20Destatis%20statistics.&arg=germany-mcp-server" class="install-btn">➕ Install Extension</a>
     </div>
 
-    <div class="card">
-        <span class="tag">Developer Tools</span>
-        <h3>MCP Tools</h3>
-        <p>CLI toolkit for creating, managing and publishing MCP servers (developer utility).</p>
-        <div class="cmd-preview">pip install mcp-tools</div>
-        <div class="cmd-preview">mcp-tools create my-server</div>
-    </div>
 
 
-    <div class="card">
-        <span class="tag">APIs</span>
-        <h3>Agent APIs</h3>
-        <p>Serverless collection of 11 free APIs (weather, cache, PII scanning, discovery, stake, etc.) — live on Vercel.</p>
-        <div class="cmd-preview">Open https://agent-apis.vercel.app</div>
-        <a href="https://agent-apis.vercel.app" class="install-btn">Open Agent APIs</a>
-    </div>
 
     </div>
 
