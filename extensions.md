@@ -169,7 +169,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 
     <div class="card">
         <span class="tag">News & Media</span>
-        <h3>News</h3>
+        <h3>News Aggregator</h3>
         <p>Aggregates trending topics from Reddit, HackerNews and global news sources for monitoring and summarization workflows.</p>
         <div class="cmd-preview">uvx news-aggregator-mcp-server</div>
         <a href="goose://extension?cmd=uvx&id=news-aggregator&name=News%20Aggregator&description=Aggregates%20trending%20topics%20from%20Reddit%2C%20HackerNews%20and%20global%20news%20sources.&arg=news-aggregator-mcp-server" class="install-btn">➕ Install Extension</a>
@@ -177,7 +177,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 
     <div class="card">
         <span class="tag">Discovery & Catalog</span>
-        <h3>Hub</h3>
+        <h3>MCP Hub</h3>
         <p>Catalog and discovery service for MCP servers — find, browse and install many community servers from a single hub.</p>
         <div class="cmd-preview">uvx mcp-hub-server</div>
         <a href="goose://extension?cmd=uvx&id=mcp-hub&name=MCP%20Hub&description=Catalog%20and%20discovery%20service%20for%20MCP%20servers.%20Find%2C%20browse%20and%20install%20community%20servers.&arg=mcp-hub-server" class="install-btn">➕ Install Extension</a>
@@ -185,7 +185,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 
     <div class="card">
         <span class="tag">Agent Infrastructure</span>
-        <h3>Directory</h3>
+        <h3>Agent Directory</h3>
         <p>Service discovery and registry for AI agents and MCP servers; useful for multi-agent orchestration and discovery.</p>
         <div class="cmd-preview">uvx agent-directory-mcp-server</div>
         <a href="goose://extension?cmd=uvx&id=agent-directory&name=Agent%20Directory&description=Service%20discovery%20and%20registry%20for%20AI%20agents%20and%20MCP%20servers.&arg=agent-directory-mcp-server" class="install-btn">➕ Install Extension</a>
@@ -193,7 +193,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 
     <div class="card">
         <span class="tag">Memory & Storage</span>
-        <h3>Memory</h3>
+        <h3>Agent Memory</h3>
         <p>Persistent memory for agents — store, retrieve and search knowledge across sessions to support long-running agent workflows.</p>
         <div class="cmd-preview">uvx agent-memory-mcp-server</div>
         <a href="goose://extension?cmd=uvx&id=agent-memory&name=Agent%20Memory&description=Persistent%20memory%20for%20agents%20%2D%20store%2C%20retrieve%20and%20search%20knowledge%20across%20sessions.&arg=agent-memory-mcp-server" class="install-btn">➕ Install Extension</a>
