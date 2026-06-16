@@ -118,51 +118,115 @@ Extend your Goose Agent capabilities by installing extensions. Click the links b
 A curated list of agent skills grouped by business category to enhance your AI Agent's functionality.
 
 ### Development & Engineering
-* **General Skills:** `npx skills add https://github.com/block/Agent-Skills -y --agent goose cline`
-* **Gooseworks (Local):** `npx -y skills add gooseworks-ai/goose-skills`
-* **Chrome DevTools:** `npx skills add ChromeDevTools/chrome-devtools-mcp -y --agent goose cline`
-* **MCP Ext Apps:** `npx skills add https://github.com/modelcontextprotocol/ext-apps.git -y --agent cline goose`
-* **Stack Overflow for Agents:** `npx skills add https://agents.stackoverflow.com/ --skill sofa -y --agent cline goose`
-* **Product Manager:** `npx skills add deanpeters/product-manager-skills -y --global --agent goose cline`
+* **General Skills:**
+
+<div class="cmd-preview">npx skills add https://github.com/block/Agent-Skills -y --agent goose cline</div>
+
+* **Gooseworks (Local):**
+
+<div class="cmd-preview">npx -y skills add gooseworks-ai/goose-skills</div>
+
+* **Chrome DevTools:**
+
+<div class="cmd-preview">npx skills add ChromeDevTools/chrome-devtools-mcp -y --agent goose cline</div>
+
+* **MCP Ext Apps:**
+
+<div class="cmd-preview">npx skills add https://github.com/modelcontextprotocol/ext-apps.git -y --agent cline goose</div>
+
+* **Stack Overflow for Agents:**
+
+<div class="cmd-preview">npx skills add https://agents.stackoverflow.com/ --skill sofa -y --agent cline goose</div>
+
+* **Product Manager:**
+
+<div class="cmd-preview">npx skills add deanpeters/product-manager-skills -y --global --agent goose cline</div>
 
 ### Search & Research
-* **Exa Labs Search:** `npx skills add exa-labs/exa-mcp-server -y --agent goose cline`
-* **Open WebSearch:** `npx skills add https://github.com/Aas-ee/open-webSearch --skill open-websearch -y --agent cline goose`
-* **Academic/Literature Research:** `npx skills add heymoezy/porter --skill academic-researcher bibliographic-researcher literature-reviewer -y --agent goose cline`
+* **Exa Labs Search:**
+
+<div class="cmd-preview">npx skills add exa-labs/exa-mcp-server -y --agent goose cline</div>
+
+* **Open WebSearch:**
+
+<div class="cmd-preview">npx skills add https://github.com/Aas-ee/open-webSearch --skill open-websearch -y --agent cline goose</div>
+
+* **Academic/Literature Research:**
+
+<div class="cmd-preview">npx skills add heymoezy/porter --skill academic-researcher bibliographic-researcher literature-reviewer -y --agent goose cline</div>
 
 ### Finance & Operations
-* **Finance Skills Core:** `npx skills add JoelLewis/finance_skills`
-* **Advisory Practice:** `npx skills add https://github.com/JoelLewis/finance_skills/tree/main/plugins/advisory-practice -y --agent goose cline`
-* **Client Operations:** `npx skills add https://github.com/JoelLewis/finance_skills/tree/main/plugins/client-operations/skills -y --agent goose cline`
-* **Compliance:** `npx skills add https://github.com/JoelLewis/finance_skills/tree/main/plugins/compliance -y --agent goose cline`
-* **Trading Operations:** `npx skills add https://github.com/JoelLewis/finance_skills/tree/main/plugins/trading-operations -y --agent goose cline`
-* **Wealth Management:** `npx skills add https://github.com/JoelLewis/finance_skills/tree/main/plugins/wealth-management -y --agent goose cline`
-* **Risk Manager:** `npx skills add finskills/risk-manager -y global --agent goose cline`
+* **Finance Skills Core:**
+
+<div class="cmd-preview">npx skills add JoelLewis/finance_skills</div>
+
+* **Advisory Practice:**
+
+<div class="cmd-preview">npx skills add https://github.com/JoelLewis/finance_skills/tree/main/plugins/advisory-practice -y --agent goose cline</div>
+
+* **Client Operations:**
+
+<div class="cmd-preview">npx skills add https://github.com/JoelLewis/finance_skills/tree/main/plugins/client-operations/skills -y --agent goose cline</div>
+
+* **Compliance:**
+
+<div class="cmd-preview">npx skills add https://github.com/JoelLewis/finance_skills/tree/main/plugins/compliance -y --agent goose cline</div>
+
+* **Trading Operations:**
+
+<div class="cmd-preview">npx skills add https://github.com/JoelLewis/finance_skills/tree/main/plugins/trading-operations -y --agent goose cline</div>
+
+* **Wealth Management:**
+
+<div class="cmd-preview">npx skills add https://github.com/JoelLewis/finance_skills/tree/main/plugins/wealth-management -y --agent goose cline</div>
+
+* **Risk Manager:**
+
+<div class="cmd-preview">npx skills add finskills/risk-manager -y global --agent goose cline</div>
 
 ### Legal Services
-* **OpenAgreements:** `npx skills add open-agreements/open-agreements -y --agent goose cline` (AI-assisted system for routine contracts)
+* **OpenAgreements:** (AI-assisted system for routine contracts)
+
+<div class="cmd-preview">npx skills add open-agreements/open-agreements -y --agent goose cline</div>
 
 ### Healthcare & Biotechnology
-* **BioMCP:** `npx skills add genomoncology/biomcp -y --agent goose cline`
+* **BioMCP:**
+
+<div class="cmd-preview">npx skills add genomoncology/biomcp -y --agent goose cline</div>
 
 ### Supply Chain & Logistics
-* **Supply Chain Optimizer:** `npx skills add heymoezy/porter --skill logistics-optimizer supply-chain-optimizer -y --agent goose cline`
+* **Supply Chain Optimizer:**
+
+<div class="cmd-preview">npx skills add heymoezy/porter --skill logistics-optimizer supply-chain-optimizer -y --agent goose cline</div>
 
 ### Smart Home / IoT
-* **Home Assistant:** `npx skills add home-assistant/core integrations -y --agent goose cline`
+* **Home Assistant:**
+
+<div class="cmd-preview">npx skills add home-assistant/core integrations -y --agent goose cline</div>
 
 ### Security
-* **OpenClaw Security (MacOS preferred):** `npx skills add UseAI-pro/openclaw-skills-security -y --agent goose cline`
+* **OpenClaw Security (MacOS preferred):**
+
+<div class="cmd-preview">npx skills add UseAI-pro/openclaw-skills-security -y --agent goose cline</div>
 
 ### Media & Productivity
-* **Google Workspace (Gemini CLI):** `npx skills add gemini-cli-extensions/workspace -y --agent goose cline`
-* **Transcript & Video Utils:** `npx skills add steipete/agent-scripts --skill agent-transcript create-cli nano-banana-pro video-transcript-downloader -y --agent goose cline`
+* **Google Workspace (Gemini CLI):**
+
+<div class="cmd-preview">npx skills add gemini-cli-extensions/workspace -y --agent goose cline</div>
+
+* **Transcript & Video Utils:**
+
+<div class="cmd-preview">npx skills add steipete/agent-scripts --skill agent-transcript create-cli nano-banana-pro video-transcript-downloader -y --agent goose cline</div>
 
 ### Blockchain / Crypto (Alternative Markets)
-* **DeBridge Skills:** `npx skills add debridge-finance/debridge-skills --agent cline goose`
+* **DeBridge Skills:**
+
+<div class="cmd-preview">npx skills add debridge-finance/debridge-skills --agent cline goose</div>
 
 ### AI / ML specific
-* **HuggingFace Skills:** `npx skills add huggingface/skills -y --agent goose cline`
+* **HuggingFace Skills:**
+
+<div class="cmd-preview">npx skills add huggingface/skills -y --agent goose cline</div>
 
 ---
 *For full component documentation and advanced configurations, see the individual component repositories.*
