@@ -129,20 +129,57 @@ start_component() {
 
   rotate_log_if_needed "$logfile"
 
+  # Build environment prefix and default args for certain components
+  local env_prefix=""
+  local component_args="$args"
+
+  if [[ "$name" =~ Llama ]]; then
+    local lh="${LLAMA_ARG_HOST:-localhost}"
+    local lp="${LLAMA_ARG_PORT:-11434}"
+    local lt="${LLAMA_ARG_TOOLS:-all}"
+    local lu="${LLAMA_ARG_UI_MCP_PROXY:-true}"
+    local lm="${LLAMA_ARG_MODELS_PRESET:-$HOME/.konnek/llamacpp/models.ini}"
+    env_prefix="LLAMA_ARG_HOST='$lh' LLAMA_ARG_PORT='$lp' LLAMA_ARG_TOOLS='$lt' LLAMA_ARG_UI_MCP_PROXY='$lu' LLAMA_ARG_MODELS_PRESET='$lm'"
+    # keep existing CLI args (e.g., --http) if present
+    if [ -z "$component_args" ]; then
+      component_args="--http --port $lp"
+    fi
+  fi
+
+  if [[ "$name" =~ agentgateway ]]; then
+    local lx="${LOCAL_XDS_PATH:-$HOME/.konnek/agentgateway/gateway.yml}"
+    env_prefix="LOCAL_XDS_PATH='$lx' $env_prefix"
+  fi
+
+  if [[ "$name" =~ MCPJungle ]]; then
+    if [ -n "${MCPJUNGLE_ARGS:-}" ]; then
+      component_args="$MCPJUNGLE_ARGS"
+    else
+      component_args="--port 9000 --sqlite-db-path $HOME/.konnek/mcpjungle/mcpjungle.db"
+    fi
+  fi
+
   if [ "$VISIBLE" -eq 1 ]; then
-    # open in terminal if possible, else run in background but not hidden
     local cmd
-    cmd="\"$exe\" $args"
+    if [ -n "$env_prefix" ]; then
+      cmd="$env_prefix \"$exe\" $component_args"
+    else
+      cmd="\"$exe\" $component_args"
+    fi
     if open_in_terminal "$cmd"; then
       echo "$name launched in terminal (executable: $exe)"
     else
-      nohup "$exe" $args >> "$logfile" 2>&1 &
+      nohup env $env_prefix "$exe" $component_args >> "$logfile" 2>&1 &
       disown
       echo "$name started (background, no terminal) (executable: $exe), logging: $logfile"
     fi
   else
-    # hidden/background using nohup
-    nohup "$exe" $args >> "$logfile" 2>&1 &
+    # hidden/background using nohup with env
+    if [ -n "$env_prefix" ]; then
+      nohup env $env_prefix "$exe" $component_args >> "$logfile" 2>&1 &
+    else
+      nohup "$exe" $component_args >> "$logfile" 2>&1 &
+    fi
     disown
     echo "$name started (hidden/background) (executable: $exe), logging: $logfile"
   fi
