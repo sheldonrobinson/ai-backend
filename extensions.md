@@ -234,6 +234,53 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <a href="goose://extension?cmd=uvx&id=nutrition&name=Nutrition%20MCP%20Server&description=USDA%20FoodData%20Central%20integration%20for%20foods%2C%20nutrients%20and%20dietary%20analysis.&arg=nutrition-mcp-server" class="install-btn">➕ Install Extension</a>
     </div>
 
+    <div class="card">
+        <span class="tag">Documents</span>
+        <h3>Documents</h3>
+        <p>Local PDF & DOCX intelligence: text extraction, table detection, metadata and language detection (no cloud).</p>
+        <div class="cmd-preview">uvx document-intelligence-mcp</div>
+        <a href="goose://extension?cmd=uvx&id=document-intelligence&name=Document%20Intelligence&description=Local%20PDF%20%26%20DOCX%20intelligence%3A%20text%20extraction%2C%20table%20detection%2C%20metadata%20and%20language%20detection.&arg=document-intelligence-mcp" class="install-btn">➕ Install Extension</a>
+    </div>
+
+    <div class="card">
+        <span class="tag">E-commerce</span>
+        <h3>E-commerce</h3>
+        <p>Product search, barcode lookup, cart & wishlist management (DummyJSON + UPCitemdb).</p>
+        <div class="cmd-preview">uvx ecommerce-mcp-server</div>
+        <a href="goose://extension?cmd=uvx&id=ecommerce&name=E-commerce&description=Product%20search%2C%20barcode%20lookup%2C%20cart%20%26%20wishlist%20management.&arg=ecommerce-mcp-server" class="install-btn">➕ Install Extension</a>
+    </div>
+
+    <div class="card">
+        <span class="tag">Regional Data</span>
+        <h3>Germany</h3>
+        <p>German public data: traffic, DWD weather & warnings, Bundestag, energy, pollen and Destatis statistics (no API key required).</p>
+        <div class="cmd-preview">uvx germany-mcp-server</div>
+        <a href="goose://extension?cmd=uvx&id=germany&name=Germany&description=German%20public%20data%3A%20traffic%2C%20DWD%20weather%20%26%20warnings%2C%20Bundestag%2C%20energy%2C%20pollen%20and%20Destatis%20statistics.&arg=germany-mcp-server" class="install-btn">➕ Install Extension</a>
+    </div>
+
+    <div class="card">
+        <span class="tag">Developer Tools</span>
+        <h3>MCP Tools</h3>
+        <p>CLI toolkit for creating, managing and publishing MCP servers (developer utility).</p>
+        <div class="cmd-preview">pip install mcp-tools</div>
+        <div class="cmd-preview">mcp-tools create my-server</div>
+    </div>
+
+    <div class="card">
+        <span class="tag">Starter Kit</span>
+        <h3>Starter Kit</h3>
+        <p>Template and guide to build a new MCP server in minutes — ideal for developers.</p>
+        <div class="cmd-preview">git clone https://github.com/AiAgentKarl/mcp-starter-kit.git</div>
+    </div>
+
+    <div class="card">
+        <span class="tag">APIs</span>
+        <h3>Agent APIs</h3>
+        <p>Serverless collection of 11 free APIs (weather, cache, PII scanning, discovery, stake, etc.) — live on Vercel.</p>
+        <div class="cmd-preview">Open https://agent-apis.vercel.app</div>
+        <a href="https://agent-apis.vercel.app" class="install-btn">Open Agent APIs</a>
+    </div>
+
     </div>
 
 
