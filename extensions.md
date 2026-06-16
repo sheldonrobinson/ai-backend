@@ -156,7 +156,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
     
     <div class="card">
         <span class="tag">Data & Utilities</span>
-        <h3>Weather MCP Server</h3>
+        <h3>Weather</h3>
         <p>Global weather, forecasts, air quality and historical climate data (Open-Meteo). No API key required for Open-Meteo; supports uvx-based install.</p>
         <div class="cmd-preview">uvx weather-mcp-server</div>
         <a href="goose://extension?cmd=uvx&id=weather&name=Weather%20MCP%20Server&description=Global%20weather%2C%20forecasts%2C%20air%20quality%20and%20historical%20climate%20data%20(Open-Meteo).&arg=weather-mcp-server&env=OPENWEATHER_API_KEY%3DOPENWEATHER_API_KEY" class="install-btn">➕ Install Extension</a>
@@ -164,7 +164,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 
     <div class="card">
         <span class="tag">Search & Research</span>
-        <h3>Research Automation</h3>
+        <h3>Research</h3>
         <p>Multi-source research MCP server: DuckDuckGo, Wikipedia, arXiv and Crossref — useful for autonomous literature and fact‑finding workflows.</p>
         <div class="cmd-preview">uvx research-automation-mcp-server</div>
         <a href="goose://extension?cmd=uvx&id=research-automation&name=Research%20Automation&description=Multi-source%20research%20MCP%20server%3A%20DuckDuckGo%2C%20Wikipedia%2C%20arXiv%20and%20Crossref.&arg=research-automation-mcp-server" class="install-btn">➕ Install Extension</a>
@@ -172,7 +172,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 
     <div class="card">
         <span class="tag">News & Media</span>
-        <h3>News Aggregator</h3>
+        <h3>News</h3>
         <p>Aggregates trending topics from Reddit, HackerNews and global news sources for monitoring and summarization workflows.</p>
         <div class="cmd-preview">uvx news-aggregator-mcp-server</div>
         <a href="goose://extension?cmd=uvx&id=news-aggregator&name=News%20Aggregator&description=Aggregates%20trending%20topics%20from%20Reddit%2C%20HackerNews%20and%20global%20news%20sources.&arg=news-aggregator-mcp-server" class="install-btn">➕ Install Extension</a>
@@ -180,7 +180,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 
     <div class="card">
         <span class="tag">Discovery & Catalog</span>
-        <h3>MCP Hub</h3>
+        <h3>Hub</h3>
         <p>Catalog and discovery service for MCP servers — find, browse and install many community servers from a single hub.</p>
         <div class="cmd-preview">uvx mcp-hub-server</div>
         <a href="goose://extension?cmd=uvx&id=mcp-hub&name=MCP%20Hub&description=Catalog%20and%20discovery%20service%20for%20MCP%20servers.%20Find%2C%20browse%20and%20install%20community%20servers.&arg=mcp-hub-server" class="install-btn">➕ Install Extension</a>
@@ -188,7 +188,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 
     <div class="card">
         <span class="tag">Agent Infrastructure</span>
-        <h3>Agent Directory</h3>
+        <h3>Directory</h3>
         <p>Service discovery and registry for AI agents and MCP servers; useful for multi-agent orchestration and discovery.</p>
         <div class="cmd-preview">uvx agent-directory-mcp-server</div>
         <a href="goose://extension?cmd=uvx&id=agent-directory&name=Agent%20Directory&description=Service%20discovery%20and%20registry%20for%20AI%20agents%20and%20MCP%20servers.&arg=agent-directory-mcp-server" class="install-btn">➕ Install Extension</a>
@@ -196,7 +196,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 
     <div class="card">
         <span class="tag">Memory & Storage</span>
-        <h3>Agent Memory</h3>
+        <h3>Memory</h3>
         <p>Persistent memory for agents — store, retrieve and search knowledge across sessions to support long-running agent workflows.</p>
         <div class="cmd-preview">uvx agent-memory-mcp-server</div>
         <a href="goose://extension?cmd=uvx&id=agent-memory&name=Agent%20Memory&description=Persistent%20memory%20for%20agents%20%2D%20store%2C%20retrieve%20and%20search%20knowledge%20across%20sessions.&arg=agent-memory-mcp-server" class="install-btn">➕ Install Extension</a>
@@ -204,7 +204,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 
     <div class="card">
         <span class="tag">Research & IP</span>
-        <h3>Patent Intelligence</h3>
+        <h3>Patents</h3>
         <p>Access US patent data, search patents, citations and trends via the PatentsView API for IP research and analysis.</p>
         <div class="cmd-preview">uvx patent-intelligence-mcp-server</div>
         <a href="goose://extension?cmd=uvx&id=patent-intel&name=Patent%20Intelligence&description=Access%20US%20patent%20data%2C%20search%20patents%2C%20citations%20and%20trends%20via%20PatentsView.&arg=patent-intelligence-mcp-server" class="install-btn">➕ Install Extension</a>
@@ -212,7 +212,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 
     <div class="card">
         <span class="tag">Space & Science</span>
-        <h3>Space Data</h3>
+        <h3>Space</h3>
         <p>NASA and astronomy data: exoplanets, Mars rover telemetry, asteroid info and Earth imagery for science workflows.</p>
         <div class="cmd-preview">uvx space-mcp-server</div>
         <a href="goose://extension?cmd=uvx&id=space-data&name=Space%20Data&description=NASA%20and%20astronomy%20data%3A%20exoplanets%2C%20Mars%20rovers%2C%20asteroids%20and%20Earth%20imagery.&arg=space-mcp-server" class="install-btn">➕ Install Extension</a>
@@ -228,7 +228,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 
     <div class="card">
         <span class="tag">Healthcare & Nutrition</span>
-        <h3>Nutrition MCP Server</h3>
+        <h3>Nutrition</h3>
         <p>USDA FoodData Central integration: foods, nutrients and dietary analysis for nutrition workflows.</p>
         <div class="cmd-preview">uvx nutrition-mcp-server</div>
         <a href="goose://extension?cmd=uvx&id=nutrition&name=Nutrition%20MCP%20Server&description=USDA%20FoodData%20Central%20integration%20for%20foods%2C%20nutrients%20and%20dietary%20analysis.&arg=nutrition-mcp-server" class="install-btn">➕ Install Extension</a>
