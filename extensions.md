@@ -35,6 +35,38 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <div class="cmd-preview">uvx --from tradingview-mcp-server tradingview-mcp</div>
         <a href="goose://extension?cmd=uvx&id=tradingview&name=TradingView&description=AI-powered%20trading%20toolkit%20for%20Claude%20and%20MCP%20clients.%20Backtesting%20%2B%20Live%20Sentiment%20%2B%20Yahoo%20Finance%20%2B%2030%2B%20Technical%20Analysis%20Tools%20%E2%80%94%20all%20in%20one%20MCP%20server.&arg=--from&arg=tradingview-mcp-server&arg=tradingview-mcp" class="install-btn">➕ Install Extension</a>
     </div>
+
+    <div class="card">
+        <span class="tag">Development & Engineering</span>
+        <h3>shadcn UI</h3>
+        <p>A shadcn/ui-native MCP server enabling structured component metadata, actions, and UI-aware tooling.</p>
+        <div class="cmd-preview">npx -y shadcn@latest mcp</div>
+        <a href="goose://extension?cmd=npx&id=shadcn&name=shadcn%20UI&description=A%20shadcn/ui-native%20MCP%20server%20enabling%20structured%20component%20metadata%2C%20actions%2C%20and%20UI-aware%20tooling.&arg=-y&arg=shadcn%40latest&arg=mcp" class="install-btn">➕ Install Extension</a>
+    </div>
+
+    <div class="card">
+        <span class="tag">Media & Productivity</span>
+        <h3>Bluesky Social</h3>
+        <p>A full-featured Bluesky MCP server that adds search, feeds, trends, follower graph tools, thread retrieval, and rich content/engagement management for agentic workflows.</p>
+        <div class="cmd-preview">npx -y @semihberkay/bluesky-mcp</div>
+        <a href="goose://extension?cmd=npx&id=blueskysocial&name=Bluesky%20Social&description=A%20full-featured%20Bluesky%20MCP%20server%20that%20adds%20search%2C%20feeds%2C%20trends%2C%20follower%20graph%20tools%2C%20thread%20retrieval%2C%20and%20rich%20content/engagement%20management%20for%20agentic%20workflows.&arg=-y&arg=%40semihberkay/bluesky-mcp&env=BLUESKY_IDENTIFIER%3DBLUESKY_IDENTIFIER&env=BLUESKY_SERVICE_URL%3DBLUESKY_SERVICE_URL&env=BLUESKY_APP_PASSWORD%3DBLUESKY_APP_PASSWORD" class="install-btn">➕ Install Extension</a>
+    </div>
+
+    <div class="card">
+        <span class="tag">Media & Productivity</span>
+        <h3>LinkedIn Jobs and Network</h3>
+        <p>A lightweight MCP server that exposes LinkedIn search and profile-scraping capabilities to agentic clients.</p>
+        <div class="cmd-preview">npx -y @pegasusheavy/linkedin-mcp</div>
+        <a href="goose://extension?cmd=npx&id=linkedinjobsandnetwork&name=LinkedIn%20Jobs%20and%20Network&description=A%20lightweight%20MCP%20server%20that%20exposes%20LinkedIn%20search%20and%20profile-scraping%20capabilities%20to%20agentic%20clients.&arg=-y&arg=%40pegasusheavy/linkedin-mcp&env=LINKEDIN_ACCESS_TOKEN%3DLINKEDIN_ACCESS_TOKEN" class="install-btn">➕ Install Extension</a>
+    </div>
+
+    <div class="card">
+        <span class="tag">Search & Research</span>
+        <h3>Open WebSearch</h3>
+        <p>A Multi-engine MCP server, CLI, and local daemon, that can also be paired with skill-guided agent workflows for live web search and content retrieval.</p>
+        <div class="cmd-preview">npx -y open-websearch@latest mcp</div>
+        <a href="goose://extension?cmd=npx&id=open_websearch&name=Open%20WebSearch&description=A%20Multi-engine%20MCP%20server%2C%20CLI%2C%20and%20local%20daemon%2C%20that%20can%20also%20be%20paired%20with%20skill-guided%20agent%20workflows%20for%20live%20web%20search%20and%20content%20retrieval.&arg=-y&arg=open-websearch%40latest&arg=mcp" class="install-btn">➕ Install Extension</a>
+    </div>
     
     
     <div class="card">
