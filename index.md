@@ -3,12 +3,6 @@ layout: page
 title: Home
 ---
 
-<div style="display:flex;justify-content:center;margin-bottom:18px;">
-  <a href="index.html" style="margin:0 8px;padding:8px 12px;background:#1e1e1e;color:#fff;border-radius:6px;text-decoration:none;">🏠 Home</a>
-  <a href="extensions.html" style="margin:0 8px;padding:8px 12px;background:#1e1e1e;color:#fff;border-radius:6px;text-decoration:none;">🧩 Extensions & Skills</a>
-  <a href="https://github.com/sheldonrobinson/ai-backend" target="_blank" style="margin:0 8px;padding:8px 12px;background:#1e1e1e;color:#fff;border-radius:6px;text-decoration:none;">📦 Repo</a>
-</div>
-
 # AI Backend
 
 A consolidated installer and toolkit for running a local AI backend. This project sets up:
