@@ -78,13 +78,6 @@ A consolidated installer and toolkit for running a local AI backend. This projec
     <div class="install-note">Runs the installer directly from memory using <code>powershell:</code> URI.</div>
 </div>
 
-<div class="install-section">
-    <div class="install-title">⬇️ Download‑and‑Run Version</div>
-    <a href="https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/install.ps1" download style="text-decoration: none;">
-        <button class="install-btn">Download Installer (install.ps1)</button>
-    </a>
-    <div class="install-note">Downloads the installer file. You can right-click it and select "Run with PowerShell".</div>
-</div>
 
 <div class="install-section">
     <div class="install-title">🛡️ Fallback Version</div>
