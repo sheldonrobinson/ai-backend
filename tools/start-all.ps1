@@ -18,13 +18,60 @@ $InstallDir = Join-Path $env:LOCALAPPDATA 'Programs\Konnek\AI-Backend'
 $LogDir = Join-Path $env:TEMP "AI-Backend-Logs"
 New-Item -Path $LogDir -ItemType Directory -Force | Out-Null
 
-# Log rotation: remove logs older than 7 days
+# Log configuration
+$retentionDays = 7
+$maxLogSizeMB = 10  # rotate when log >= 10 MB
+$compressAfterDays = 1 # compress raw .log files older than this (days)
+$maxLogSize = $maxLogSizeMB * 1MB
+
+function Compress-LogFile {
+    param([string]$Path)
+    try {
+        $zipPath = "$Path.zip"
+        if (Test-Path $zipPath) { Remove-Item $zipPath -Force -ErrorAction SilentlyContinue }
+        Compress-Archive -Path $Path -DestinationPath $zipPath -Force -ErrorAction Stop
+        Remove-Item $Path -Force -ErrorAction SilentlyContinue
+        Write-Host "Compressed $Path -> $zipPath"
+    } catch {
+        Write-Warning "Failed to compress $Path: $_"
+    }
+}
+
+function Rotate-LogIfNeeded {
+    param(
+        [string]$LogFile,
+        [int64]$MaxSizeBytes
+    )
+    try {
+        if (Test-Path $LogFile) {
+            $size = (Get-Item $LogFile).Length
+            if ($size -ge $MaxSizeBytes) {
+                $timestamp = Get-Date -Format yyyyMMddHHmmss
+                $rotated = "$LogFile.$timestamp"
+                Move-Item -Path $LogFile -Destination $rotated -Force
+                Compress-LogFile -Path $rotated
+                Write-Host "Rotated and compressed $LogFile -> $rotated.zip"
+            }
+        }
+    } catch {
+        Write-Warning "Rotate-LogIfNeeded failed for $LogFile: $_"
+    }
+}
+
+# Compress raw .log files older than $compressAfterDays
 try {
-    $retentionDays = 7
+    $compressThreshold = (Get-Date).AddDays(-$compressAfterDays)
+    Get-ChildItem -Path $LogDir -Filter '*.log' -File -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -lt $compressThreshold } | ForEach-Object { Compress-LogFile -Path $_.FullName }
+} catch {
+    Write-Warning "Compress old logs failed: $_"
+}
+
+# Remove archived files older than retention (both .log and .zip)
+try {
     $threshold = (Get-Date).AddDays(-$retentionDays)
     Get-ChildItem -Path $LogDir -File -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -lt $threshold } | Remove-Item -Force -ErrorAction SilentlyContinue
 } catch {
-    Write-Warning "Log rotation failed: $_"
+    Write-Warning "Log retention cleanup failed: $_"
 }
 
 function Find-Exe {
@@ -67,6 +114,9 @@ function Start-Component {
     $safeName = ($Name -replace '[^a-zA-Z0-9]','_')
     $datePart = Get-Date -Format yyyy-MM-dd
     $logFile = Join-Path $LogDir "$($safeName)-$datePart.log"
+
+    # Rotate/compress logs if they exceed size or are old (size-rotation will compress rotated file)
+    Rotate-LogIfNeeded -LogFile $logFile -MaxSizeBytes $maxLogSize
 
     $cmd = "`"$exe`" $Args"
     if ($Hidden) {
