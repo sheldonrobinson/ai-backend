@@ -2,6 +2,9 @@
 layout: default
 ---
 <style>
+/* Hide theme-provided header to avoid duplicate navbars */
+header.site-header, header[role="banner"], .site-header, .site-header-inner, .header, .top-header { display: none !important; }
+
 .navbar {
     background: #1e1e1e;
     overflow: hidden;
