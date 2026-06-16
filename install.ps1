@@ -112,8 +112,8 @@ if (Get-Command npx -ErrorAction SilentlyContinue) {
     }
 }
 
-# Copy start script into Program Files and create shortcuts for easy launch
-$InstallDir = "$env:ProgramFiles\AI-Backend"
+# Copy start script into local user Programs folder and create per-user shortcuts (no elevation required)
+$InstallDir = Join-Path $env:LOCALAPPDATA 'Programs\Konnek\AI-Backend'
 New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
 $sourceScript = Join-Path $PSScriptRoot 'tools\start-all.ps1'
 $destScript = Join-Path $InstallDir 'start-all.ps1'
@@ -124,11 +124,13 @@ if (Test-Path $sourceScript) {
     Write-Warning "Start script $sourceScript not found in installer package. You can manually place start-all.ps1 in $InstallDir."
 }
 
-# Create Start Menu and Desktop shortcuts (All Users)
+# Create Start Menu and Desktop shortcuts (Current User)
 try {
     $wsh = New-Object -ComObject WScript.Shell
 
-    $startMenuShortcut = Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs\AI Backend.lnk'
+    $startMenuDir = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Konnek'
+    New-Item -ItemType Directory -Path $startMenuDir -Force | Out-Null
+    $startMenuShortcut = Join-Path $startMenuDir 'AI Backend.lnk'
     $sc = $wsh.CreateShortcut($startMenuShortcut)
     $sc.TargetPath = Join-Path $env:SystemRoot 'system32\WindowsPowerShell\v1.0\powershell.exe'
     $sc.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$destScript`""
@@ -137,8 +139,8 @@ try {
     $sc.Save()
     Write-Host "Created Start Menu shortcut: $startMenuShortcut"
 
-    $publicDesktop = Join-Path $env:Public 'Desktop'
-    $desktopShortcut = Join-Path $publicDesktop 'AI Backend.lnk'
+    $desktop = Join-Path $env:USERPROFILE 'Desktop'
+    $desktopShortcut = Join-Path $desktop 'AI Backend.lnk'
     $sc2 = $wsh.CreateShortcut($desktopShortcut)
     $sc2.TargetPath = $sc.TargetPath
     $sc2.Arguments = $sc.Arguments
