@@ -153,6 +153,23 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <div class="cmd-preview">npx -y open-websearch@latest mcp</div>
         <a href="goose://extension?cmd=npx&id=open_websearch&name=Open%20WebSearch&description=A%20Multi-engine%20MCP%20server%2C%20CLI%2C%20and%20local%20daemon%2C%20that%20can%20also%20be%20paired%20with%20skill-guided%20agent%20workflows%20for%20live%20web%20search%20and%20content%20retrieval.&arg=-y&arg=open-websearch%40latest&arg=mcp" class="install-btn">➕ Install Extension</a>
     </div>
+    
+    <div class="card">
+        <span class="tag">Data & Utilities</span>
+        <h3>Weather MCP Server</h3>
+        <p>Global weather, forecasts, air quality and historical climate data (Open-Meteo). No API key required for Open-Meteo; supports uvx-based install.</p>
+        <div class="cmd-preview">uvx weather-mcp-server</div>
+        <a href="goose://extension?cmd=uvx&id=weather&name=Weather%20MCP%20Server&description=Global%20weather%2C%20forecasts%2C%20air%20quality%20and%20historical%20climate%20data%20(Open-Meteo).&arg=weather-mcp-server&env=OPENWEATHER_API_KEY%3DOPENWEATHER_API_KEY" class="install-btn">➕ Install Extension</a>
+    </div>
+
+    <div class="card">
+        <span class="tag">Search & Research</span>
+        <h3>Research Automation</h3>
+        <p>Multi-source research MCP server: DuckDuckGo, Wikipedia, arXiv and Crossref — useful for autonomous literature and fact‑finding workflows.</p>
+        <div class="cmd-preview">uvx research-automation-mcp-server</div>
+        <a href="goose://extension?cmd=uvx&id=research-automation&name=Research%20Automation&description=Multi-source%20research%20MCP%20server%3A%20DuckDuckGo%2C%20Wikipedia%2C%20arXiv%20and%20Crossref.&arg=research-automation-mcp-server" class="install-btn">➕ Install Extension</a>
+    </div>
+
     </div>
 
 
