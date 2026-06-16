@@ -2,7 +2,7 @@
 
 This documentation summarizes the purpose of each component in the AI Backend, how they interact, and operational notes.
 
-![AI Backend Flow](../ai-backend-flow.svg)
+![AI Backend Flow]({{ '/ai-backend-flow.svg' | relative_url }})
 
 ## Components
 
