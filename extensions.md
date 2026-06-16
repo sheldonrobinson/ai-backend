@@ -170,8 +170,6 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <a href="goose://extension?cmd=uvx&id=research-automation&name=Research%20Automation&description=Multi-source%20research%20MCP%20server%3A%20DuckDuckGo%2C%20Wikipedia%2C%20arXiv%20and%20Crossref.&arg=research-automation-mcp-server" class="install-btn">➕ Install Extension</a>
     </div>
 
-    </div>
-
     <div class="card">
         <span class="tag">News & Media</span>
         <h3>News Aggregator</h3>
