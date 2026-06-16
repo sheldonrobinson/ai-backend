@@ -133,7 +133,7 @@ A curated list of agent skills grouped by business category to enhance your AI A
 
 * **Product Manager:**
 
-<div class="cmd-preview">npx skills add deanpeters/product-manager-skills -y --global --agent goose cline</div>
+<div class="cmd-preview">npx skills add deanpeters/product-manager-skills -y --agent goose cline</div>
 
 ### Search & Research
 * **Exa Labs Search:**

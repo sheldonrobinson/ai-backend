@@ -22,7 +22,7 @@ extensions = [
     {"name": "Open WebSearch", "id": "open_websearch", "desc": "A Multi-engine MCP server, CLI, and local daemon, that can also be paired with skill-guided agent workflows for live web search and content retrieval.", "cmd": "npx", "args": ["-y", "open-websearch@latest", "mcp"], "category": "Search & Research"}
 ]
 
-# Skills (Not Extensions, won't get goose://extension links, but will show the copyable install command)
+# Skills
 skills = [
     {"name": "OpenAgreements", "desc": "AI-assisted system for generating clear, consistent drafts of common legal documents and routine contracts.", "cmd": "npx skills add open-agreements/open-agreements -y --agent goose cline", "category": "Legal Services"},
     {"name": "BioMCP", "desc": "Search and retrieve biomedical data - genes, variants, clinical trials, and phenotype-disease matching.", "cmd": "npx skills add genomoncology/biomcp -y --agent goose cline", "category": "Healthcare & Biotechnology"},
@@ -34,13 +34,13 @@ skills = [
     {"name": "HuggingFace Skills", "desc": "Hugging Face Hub CLI (hf) for downloading, uploading, and managing models, datasets, spaces, buckets.", "cmd": "npx skills add huggingface/skills -y --agent goose cline", "category": "AI / ML specific"},
     {"name": "OpenClaw Security", "desc": "Security-first vetting for OpenClaw skills. Use before installing any skill from ClawHub, GitHub.", "cmd": "npx skills add UseAI-pro/openclaw-skills-security -y --agent goose cline", "category": "Security"},
     {"name": "Finance Skills", "desc": "Financial analyst agent skill. Ratio analysis, DCF valuation, budget variance, rolling forecasts.", "cmd": "npx skills add JoelLewis/finance_skills", "category": "Finance & Operations"},
-    {"name": "Product Manager", "desc": "Product Management skills for agents.", "cmd": "npx skills add deanpeters/product-manager-skills -y --global --agent goose cline", "category": "Development & Engineering"},
+    {"name": "Product Manager", "desc": "Product Management skills for agents.", "cmd": "npx skills add deanpeters/product-manager-skills -y --agent goose cline", "category": "Development & Engineering"},
     {"name": "Supply Chain Optimizer", "desc": "Supply chain and logistics optimization skills.", "cmd": "npx skills add heymoezy/porter --skill logistics-optimizer supply-chain-optimizer -y --agent goose cline", "category": "Supply Chain & Logistics"},
     {"name": "Stack Overflow for Agents", "desc": "Interact with Stack Overflow for Agents: authenticate, search validated knowledge, read context pages.", "cmd": "npx skills add https://agents.stackoverflow.com/ --skill sofa --yes --agent cline goose", "category": "Development & Engineering"}
 ]
 
 html = """---
-layout: default
+layout: page
 title: Extensions & Skills Registry
 ---
 
@@ -78,7 +78,7 @@ for ext in extensions:
     }
     
     # URL Encode params
-    encoded_params = [f"{k}={urllib.parse.quote(v)}" for k, v in params.items()]
+    encoded_params = [f"{k}={urllib.parse.quote(str(v))}" for k, v in params.items()]
     
     # Add array of args
     for arg in ext["args"]:

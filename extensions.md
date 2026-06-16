@@ -267,7 +267,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         </div>
         <h3>Product Manager</h3>
         <p>Product Management skills for agents.</p>
-        <div class="cmd-preview">npx skills add deanpeters/product-manager-skills -y --global --agent goose cline</div>
+        <div class="cmd-preview">npx skills add deanpeters/product-manager-skills -y --agent goose cline</div>
     </div>
     
     <div class="card">
