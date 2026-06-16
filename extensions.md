@@ -26,21 +26,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 <p>Click "Install with Goose" to add these directly to Goose Desktop.</p>
 <div class="grid">
 
-    <div class="card">
-        <span class="tag">Development & Engineering</span>
-        <h3>shadcn UI</h3>
-        <p>A shadcn/ui-native MCP server enabling structured component metadata, actions, and UI-aware tooling.</p>
-        <div class="cmd-preview">npx -y shadcn@latest mcp</div>
-        <a href="goose://extension?cmd=npx&id=shadcn&name=shadcn%20UI&description=A%20shadcn/ui-native%20MCP%20server%20enabling%20structured%20component%20metadata%2C%20actions%2C%20and%20UI-aware%20tooling.&arg=-y&arg=shadcn%40latest&arg=mcp" class="install-btn">➕ Install Extension</a>
-    </div>
     
-    <div class="card">
-        <span class="tag">Legal Services</span>
-        <h3>Legal Document Analyzer</h3>
-        <p>Analyzes legal documents, extract key clauses, summarize content, and highlight potential risks.</p>
-        <div class="cmd-preview">npx -y mcp-legal-doc-analyzer@latest --templates ~/.legal-doc-analyzer/templates --db-path ~/.legal-doc-analyzer/legal.db</div>
-        <a href="goose://extension?cmd=npx&id=legal-doc-analyzer&name=Legal%20Document%20Analyzer&description=Analyzes%20legal%20documents%2C%20extract%20key%20clauses%2C%20summarize%20content%2C%20and%20highlight%20potential%20risks.&arg=-y&arg=mcp-legal-doc-analyzer%40latest&arg=--templates&arg=~/.legal-doc-analyzer/templates&arg=--db-path&arg=~/.legal-doc-analyzer/legal.db" class="install-btn">➕ Install Extension</a>
-    </div>
     
     <div class="card">
         <span class="tag">Finance & Operations</span>
@@ -50,13 +36,6 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <a href="goose://extension?cmd=uvx&id=tradingview&name=TradingView&description=AI-powered%20trading%20toolkit%20for%20Claude%20and%20MCP%20clients.%20Backtesting%20%2B%20Live%20Sentiment%20%2B%20Yahoo%20Finance%20%2B%2030%2B%20Technical%20Analysis%20Tools%20%E2%80%94%20all%20in%20one%20MCP%20server.&arg=--from&arg=tradingview-mcp-server&arg=tradingview-mcp" class="install-btn">➕ Install Extension</a>
     </div>
     
-    <div class="card">
-        <span class="tag">Media & Productivity</span>
-        <h3>Bluesky Social</h3>
-        <p>A full-featured Bluesky MCP server that adds search, feeds, trends, follower graph tools, thread retrieval, and rich content/engagement management for agentic workflows.</p>
-        <div class="cmd-preview">npx -y @semihberkay/bluesky-mcp</div>
-        <a href="goose://extension?cmd=npx&id=blueskysocial&name=Bluesky%20Social&description=A%20full-featured%20Bluesky%20MCP%20server%20that%20adds%20search%2C%20feeds%2C%20trends%2C%20follower%20graph%20tools%2C%20thread%20retrieval%2C%20and%20rich%20content/engagement%20management%20for%20agentic%20workflows.&arg=-y&arg=%40semihberkay/bluesky-mcp&env=BLUESKY_IDENTIFIER%3DBLUESKY_IDENTIFIER&env=BLUESKY_SERVICE_URL%3DBLUESKY_SERVICE_URL&env=BLUESKY_APP_PASSWORD%3DBLUESKY_APP_PASSWORD" class="install-btn">➕ Install Extension</a>
-    </div>
     
     <div class="card">
         <span class="tag">Media & Productivity</span>
@@ -82,13 +61,6 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <a href="goose://extension?cmd=uvx&id=linkedin&name=LinkedIn&description=A%20minimal%20LinkedIn%20MCP%20server%20that%20enables%20agents%20to%20authenticate%2C%20fetch%20profiles%2C%20and%20perform%20basic%20LinkedIn%20interactions%20programmatically.&arg=linkedin-scraper-mcp%40latest&arg=--transport&arg=stdio&env=UV_HTTP_TIMEOUT%3DUV_HTTP_TIMEOUT" class="install-btn">➕ Install Extension</a>
     </div>
     
-    <div class="card">
-        <span class="tag">Media & Productivity</span>
-        <h3>LinkedIn Jobs and Network</h3>
-        <p>A lightweight MCP server that exposes LinkedIn search and profile-scraping capabilities to agentic clients.</p>
-        <div class="cmd-preview">npx -y @pegasusheavy/linkedin-mcp</div>
-        <a href="goose://extension?cmd=npx&id=linkedinjobsandnetwork&name=LinkedIn%20Jobs%20and%20Network&description=A%20lightweight%20MCP%20server%20that%20exposes%20LinkedIn%20search%20and%20profile-scraping%20capabilities%20to%20agentic%20clients.&arg=-y&arg=%40pegasusheavy/linkedin-mcp&env=LINKEDIN_ACCESS_TOKEN%3DLINKEDIN_ACCESS_TOKEN" class="install-btn">➕ Install Extension</a>
-    </div>
     
     <div class="card">
         <span class="tag">Development & Engineering</span>
@@ -146,13 +118,6 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <a href="goose://extension?cmd=uvx&id=supply-chain-agent&name=Supply-Chain%20Agent&description=A%20lightweight%20MCP%20server%20providing%20structured%20access%20to%20logistics%20workflows%E2%80%94shipments%2C%20tracking%2C%20routing%2C%20and%20supply-chain%20operations%E2%80%94for%20AI%20agents%20and%20automation.&arg=logistics_ai_mcp" class="install-btn">➕ Install Extension</a>
     </div>
     
-    <div class="card">
-        <span class="tag">Search & Research</span>
-        <h3>Open WebSearch</h3>
-        <p>A Multi-engine MCP server, CLI, and local daemon, that can also be paired with skill-guided agent workflows for live web search and content retrieval.</p>
-        <div class="cmd-preview">npx -y open-websearch@latest mcp</div>
-        <a href="goose://extension?cmd=npx&id=open_websearch&name=Open%20WebSearch&description=A%20Multi-engine%20MCP%20server%2C%20CLI%2C%20and%20local%20daemon%2C%20that%20can%20also%20be%20paired%20with%20skill-guided%20agent%20workflows%20for%20live%20web%20search%20and%20content%20retrieval.&arg=-y&arg=open-websearch%40latest&arg=mcp" class="install-btn">➕ Install Extension</a>
-    </div>
     
     <div class="card">
         <span class="tag">Data & Utilities</span>
@@ -242,13 +207,6 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <a href="goose://extension?cmd=uvx&id=document-intelligence&name=Document%20Intelligence&description=Local%20PDF%20%26%20DOCX%20intelligence%3A%20text%20extraction%2C%20table%20detection%2C%20metadata%20and%20language%20detection.&arg=document-intelligence-mcp" class="install-btn">➕ Install Extension</a>
     </div>
 
-    <div class="card">
-        <span class="tag">E-commerce</span>
-        <h3>E-commerce</h3>
-        <p>Product search, barcode lookup, cart & wishlist management (DummyJSON + UPCitemdb).</p>
-        <div class="cmd-preview">uvx ecommerce-mcp-server</div>
-        <a href="goose://extension?cmd=uvx&id=ecommerce&name=E-commerce&description=Product%20search%2C%20barcode%20lookup%2C%20cart%20%26%20wishlist%20management.&arg=ecommerce-mcp-server" class="install-btn">➕ Install Extension</a>
-    </div>
 
     <div class="card">
         <span class="tag">Regional Data</span>
@@ -266,12 +224,6 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <div class="cmd-preview">mcp-tools create my-server</div>
     </div>
 
-    <div class="card">
-        <span class="tag">Starter Kit</span>
-        <h3>Starter Kit</h3>
-        <p>Template and guide to build a new MCP server in minutes — ideal for developers.</p>
-        <div class="cmd-preview">git clone https://github.com/AiAgentKarl/mcp-starter-kit.git</div>
-    </div>
 
     <div class="card">
         <span class="tag">APIs</span>
