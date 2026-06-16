@@ -144,8 +144,23 @@ $components = @(
     @{ Name = 'MCPJungle MCP gateway'; Exes = @('mcpjungle.exe','mcpjungle-server.exe','mcpjungle'); Args = '' }
 )
 
+# Ensure MCPJUNGLE_ARGS exists (from env, args file, or default)
+$McpArgsFile = Join-Path $env:USERPROFILE '.konnek\mcpjungle\args.txt'
+if (-not $env:MCPJUNGLE_ARGS) {
+    if (Test-Path $McpArgsFile) {
+        try { $env:MCPJUNGLE_ARGS = Get-Content -Path $McpArgsFile -Raw -ErrorAction Stop } catch { $env:MCPJUNGLE_ARGS = $null }
+    }
+    if (-not $env:MCPJUNGLE_ARGS) {
+        $env:MCPJUNGLE_ARGS = "--port 9000 --sqlite-db-path $env:USERPROFILE\.konnek\mcpjungle\mcpjungle.db"
+    }
+}
+
 foreach ($c in $components) {
-    Start-Component -Name $c.Name -ExeNames $c.Exes -Args $c.Args -WorkingDir $InstallDir
+    $args = $c.Args
+    if (($c.Name -like '*MCPJungle*' -or $c.Name -like '*MCP Jungle*') -and ([string]::IsNullOrEmpty($args))) {
+        $args = $env:MCPJUNGLE_ARGS
+    }
+    Start-Component -Name $c.Name -ExeNames $c.Exes -Args $args -WorkingDir $InstallDir
 }
 
 Write-Host "All start requests issued. Check console windows for each component's logs."
