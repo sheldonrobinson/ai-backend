@@ -8,6 +8,10 @@ This repository bundles components and installers to run a local AI backend comp
 - MCPJungle — MCP gateway
 - Goose — AI agent / CLI
 
+🚀 **[Visit our GitHub Pages site](https://sheldonrobinson.github.io/ai-backend/) for full documentation, extensions gallery, and skill registry!**
+
+Whether you're in **financial services**, **legal**, **supply-chain & logistics**, **healthcare**, **content creation & social media management**, or tackling **lifestyle, travel, job-seeking, or career challenges** — this AI backend empowers you to deploy private, on-device LLM agents that integrate with your workflows. No cloud vendor lock-in, no API costs, full privacy.
+
 Quick start (Windows)
 
 1. Open PowerShell as your normal user and run the installer (elevated steps may be requested by installer for system packages):
