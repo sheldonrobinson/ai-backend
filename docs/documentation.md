@@ -56,6 +56,5 @@ This documentation summarizes the purpose of each component in the AI Backend, h
 - `tools/start-all.ps1`, `tools/start-all.sh` — start scripts (hidden-by-default with -Visible/--visible option)
 - `tools/uninstall.ps1` — per-user uninstaller
 - `extensions.md` — Goose Extensions registry
-- `ai-backend-flow.svg` — architecture diagram (embedded above)
 
 If you want, add a dedicated troubleshooting or operations page with step-by-step checks for failures (ports, logs, process supervision).
