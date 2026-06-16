@@ -1,3 +1,8 @@
+---
+layout: page
+title: Home
+---
+
 # AI Backend
 
 A consolidated installer and toolkit for running a local AI backend. This project sets up:
