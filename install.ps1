@@ -169,6 +169,16 @@ try {
     $sc3.IconLocation = $sc.IconLocation
     $sc3.Save()
     Write-Host "Created Startup shortcut: $startupShortcut"
+
+    # Create Uninstall shortcut in Start Menu
+    $uninstallShortcut = Join-Path $startMenuDir 'Uninstall AI Backend.lnk'
+    $scU = $wsh.CreateShortcut($uninstallShortcut)
+    $scU.TargetPath = Join-Path $env:SystemRoot 'system32\WindowsPowerShell\v1.0\powershell.exe'
+    $scU.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$destUninstall`""
+    $scU.WorkingDirectory = $InstallDir
+    $scU.IconLocation = "shell32.dll,16801"
+    $scU.Save()
+    Write-Host "Created Uninstall shortcut: $uninstallShortcut"
 } catch {
     Write-Warning "Failed to create shortcuts: $_"
 }

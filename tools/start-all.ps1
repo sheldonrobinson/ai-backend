@@ -18,6 +18,15 @@ $InstallDir = Join-Path $env:LOCALAPPDATA 'Programs\Konnek\AI-Backend'
 $LogDir = Join-Path $env:TEMP "AI-Backend-Logs"
 New-Item -Path $LogDir -ItemType Directory -Force | Out-Null
 
+# Log rotation: remove logs older than 7 days
+try {
+    $retentionDays = 7
+    $threshold = (Get-Date).AddDays(-$retentionDays)
+    Get-ChildItem -Path $LogDir -File -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -lt $threshold } | Remove-Item -Force -ErrorAction SilentlyContinue
+} catch {
+    Write-Warning "Log rotation failed: $_"
+}
+
 function Find-Exe {
     param([string[]]$Names)
     foreach ($n in $Names) {
@@ -55,17 +64,20 @@ function Start-Component {
         return
     }
 
+    $safeName = ($Name -replace '[^a-zA-Z0-9]','_')
+    $datePart = Get-Date -Format yyyy-MM-dd
+    $logFile = Join-Path $LogDir "$($safeName)-$datePart.log"
+
     $cmd = "`"$exe`" $Args"
     if ($Hidden) {
-        # Start hidden/background
+        # Start hidden/background with log redirection (append into daily file)
         try {
-            Start-Process -FilePath $exe -ArgumentList $Args -WorkingDirectory $WorkingDir -WindowStyle Hidden -ErrorAction Stop
-            Write-Host "$Name started (hidden) (executable: $exe)"
+            $redir = ">> `"$logFile`" 2>&1"
+            $psiArgs = "/c `"$exe`" $Args $redir"
+            Start-Process -FilePath "cmd.exe" -ArgumentList $psiArgs -WorkingDirectory $WorkingDir -WindowStyle Hidden -ErrorAction Stop
+            Write-Host "$Name started (hidden) (executable: $exe), logging to $logFile"
         } catch {
-            # Fallback to launching via cmd hidden
-            $psiArgs = "/c `"$exe`" $Args"
-            Start-Process -FilePath "cmd.exe" -ArgumentList $psiArgs -WorkingDirectory $WorkingDir -WindowStyle Hidden
-            Write-Host "$Name started (hidden via cmd) (executable: $exe)"
+            Write-Warning "Failed to start $Name hidden: $_"
         }
     } else {
         # Open a new cmd window and run the command so output is visible and persists

@@ -7,6 +7,7 @@ $ErrorActionPreference = 'Stop'
 $InstallDir = Join-Path $env:LOCALAPPDATA 'Programs\Konnek\AI-Backend'
 $startMenuDir = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Konnek'
 $startMenuShortcut = Join-Path $startMenuDir 'AI Backend.lnk'
+$uninstallShortcut = Join-Path $startMenuDir 'Uninstall AI Backend.lnk'
 $desktopShortcut = Join-Path (Join-Path $env:USERPROFILE 'Desktop') 'AI Backend.lnk'
 $startupDir = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Startup'
 $startupShortcut = Join-Path $startupDir 'AI Backend.lnk'
@@ -17,6 +18,10 @@ try {
     if (Test-Path $startMenuShortcut) {
         Remove-Item $startMenuShortcut -Force
         Write-Host "Removed Start Menu shortcut: $startMenuShortcut"
+    }
+    if (Test-Path $uninstallShortcut) {
+        Remove-Item $uninstallShortcut -Force
+        Write-Host "Removed Uninstall shortcut: $uninstallShortcut"
     }
     if (Test-Path $desktopShortcut) {
         Remove-Item $desktopShortcut -Force
