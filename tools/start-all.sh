@@ -185,12 +185,21 @@ start_component() {
   fi
 }
 
+# Ensure MCPJUNGLE_ARGS available (env, args file, or default)
+if [ -z "${MCPJUNGLE_ARGS:-}" ]; then
+  if [ -f "$HOME/.konnek/mcpjungle/args.txt" ]; then
+    MCPJUNGLE_ARGS=$(cat "$HOME/.konnek/mcpjungle/args.txt")
+  else
+    MCPJUNGLE_ARGS="--sqlite-db-path $HOME/.konnek/mcpjungle/mcpjungle.db"
+  fi
+fi
+
 # Components list (name, array of possible exe names, args)
 llama_exes=(llama-server llama-server-http llama)
 agent_exes=(agentgateway agentgateway-server)
 mcp_exes=(mcpjungle mcpjungle-server)
 
-start_component "Llama.C++ HTTP Server" llama_exes -- --http --port 8080
+start_component "Llama.C++ HTTP Server" llama_exes
 start_component "agentgateway LLM proxy" agent_exes
 start_component "MCPJungle MCP gateway" mcp_exes
 

@@ -139,7 +139,7 @@ function Start-Component {
 
 # Default component configurations (adjust ports/args below if needed)
 $components = @(
-    @{ Name = 'Llama.C++ HTTP Server'; Exes = @('llama-server.exe','llama-server','llama.exe'); Args = '--http --port 8080' },
+    @{ Name = 'Llama.C++ HTTP Server'; Exes = @('llama-server.exe','llama-server','llama.exe'); Args = '' },
     @{ Name = 'agentgateway LLM proxy'; Exes = @('agentgateway.exe','agentgateway'); Args = '' },
     @{ Name = 'MCPJungle MCP gateway'; Exes = @('mcpjungle.exe','mcpjungle-server.exe','mcpjungle'); Args = '' }
 )
@@ -151,7 +151,7 @@ if (-not $env:MCPJUNGLE_ARGS) {
         try { $env:MCPJUNGLE_ARGS = Get-Content -Path $McpArgsFile -Raw -ErrorAction Stop } catch { $env:MCPJUNGLE_ARGS = $null }
     }
     if (-not $env:MCPJUNGLE_ARGS) {
-        $env:MCPJUNGLE_ARGS = "--port 9000 --sqlite-db-path $env:USERPROFILE\.konnek\mcpjungle\mcpjungle.db"
+        $env:MCPJUNGLE_ARGS = "--sqlite-db-path $env:USERPROFILE\.konnek\mcpjungle\mcpjungle.db"
     }
 }
 
