@@ -257,7 +257,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         </div>
         <h3>Finance Skills</h3>
         <p>Financial analyst agent skill. Ratio analysis, DCF valuation, budget variance, rolling forecasts.</p>
-        <div class="cmd-preview">npx skills add JoelLewis/finance_skills</div>
+        <div class="cmd-preview">npx skills add JoelLewis/finance_skills -y --agent goose cline</div>
     </div>
     
     <div class="card">
@@ -287,6 +287,6 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         </div>
         <h3>Stack Overflow for Agents</h3>
         <p>Interact with Stack Overflow for Agents: authenticate, search validated knowledge, read context pages.</p>
-        <div class="cmd-preview">npx skills add https://agents.stackoverflow.com/ --skill sofa --yes --agent cline goose</div>
+        <div class="cmd-preview">npx skills add https://agents.stackoverflow.com/ --skill sofa --yes --agent goose cline</div>
     </div>
     </div>

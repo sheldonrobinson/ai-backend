@@ -33,10 +33,10 @@ skills = [
     {"name": "Exa Labs Search", "desc": "Deep research powered by Exa. Use for lead generation, literature reviews, deep dives, competitive analysis.", "cmd": "npx skills add exa-labs/exa-mcp-server -y --agent goose cline", "category": "Search & Research"},
     {"name": "HuggingFace Skills", "desc": "Hugging Face Hub CLI (hf) for downloading, uploading, and managing models, datasets, spaces, buckets.", "cmd": "npx skills add huggingface/skills -y --agent goose cline", "category": "AI / ML specific"},
     {"name": "OpenClaw Security", "desc": "Security-first vetting for OpenClaw skills. Use before installing any skill from ClawHub, GitHub.", "cmd": "npx skills add UseAI-pro/openclaw-skills-security -y --agent goose cline", "category": "Security"},
-    {"name": "Finance Skills", "desc": "Financial analyst agent skill. Ratio analysis, DCF valuation, budget variance, rolling forecasts.", "cmd": "npx skills add JoelLewis/finance_skills", "category": "Finance & Operations"},
+    {"name": "Finance Skills", "desc": "Financial analyst agent skill. Ratio analysis, DCF valuation, budget variance, rolling forecasts.", "cmd": "npx skills add JoelLewis/finance_skills -y --agent goose cline", "category": "Finance & Operations"},
     {"name": "Product Manager", "desc": "Product Management skills for agents.", "cmd": "npx skills add deanpeters/product-manager-skills -y --agent goose cline", "category": "Development & Engineering"},
     {"name": "Supply Chain Optimizer", "desc": "Supply chain and logistics optimization skills.", "cmd": "npx skills add heymoezy/porter --skill logistics-optimizer supply-chain-optimizer -y --agent goose cline", "category": "Supply Chain & Logistics"},
-    {"name": "Stack Overflow for Agents", "desc": "Interact with Stack Overflow for Agents: authenticate, search validated knowledge, read context pages.", "cmd": "npx skills add https://agents.stackoverflow.com/ --skill sofa --yes --agent cline goose", "category": "Development & Engineering"}
+    {"name": "Stack Overflow for Agents", "desc": "Interact with Stack Overflow for Agents: authenticate, search validated knowledge, read context pages.", "cmd": "npx skills add https://agents.stackoverflow.com/ --skill sofa --yes --agent goose cline", "category": "Development & Engineering"}
 ]
 
 html = """---

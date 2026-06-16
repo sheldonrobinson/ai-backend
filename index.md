@@ -125,11 +125,11 @@ A curated list of agent skills grouped by business category to enhance your AI A
 
 * **MCP Ext Apps:**
 
-<div class="cmd-preview">npx skills add https://github.com/modelcontextprotocol/ext-apps.git -y --agent cline goose</div>
+<div class="cmd-preview">npx skills add https://github.com/modelcontextprotocol/ext-apps.git -y --agent goose cline</div>
 
 * **Stack Overflow for Agents:**
 
-<div class="cmd-preview">npx skills add https://agents.stackoverflow.com/ --skill sofa -y --agent cline goose</div>
+<div class="cmd-preview">npx skills add https://agents.stackoverflow.com/ --skill sofa -y --agent goose cline</div>
 
 * **Product Manager:**
 
@@ -142,7 +142,7 @@ A curated list of agent skills grouped by business category to enhance your AI A
 
 * **Open WebSearch:**
 
-<div class="cmd-preview">npx skills add https://github.com/Aas-ee/open-webSearch --skill open-websearch -y --agent cline goose</div>
+<div class="cmd-preview">npx skills add https://github.com/Aas-ee/open-webSearch --skill open-websearch -y --agent goose cline</div>
 
 * **Academic/Literature Research:**
 
@@ -151,7 +151,7 @@ A curated list of agent skills grouped by business category to enhance your AI A
 ### Finance & Operations
 * **Finance Skills Core:**
 
-<div class="cmd-preview">npx skills add JoelLewis/finance_skills</div>
+<div class="cmd-preview">npx skills add JoelLewis/finance_skills -y --agent goose cline</div>
 
 * **Advisory Practice:**
 
