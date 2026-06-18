@@ -35,7 +35,23 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <div class="cmd-preview">uvx --from tradingview-mcp-server tradingview-mcp</div>
         <a href="goose://extension?cmd=uvx&id=tradingview&name=TradingView&description=AI-powered%20trading%20toolkit%20for%20Claude%20and%20MCP%20clients.%20Backtesting%20%2B%20Live%20Sentiment%20%2B%20Yahoo%20Finance%20%2B%2030%2B%20Technical%20Analysis%20Tools%20%E2%80%94%20all%20in%20one%20MCP%20server.&arg=--from&arg=tradingview-mcp-server&arg=tradingview-mcp" class="install-btn">➕ Install Extension</a>
     </div>
-
+    
+    <div class="card">
+        <span class="tag">Finance & Operations</span>
+        <h3>SEC EDGAR</h3>
+        <p>An MCP server for connecting AI assistants SEC's Electronic Data Gathering, Analysis, and Retrieval (EDGAR) system for access to company filings, financial statements, and insider trading data.</p>
+        <div class="cmd-preview">uvx sec-edgar-mcp</div>
+        <a href="goose://extension?cmd=uvx&arg=sec-edgar-mcp&id=sec_edgar&name=SEC%20EDGAR&description=An%20MCP%20server%20for%20connecting%20AI%20assistants%20SEC's%20Electronic%20Data%20Gathering%2C%20Analysis%2C%20and%20Retrieval%20(EDGAR)%20system%20for%20access%20to%20company%20filings%2C%20financial%20statements%2C%20and%20insider%20trading%20data.&env=SEC_EDGAR_USER_AGENT%3DJohn%20Doe%20(john.doe%40example.com)" class="install-btn">➕ Install Extension</a>
+    </div>
+    
+    <div class="card">
+        <span class="tag">Finance & Operations</span>
+        <h3>FRB of St. Louis FRED</h3>
+        <p>An MCP server that provides access to Federal Reserve Bank of St. Louis FRED (Federal Reserve Economic Data), including the Maps API for regional and geographic data.</p>
+        <div class="cmd-preview">uvx fred-mcp-server</div>
+        <a href="goose://extension?cmd=uvx&arg=fred-mcp-server&id=stlouisfed_fred&name=FRB%20of%20St.%20Louis%20FRED&description=An%20MCP%20server%20that%20provides%20access%20to%20Federal%20Reserve%20Bank%20of%20St.%20Louis%20FRED%20(Federal%20Reserve%20Economic%20Data)%2C%20including%20the%20Maps%20API%20for%20regional%20and%20geographic%20data.&env=FRED_API_KEY%3Dyour-fred-api-key" class="install-btn">➕ Install Extension</a>
+    </div>
+    
     <div class="card">
         <span class="tag">Development & Engineering</span>
         <h3>shadcn UI</h3>
@@ -65,7 +81,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <h3>Open WebSearch</h3>
         <p>A Multi-engine MCP server, CLI, and local daemon, that can also be paired with skill-guided agent workflows for live web search and content retrieval.</p>
         <div class="cmd-preview">npx -y open-websearch@latest mcp</div>
-        <a href="goose://extension?cmd=npx&id=open_websearch&name=Open%20WebSearch&description=A%20Multi-engine%20MCP%20server%2C%20CLI%2C%20and%20local%20daemon%2C%20that%20can%20also%20be%20paired%20with%20skill-guided%20agent%20workflows%20for%20live%20web%20search%20and%20content%20retrieval.&arg=-y&arg=open-websearch%40latest&arg=mcp" class="install-btn">➕ Install Extension</a>
+        <a href="goose://extension?cmd=npx&arg=-y&arg=open-websearch%40latest&id=open_websearch&name=Open%20WebSearch&description=A%20Multi-engine%20MCP%20server%2C%20CLI%2C%20and%20local%20daemon%2C%20that%20can%20also%20be%20paired%20with%20skill-guided%20agent%20workflows%20for%20live%20web%20search%20and%20content%20retrieval.&env=ENABLE_CORS%3Dtrue&env=MODE%3Dstdio" class="install-btn">➕ Install Extension</a>
     </div>
     
     
