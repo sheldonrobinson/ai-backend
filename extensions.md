@@ -196,7 +196,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
     </div>
 
     <div class="card">
-        <span class="tag">News & Media</span>
+        <span class="tag">Media & Productivity</span>
         <h3>News Aggregator</h3>
         <p>Aggregates trending topics from Reddit, HackerNews and global news sources for monitoring and summarization workflows.</p>
         <div class="cmd-preview">uvx news-aggregator-mcp-server</div>
@@ -204,7 +204,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
     </div>
 
     <div class="card">
-        <span class="tag">Discovery & Catalog</span>
+        <span class="tag">Agent Infrastructure</span>
         <h3>MCP Hub</h3>
         <p>Catalog and discovery service for MCP servers — find, browse and install many community servers from a single hub.</p>
         <div class="cmd-preview">uvx mcp-hub-server</div>
@@ -220,7 +220,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
     </div>
 
     <div class="card">
-        <span class="tag">Memory & Storage</span>
+        <span class="tag">Agent Infrastructure</span>
         <h3>Agent Memory</h3>
         <p>Persistent memory for agents — store, retrieve and search knowledge across sessions to support long-running agent workflows.</p>
         <div class="cmd-preview">uvx agent-memory-mcp-server</div>
@@ -228,7 +228,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
     </div>
 
     <div class="card">
-        <span class="tag">Research & IP</span>
+        <span class="tag">Search & Research</span>
         <h3>Patents</h3>
         <p>Access US patent data, search patents, citations and trends via the PatentsView API for IP research and analysis.</p>
         <div class="cmd-preview">uvx patent-intelligence-mcp-server</div>
@@ -236,7 +236,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
     </div>
 
     <div class="card">
-        <span class="tag">Space & Science</span>
+        <span class="tag">Data & Utilities</span>
         <h3>Space</h3>
         <p>NASA and astronomy data: exoplanets, Mars rover telemetry, asteroid info and Earth imagery for science workflows.</p>
         <div class="cmd-preview">uvx space-mcp-server</div>
@@ -244,7 +244,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
     </div>
 
     <div class="card">
-        <span class="tag">Open Data</span>
+        <span class="tag">Healthcare & Biotechnology</span>
         <h3>OpenFoodFacts</h3>
         <p>Food product database lookup for nutrition and ingredients information via OpenFoodFacts.</p>
         <div class="cmd-preview">uvx openfoodfacts-mcp-server</div>
@@ -252,7 +252,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
     </div>
 
     <div class="card">
-        <span class="tag">Healthcare & Nutrition</span>
+        <span class="tag">Healthcare & Biotechnology</span>
         <h3>Nutrition</h3>
         <p>USDA FoodData Central integration: foods, nutrients and dietary analysis for nutrition workflows.</p>
         <div class="cmd-preview">uvx nutrition-mcp-server</div>
@@ -260,7 +260,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
     </div>
 
     <div class="card">
-        <span class="tag">Documents</span>
+        <span class="tag">Media & Productivity</span>
         <h3>Documents</h3>
         <p>Local PDF & DOCX intelligence: text extraction, table detection, metadata and language detection (no cloud).</p>
         <div class="cmd-preview">uvx document-intelligence-mcp</div>
@@ -269,7 +269,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 
 
     <div class="card">
-        <span class="tag">Regional Data</span>
+        <span class="tag">Data & Utilities</span>
         <h3>Germany</h3>
         <p>German public data: traffic, DWD weather & warnings, Bundestag, energy, pollen and Destatis statistics (no API key required).</p>
         <div class="cmd-preview">uvx germany-mcp-server</div>
@@ -359,7 +359,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
     
     <div class="card">
         <div>
-            <span class="tag skill">AI / ML specific</span>
+            <span class="tag skill">Agent Infrastructure</span>
             <span class="tag skill" style="background-color: #ffdce0; color: #22863a; border-color: #22863a;">Skill</span>
         </div>
         <h3>HuggingFace Skills</h3>
@@ -369,7 +369,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
     
     <div class="card">
         <div>
-            <span class="tag skill">Security</span>
+            <span class="tag skill">Agent Infrastructure</span>
             <span class="tag skill" style="background-color: #ffdce0; color: #22863a; border-color: #22863a;">Skill</span>
         </div>
         <h3>OpenClaw Security</h3>
