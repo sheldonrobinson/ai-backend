@@ -24,6 +24,11 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 
 <h2 class="section-title">📦 Extensions (MCP Servers)</h2>
 <p>Click "Install with Goose" to add these directly to Goose Desktop.</p>
+<label for="category-filter" style="font-weight:600; margin-right:8px;">Filter by category:</label>
+<select id="category-filter" style="padding:6px 8px; border-radius:6px; border:1px solid #e1e4e8;">
+  <option value="All">All</option>
+</select>
+<div style="height:12px"></div>
 <div class="grid">
 
     
@@ -269,8 +274,9 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 
     </div>
 
+    <script src="{{ '/docs/assets/extensions-filter.js' | relative_url }}"></script>
 
-<h2 class="section-title">🧠 Agent Skills</h2>
+    <h2 class="section-title">🧠 Agent Skills</h2>
 <p>Run these commands in your terminal to install these specialized skills into Goose.</p>
 <div class="grid">
 
