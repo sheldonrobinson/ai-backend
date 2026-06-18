@@ -147,6 +147,14 @@ Browse, discover, and install extensions and skills for your Goose Agent.
     </div>
     
     <div class="card">
+        <span class="tag">Legal Services</span>
+        <h3>Paralegal Assistant</h3>
+        <p>An MCP server analyzes legal documents, extract key clauses, summarize content, and highlight potential risks for automated legal workflows.</p>
+        <div class="cmd-preview">npx -y mcp-legal-doc-analyzer@latest --templates ~/.legal-doc-analyzer/templates --db-path ~/.legal-doc-analyzer/legal.db</div>
+        <a href="goose://extension?cmd=npx&arg=-y&arg=mcp-legal-doc-analyzer%40latest&arg=--templates&arg=~%2F.legal-doc-analyzer%2Ftemplates&arg=--db-path&arg=~%2F.legal-doc-analyzer%2Flegal.db&id=paralegal&name=Paralegal%20Assistant&description=An%20MCP%20server%20analyzes%20legal%20documents%2C%20extract%20key%20clauses%2C%20summarize%20content%2C%20and%20highlight%20potential%20risks%20for%20automated%20legal%20workflows." class="install-btn">➕ Install Extension</a>
+    </div>
+    
+    <div class="card">
         <span class="tag">Finance & Operations</span>
         <h3>Real Estate Assistant</h3>
         <p>An MCP server that gives AI agents unified access to U.S. real-estate data, including property records, valuations, and market insights for analysis and automation.</p>
