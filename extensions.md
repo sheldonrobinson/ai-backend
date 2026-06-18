@@ -89,6 +89,14 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <a href="goose://extension?cmd=npx&arg=-y&arg=open-websearch%40latest&id=open_websearch&name=Open%20WebSearch&description=A%20Multi-engine%20MCP%20server%2C%20CLI%2C%20and%20local%20daemon%2C%20that%20can%20also%20be%20paired%20with%20skill-guided%20agent%20workflows%20for%20live%20web%20search%20and%20content%20retrieval.&env=ENABLE_CORS%3Dtrue&env=MODE%3Dstdio" class="install-btn">➕ Install Extension</a>
     </div>
     
+    <div class="card">
+        <span class="tag">Healthcare & Biotechnology</span>
+        <h3>BioMCP</h3>
+        <p>BioMCP is an open-source toolkit that empowers AI assistants and agents with specialized biomedical knowledge. It connects AI systems to authoritative biomedical data sources, enabling them to answer questions about clinical trials, scientific literature, and genomic variants with precision and depth.</p>
+        <div class="cmd-preview">uvx --from biomcp-python biomcp run --mode stdio</div>
+        <a href="goose://extension?cmd=uvx&arg=--from&arg=biomcp-python&arg=biomcp&arg=run&arg=--mode&arg=stdio&id=biomcp&name=BioMCP&description=BioMCP%20is%20an%20open-source%20toolkit%20that%20empowers%20AI%20assistants%20and%20agents%20with%20specialized%20biomedical%20knowledge.%20It%20connects%20AI%20systems%20to%20authoritative%20biomedical%20data%20sources%2C%20enabling%20them%20to%20answer%20questions%20about%20clinical%20trials%2C%20scientific%20literature%2C%20and%20genomic%20variants%20with%20precision%20and%20depth." class="install-btn">➕ Install Extension</a>
+    </div>
+    
     
     <div class="card">
         <span class="tag">Media & Productivity</span>
