@@ -194,13 +194,21 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <div class="cmd-preview">uvx research-automation-mcp-server</div>
         <a href="goose://extension?cmd=uvx&id=research-automation&name=Research%20Automation&description=Multi-source%20research%20MCP%20server%3A%20DuckDuckGo%2C%20Wikipedia%2C%20arXiv%20and%20Crossref.&arg=research-automation-mcp-server" class="install-btn">➕ Install Extension</a>
     </div>
-
-    <div class="card">
+    
+   <div class="card">
         <span class="tag">Media & Productivity</span>
         <h3>News Aggregator</h3>
         <p>Aggregates trending topics from Reddit, HackerNews and global news sources for monitoring and summarization workflows.</p>
         <div class="cmd-preview">uvx news-aggregator-mcp-server</div>
         <a href="goose://extension?cmd=uvx&id=news-aggregator&name=News%20Aggregator&description=Aggregates%20trending%20topics%20from%20Reddit%2C%20HackerNews%20and%20global%20news%20sources.&arg=news-aggregator-mcp-server" class="install-btn">➕ Install Extension</a>
+    </div>
+
+    <div class="card">
+        <span class="tag">Media & Productivity</span>
+        <h3>Email Server</h3>
+        <p>An MCP server that performs IMAP/SMTP email operations with Claude, Cursor, and other AI assistants.</p>
+        <div class="cmd-preview">npx -y mcp-mail-server</div>
+        <a href="goose://extension?cmd=npx&arg=-y&arg=mcp-mail-server&id=emailserver&name=Email%20Server&description=An%20MCP%20server%20that%20performs%20IMAP%2FSMTP%20email%20operations%20with%20Claude%2C%20Cursor%2C%20and%20other%20AI%20assistants.&env=IMAP_HOST%3DIMAP%20server%20address%20(e.g.%20imap.gmail.com)&env=IMAP_PORT%3DIMAP%20port%20number%20(e.g.%20993)&env=IMAP_SECURE%3DEnable%20TLS%20(e.g.%20true)&env=SMTP_HOST%3DSMTP%20server%20address%20(e.g.%20smtp.gmail.com)&env=SMTP_PORT%3DSMTP%20port%20number%09(e.g.%20465)&env=SMTP_SECURE%3DEnable%20SSL%20(e.g.%20true)&env=EMAIL_USER%3DEmail%20username%20(e.g.%20your-email%40gmail.com)&env=EMAIL_PASS%3DEmail%20password%2Fapp%20password" class="install-btn">➕ Install Extension</a>
     </div>
 
     <div class="card">
