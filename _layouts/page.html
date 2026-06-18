@@ -138,3 +138,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 </script>
+
+{% if page.url == "/extensions.html" or page.title == "Extensions & Skills Registry" %}
+<script src="{{ '/docs/assets/extensions-filter.js' | relative_url }}"></script>
+{% endif %}

@@ -281,7 +281,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 
     </div>
 
-    <script src="{{ '/docs/assets/extensions-filter.js' | relative_url }}"></script>
+
 
     <h2 class="section-title">🧠 Agent Skills</h2>
 <p>Run these commands in your terminal to install these specialized skills into Goose.</p>
