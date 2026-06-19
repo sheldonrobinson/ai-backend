@@ -139,10 +139,26 @@ function Start-Component {
 
 # Default component configurations (adjust ports/args below if needed)
 $components = @(
-    @{ Name = 'Llama.C++ HTTP Server'; Exes = @('llama-server.exe','llama-server','llama.exe'); Args = '' },
-    @{ Name = 'agentgateway LLM proxy'; Exes = @('agentgateway.exe','agentgateway'); Args = '' },
-    @{ Name = 'MCPJungle MCP gateway'; Exes = @('mcpjungle.exe','mcpjungle-server.exe','mcpjungle'); Args = '' }
+    @{
+        Name = 'Llama.C++ HTTP Server'
+        BaseDir = Join-Path $env:LOCALAPPDATA 'Programs\Konnek\llamacpp'
+        Exes = @('llama-server.exe','llama-server','llama.exe')
+        Args = ''
+    },
+    @{
+        Name = 'agentgateway LLM proxy'
+        BaseDir = Join-Path $env:LOCALAPPDATA 'Programs\Konnek\agentgateway'
+        Exes = @('agentgateway.exe','agentgateway')
+        Args = ''
+    },
+    @{
+        Name = 'MCPJungle MCP gateway'
+        BaseDir = Join-Path $env:LOCALAPPDATA 'Programs\Konnek\mcpjungle'
+        Exes = @('mcpjungle.exe','mcpjungle-server.exe','mcpjungle')
+        Args = ''
+    }
 )
+
 
 # Ensure MCPJUNGLE_ARGS exists (from env, args file, or default)
 $McpArgsFile = Join-Path $env:USERPROFILE '.konnek\mcpjungle\args.txt'
