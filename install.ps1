@@ -31,6 +31,7 @@ pipx.exe ensurepath
 
 # Sugar
 pipx install sugarai
+sugar init
 
 # Build tools & VCS
 winget install OpenJS.NodeJS.LTS --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
