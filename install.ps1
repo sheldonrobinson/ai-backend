@@ -25,6 +25,8 @@ winget install pnpm.pnpm --accept-package-agreements --accept-source-agreements 
 
 # pipx
 python -m pip install --quiet --user pipx
+# iex (Invoke-WebRequest -Uri "https://astral.sh/uv/install.ps1").Content
+winget install astral-sh.uv --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
 pipx.exe ensurepath
 
 # Sugar
