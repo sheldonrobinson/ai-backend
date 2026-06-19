@@ -45,25 +45,44 @@ winget install alirezagsm.trayy --accept-package-agreements --accept-source-agre
 function Install-GitHubRelease {
     param(
         [string]$Repo,
-        [string]$Match = "enduser.*\.(exe|msi)$"
+        [string]$Match = "enduser.*\.msi$"
     )
+
     Write-Host "Fetching latest release for $Repo..."
     $apiUrl = "https://api.github.com/repos/$Repo/releases/latest"
+
     try {
         $release = Invoke-RestMethod -Uri $apiUrl -ErrorAction Stop
         $asset = $release.assets | Where-Object { $_.name -match $Match } | Select-Object -First 1
-        if ($asset) {
-            $downloadUrl = $asset.browser_download_url
-            $fileName = "$env:TEMP\$($asset.name)"
-            Write-Host "Downloading $($asset.name)..."
-            Invoke-WebRequest -Uri $downloadUrl -OutFile $fileName
-            Write-Host "Installing $($asset.name)..."
-            Start-Process -FilePath $fileName -ArgumentList "/quiet", "/passive", "/norestart" -Wait -NoNewWindow
-            Write-Host "Successfully installed $($asset.name)"
-        } else {
+
+        if (-not $asset) {
             Write-Host "No installable asset matching '$Match' found for $Repo."
+            return
         }
-    } catch {
+
+        $downloadUrl = $asset.browser_download_url
+        $fileName = Join-Path $env:TEMP $asset.name
+
+        Write-Host "Downloading $($asset.name)..."
+        Invoke-WebRequest -Uri $downloadUrl -OutFile $fileName
+
+        Write-Host "Installing $($asset.name)..."
+
+        if ($fileName -match "\.msi$") {
+            # Install MSI silently
+            Start-Process "msiexec.exe" -ArgumentList "/i `"$fileName`" /qn /norestart" -Wait -NoNewWindow
+        }
+        elseif ($fileName -match "\.exe$") {
+            # Install EXE silently
+            Start-Process -FilePath $fileName -ArgumentList "/quiet", "/passive", "/norestart" -Wait -NoNewWindow
+        }
+        else {
+            throw "Unsupported installer type: $fileName"
+        }
+
+        Write-Host "Successfully installed $($asset.name)"
+    }
+    catch {
         Write-Host "Failed to fetch or install release for $Repo. Error: $_"
     }
 }
