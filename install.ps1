@@ -40,20 +40,6 @@ winget install Kitware.CMake --accept-package-agreements --accept-source-agreeme
 winget install Xmake-io.Xmake --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
 winget install alirezagsm.trayy --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
 
-Write-Host "Determining best ggml-backend..."
-$hasNvidia = Get-WmiObject Win32_VideoController | Where-Object { $_.Name -match "NVIDIA" }
-$hasAmd = Get-WmiObject Win32_VideoController | Where-Object { $_.Name -match "AMD" }
-if ($hasNvidia) {
-    Write-Host "NVIDIA GPU detected. Optimal backend is CUDA."
-} elseif ($hasAmd) {
-    Write-Host "AMD GPU detected. Optimal backend is Vulkan/ROCm."
-} else {
-    Write-Host "No dedicated GPU detected. Optimal backend is CPU/Vulkan."
-}
-
-# llamacpp
-Write-Host "Installing llamacpp via winget..."
-winget install ggml.llamacpp --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
 
 # Helper to automatically fetch and install the latest GitHub release assets (specifically enduser variant)
 function Install-GitHubRelease {
@@ -82,6 +68,41 @@ function Install-GitHubRelease {
     }
 }
 
+Write-Host "Determining best ggml-backend..."
+$hasNvidia = Get-WmiObject Win32_VideoController | Where-Object { $_.Name -match "NVIDIA" }
+$hasAmd = Get-WmiObject Win32_VideoController | Where-Object { $_.Name -match "AMD" }
+$hasIntel  = $gpus | Where-Object { $_.Name -match "Intel" }
+
+# Detect Intel oneAPI runtimes (Level Zero, DPC++, OpenCL)
+$oneApiRoot = "C:\Program Files (x86)\Intel\oneAPI"
+$oneApiInstalled = Test-Path $oneApiRoot
+
+# Optional: check for specific SYCL components
+$hasDpcpp = Test-Path "$oneApiRoot\compiler"
+$hasLevelZero = Test-Path "$oneApiRoot\level-zero"
+$hasOpenCL = Test-Path "$oneApiRoot\opencl"
+
+$syclRuntimeAvailable = $oneApiInstalled -and ($hasDpcpp -or $hasLevelZero -or $hasOpenCL)
+
+# llamacpp
+if ($hasNvidia) {
+    Write-Host "NVIDIA GPU detected. Optimal backend is CUDA."
+    Install-GitHubRelease -Repo "sheldonrobinson/llamacpp.install" -Match "enduser-cuda-13.3.*\.(exe|msi)$"
+} elseif ($hasAmd) {
+    Write-Host "AMD GPU detected. Optimal backend is Vulkan/ROCm."
+    Install-GitHubRelease -Repo "sheldonrobinson/llamacpp.install" -Match "enduser-hip-radeon.*\.(exe|msi)$"
+} elseif ($hasIntel -and $syclRuntimeAvailable) {
+    Write-Host "Intel GPU + oneAPI runtime detected. Optimal backend is SYCL."
+    Install-GitHubRelease -Repo "sheldonrobinson/llamacpp.install" -Match "enduser-sycl.*\.(exe|msi)$"
+} elseif ($hasIntel -and -not $syclRuntimeAvailable) {
+    Write-Host "Intel GPU detected, but oneAPI runtime missing. Recommend installing oneAPI for SYCL."
+    Write-Host "Falling back to CPU/Vulkan."
+    Install-GitHubRelease -Repo "sheldonrobinson/llamacpp.install" -Match "enduser-vulkan.*\.(exe|msi)$"
+} else {
+    Write-Host "No dedicated GPU detected. Optimal backend is CPU/Vulkan."
+    Install-GitHubRelease -Repo "sheldonrobinson/llamacpp.install" -Match "enduser-cpu.*\.(exe|msi)$"
+}
+
 # agentgateway
 Install-GitHubRelease -Repo "sheldonrobinson/agentgateway.install"
 
@@ -94,24 +115,6 @@ $env:Configure="false"; iex (Invoke-WebRequest -Uri "https://raw.githubuserconte
 
 # Goose Desktop
 Install-GitHubRelease -Repo "sheldonrobinson/aaif-goose.install"
-
-# Setup local-mcp configuration
-Write-Host "Setting up local-mcp configuration..."
-if (Get-Command npx -ErrorAction SilentlyContinue) {
-    $env:LMCP_REF="67df72f4"
-    try {
-        npx -y local-mcp@latest setup
-    } catch {
-        Write-Host "local-mcp setup failed, continuing..."
-    }
-} else {
-    Write-Host "npx not found, falling back to powershell install..."
-    try {
-        Invoke-RestMethod -Uri "https://local-mcp.com/install-windows?ref=67df72f4" | Invoke-Expression
-    } catch {
-        Write-Host "local-mcp fallback install failed, continuing..."
-    }
-}
 
 # Copy start script into local user Programs folder and create per-user shortcuts (no elevation required)
 $InstallDir = Join-Path $env:LOCALAPPDATA 'Programs\Konnek\AI-Backend'
