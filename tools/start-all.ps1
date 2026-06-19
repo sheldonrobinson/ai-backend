@@ -1,17 +1,11 @@
 <#
 Start-All.ps1
 Starts Llama.C++ HTTP server, agentgateway, and MCPJungle.
-Default behavior runs components hidden/background. Use -Visible to open console windows.
 Installs to %LOCALAPPDATA%\Programs\Konnek\AI-Backend when provided by installer.
 #>
-param(
-    [switch]$Visible
-)
 
 $ErrorActionPreference = 'Stop'
 
-# By default run hidden/background. Use -Visible to open consoles.
-$Hidden = -not $Visible
 
 # Configurable values
 $InstallDir = Join-Path $env:LOCALAPPDATA 'Programs\Konnek\AI-Backend'
@@ -118,14 +112,16 @@ function Start-Component {
     param(
         [string]$Name,
         [string[]]$ExeNames,
-        [string]$Args = '',
-        [string]$WorkingDir = $InstallDir
+        [string]$CommandArgs ,
+        [string]$WorkingDir = $InstallDir,
+        [switch]$Visible
     )
 
     Write-Host ("Starting {0}..." -f $Name)
-    $exe = Find-Exe -Names $ExeNames -BaseDir $c.BaseDir
+
+    $exe = Find-Exe -Names $ExeNames -BaseDir $WorkingDir
     if (-not $exe) {
-        Write-Warning ("Could not find executable for {0}  (tried: $($ExeNames -join ', ')). Skipping." -f $Name)
+        Write-Warning ("Could not find executable for {0} (tried: $($ExeNames -join ', ')). Skipping." -f $Name)
         return
     }
 
@@ -133,69 +129,56 @@ function Start-Component {
     $datePart = Get-Date -Format yyyy-MM-dd
     $logFile = Join-Path $LogDir "$($safeName)-$datePart.log"
 
-    # Rotate/compress logs if they exceed size or are old (size-rotation will compress rotated file)
     Rotate-LogIfNeeded -LogFile $logFile -MaxSizeBytes $maxLogSize
 
-    $cmd = "`"$exe`" $Args"
-    if ($Hidden) {
-        # Start hidden/background with log redirection (append into daily file)
-        try {
-            $redir = ">> `"$logFile`" 2>&1"
-            $psiArgs = "/c `"$exe`" $Args $redir"
-            Start-Process -FilePath "cmd.exe" -ArgumentList $psiArgs -WorkingDirectory $WorkingDir -WindowStyle Hidden -ErrorAction Stop
-            Write-Host "$Name started (hidden) (executable: $exe), logging to $logFile"
-        } catch {
-            Write-Warning "Failed to start $Name hidden: $_"
-        }
-    } else {
-        # Open a new cmd window and run the command so output is visible and persists
-        $psiArgs = "/k `"$exe`" $Args"
+    # Build the full command exactly once  
+    $full = "`"$exe $CommandArgs`""
+
+    if ($Visible) {
+        $psiArgs = @('/k', $full)
         Start-Process -FilePath "cmd.exe" -ArgumentList $psiArgs -WorkingDirectory $WorkingDir -WindowStyle Normal
-        Write-Host "$Name started (visible) (executable: $exe)"
     }
+    else {
+        $redir = ">> `"$logFile`" 2>&1"
+        $psiArgs = @('/c', $full, $redir)
+        Write-Host "ArgumentList $($psiArgs -join ' | ')"   # DEBUG ONLY
+        Start-Process -FilePath "cmd.exe" -ArgumentList $psiArgs -WorkingDirectory $WorkingDir -WindowStyle Hidden
+    }
+
 }
+
 
 # Default component configurations (adjust ports/args below if needed)
 $components = @(
     @{
         Name = 'Llama.C++ HTTP Server'
         BaseDir = Join-Path $env:LOCALAPPDATA 'Programs\Konnek\llamacpp'
-        Exes = @('llama-server.exe','llama-server','llama.exe')
+        Exes = @('llama-server.exe')
         Args = ''
+        Visible = $true
     },
     @{
         Name = 'agentgateway LLM proxy'
         BaseDir = Join-Path $env:LOCALAPPDATA 'Programs\Konnek\agentgateway'
-        Exes = @('agentgateway.exe','agentgateway')
+        Exes = @('agentgateway.exe')
         Args = ''
+        Visible = $true
     },
     @{
         Name = 'MCPJungle MCP gateway'
         BaseDir = Join-Path $env:LOCALAPPDATA 'Programs\Konnek\mcpjungle'
-        Exes = @('mcpjungle.exe','mcpjungle-server.exe','mcpjungle')
-        Args = ''
+        Exes = @('mcpjungle.exe')
+        Args = "start --port 8080 --sqlite-db-path `"$env:APPDATA\Konnek\mcpjungle\mcpjungle.db`""
+        Visible = $true
     }
 )
 
 
-# Ensure MCPJUNGLE_ARGS exists (from env, args file, or default)
-$McpArgsFile = Join-Path $env:USERPROFILE '.konnek\mcpjungle\args.txt'
-if (-not $env:MCPJUNGLE_ARGS) {
-    if (Test-Path $McpArgsFile) {
-        try { $env:MCPJUNGLE_ARGS = Get-Content -Path $McpArgsFile -Raw -ErrorAction Stop } catch { $env:MCPJUNGLE_ARGS = $null }
-    }
-    if (-not $env:MCPJUNGLE_ARGS) {
-        $env:MCPJUNGLE_ARGS = "--sqlite-db-path $env:USERPROFILE\.konnek\mcpjungle\mcpjungle.db"
-    }
+foreach ($c in $components) {
+
+    Start-Component -Name $c.Name -ExeNames $c.Exes -CommandArgs  $c.Args -WorkingDir $c.BaseDir -Visible:$($c.Visible)
 }
 
-foreach ($c in $components) {
-    $args = $c.Args
-    if (($c.Name -like '*MCPJungle*' -or $c.Name -like '*MCP Jungle*') -and ([string]::IsNullOrEmpty($args))) {
-        $args = $env:MCPJUNGLE_ARGS
-    }
-    Start-Component -Name $c.Name -ExeNames $c.Exes -Args $args -WorkingDir $InstallDir
-}
 
 Write-Host "All start requests issued. Check console windows for each component's logs."
 
