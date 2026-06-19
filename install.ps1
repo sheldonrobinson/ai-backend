@@ -185,7 +185,7 @@ try {
     $sc.TargetPath = Join-Path $env:SystemRoot 'system32\WindowsPowerShell\v1.0\powershell.exe'
     $sc.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$destScript`""
     $sc.WorkingDirectory = $InstallDir
-    $sc.IconLocation = "shell32.dll,16769"
+    $sc.IconLocation = "shell32.dll,16801"
     $sc.Save()
     Write-Host "Created Start Menu shortcut: $startMenuShortcut"
 
@@ -218,7 +218,7 @@ try {
     $scU.TargetPath = Join-Path $env:SystemRoot 'system32\WindowsPowerShell\v1.0\powershell.exe'
     $scU.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$destUninstall`""
     $scU.WorkingDirectory = $InstallDir
-    $scU.IconLocation = "shell32.dll,16769"
+    $scU.IconLocation = "shell32.dll,254"
     $scU.Save()
     Write-Host "Created Uninstall shortcut: $uninstallShortcut"
 } catch {
