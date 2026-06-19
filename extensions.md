@@ -52,9 +52,9 @@ Browse, discover, and install extensions and skills for your Goose Agent.
     <div class="card">
         <span class="tag">Finance & Operations</span>
         <h3>FRB of St. Louis FRED</h3>
-        <p>An MCP server that provides access to Federal Reserve Bank of St. Louis FRED (Federal Reserve Economic Data), including the Maps API for regional and geographic data.</p>
+        <p>A MCP server that provides access to Federal Reserve Bank of St. Louis FRED (Federal Reserve Economic Data), including the Maps API for regional and geographic data.</p>
         <div class="cmd-preview">uvx fred-mcp-server</div>
-        <a href="goose://extension?cmd=uvx&arg=fred-mcp-server&id=stlouisfed_fred&name=FRB%20of%20St.%20Louis%20FRED&description=An%20MCP%20server%20that%20provides%20access%20to%20Federal%20Reserve%20Bank%20of%20St.%20Louis%20FRED%20(Federal%20Reserve%20Economic%20Data)%2C%20including%20the%20Maps%20API%20for%20regional%20and%20geographic%20data.&env=FRED_API_KEY%3Dyour-fred-api-key" class="install-btn">➕ Install Extension</a>
+        <a href="goose://extension?cmd=uvx&arg=fred-mcp-server&id=stlouisfed_fred&name=FRB%20of%20St.%20Louis%20FRED&description=A%20MCP%20server%20that%20provides%20access%20to%20Federal%20Reserve%20Bank%20of%20St.%20Louis%20FRED%20(Federal%20Reserve%20Economic%20Data)%2C%20including%20the%20Maps%20API%20for%20regional%20and%20geographic%20data.&env=FRED_API_KEY%3Dyour-fred-api-key" class="install-btn">➕ Install Extension</a>
     </div>
     
     <div class="card">
@@ -79,6 +79,14 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <p>A MCP server that connects to Bluesky and provides tools to interact with the ATProtocol.</p>
         <div class="cmd-preview">npx -y @brianellin/bsky-mcp-server</div>
         <a href="goose://extension?cmd=npx&arg=-y&arg=%40brianellin%2Fbsky-mcp-server&id=bluesky&name=Bluesky&description=A%20MCP%20server%20that%20connects%20to%20Bluesky%20and%20provides%20tools%20to%20interact%20with%20the%20ATProtocol.&env=BLUESKY_IDENTIFIER%3Dyour-handle.bsky.social&env=BLUESKY_APP_PASSWORD%3Dyour-app-password&env=BLUESKY_SERVICE_URL%3Dhttps%3A%2F%2Fbsky.social" class="install-btn">➕ Install Extension</a>
+    </div>
+
+    <div class="card">
+        <span class="tag">Media & Productivity</span>
+        <h3>Discord</h3>
+        <p>A minimal Discord MCP server that exposes basic message-sending and channel-interaction tools for agentic automation.</p>
+        <div class="cmd-preview">npx -y @pasympa/discord-mcp</div>
+        <a href="goose://extension?cmd=npx&arg=-y&arg=%40pasympa%2Fdiscord-mcp&id=discord&name=Discord&description=A%20minimal%20Discord%20MCP%20server%20that%20exposes%20basic%20message-sending%20and%20channel-interaction%20tools%20for%20agentic%20automation.&env=DISCORD_TOKEN%3Dyour-discord-token" class="install-btn">➕ Install Extension</a>
     </div>
 
     <div class="card">
