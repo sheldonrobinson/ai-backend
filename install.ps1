@@ -227,5 +227,5 @@ try {
 
 Write-Host "Installation script completed successfully."
 # Keep window open for a few seconds to see result
-Start-Sleep -Seconds 5
+Start-Sleep -Seconds 15
 
