@@ -27,13 +27,13 @@ $maxLogSize = $maxLogSizeMB * 1MB
 function Compress-LogFile {
     param([string]$Path)
     try {
-        $zipPath = "$Path.zip"
+        $zipPath = "{0}.zip" -f $Path
         if (Test-Path $zipPath) { Remove-Item $zipPath -Force -ErrorAction SilentlyContinue }
         Compress-Archive -Path $Path -DestinationPath $zipPath -Force -ErrorAction Stop
         Remove-Item $Path -Force -ErrorAction SilentlyContinue
-        Write-Host "Compressed $Path -> $zipPath"
+        Write-Host ("Compressed {0} -> {1}" -f $Path, $zipPath)
     } catch {
-        Write-Warning "Failed to compress $Path: $_"
+        Write-Warning ("Failed to compress {0}: $_" -f $Path)
     }
 }
 
@@ -47,14 +47,14 @@ function Rotate-LogIfNeeded {
             $size = (Get-Item $LogFile).Length
             if ($size -ge $MaxSizeBytes) {
                 $timestamp = Get-Date -Format yyyyMMddHHmmss
-                $rotated = "$LogFile.$timestamp"
+                $rotated = "{0}.{1}" -f $LogFile, $timestamp
                 Move-Item -Path $LogFile -Destination $rotated -Force
                 Compress-LogFile -Path $rotated
-                Write-Host "Rotated and compressed $LogFile -> $rotated.zip"
+                Write-Host ("Rotated and compressed {0} -> {1}.zip" -f $LogFile, $rotated)
             }
         }
     } catch {
-        Write-Warning "Rotate-LogIfNeeded failed for $LogFile: $_"
+        Write-Warning ("Rotate-LogIfNeeded failed for {0}: $_" -f $LogFile)
     }
 }
 
@@ -75,26 +75,44 @@ try {
 }
 
 function Find-Exe {
-    param([string[]]$Names)
+    param(
+        [string[]]$Names,
+        [string]$BaseDir
+    )
+
     foreach ($n in $Names) {
-        # Check PATH
-        try { $cmd = Get-Command $n -ErrorAction SilentlyContinue } catch { $cmd = $null }
+
+        # 1. Check PATH
+        $cmd = Get-Command $n -ErrorAction SilentlyContinue
         if ($cmd) { return $cmd.Path }
-        # Check common install locations
-        $candidates = @(
-            Join-Path $InstallDir $n,
-            Join-Path $InstallDir ("bin\" + $n),
-            Join-Path $env:ProgramFiles $n,
-            Join-Path $env:ProgramFiles ("\" + $n),
-            Join-Path $env:LOCALAPPDATA "Programs\$n"
+
+        # 2. Check BaseDir (your real install location)
+        if ($BaseDir) {
+            $candidate = Join-Path $BaseDir $n
+            if (Test-Path $candidate) { return (Resolve-Path $candidate).Path }
+
+            if (Test-Path ($candidate + ".exe")) {
+                return (Resolve-Path ($candidate + ".exe")).Path
+            }
+        }
+
+        # 3. Fallback search
+        $fallbacks = @(
+            (Join-Path $InstallDir $n)
+            (Join-Path $InstallDir ("bin\" + $n))
+            (Join-Path $env:ProgramFiles $n)
+            (Join-Path $env:LOCALAPPDATA ("Programs\$n"))
         )
-        foreach ($p in $candidates) {
+
+        foreach ($p in $fallbacks) {
             if (Test-Path $p) { return (Resolve-Path $p).Path }
-            if (Test-Path ($p + '.exe')) { return (Resolve-Path ($p + '.exe')).Path }
+            if (Test-Path ($p + ".exe")) { return (Resolve-Path ($p + ".exe")).Path }
         }
     }
+
     return $null
 }
+
 
 function Start-Component {
     param(
@@ -104,10 +122,10 @@ function Start-Component {
         [string]$WorkingDir = $InstallDir
     )
 
-    Write-Host "Starting $Name..."
-    $exe = Find-Exe -Names $ExeNames
+    Write-Host ("Starting {0}..." -f $Name)
+    $exe = Find-Exe -Names $ExeNames -BaseDir $c.BaseDir
     if (-not $exe) {
-        Write-Warning "Could not find executable for $Name (tried: $($ExeNames -join ', ')). Skipping."
+        Write-Warning ("Could not find executable for {0}  (tried: $($ExeNames -join ', ')). Skipping." -f $Name)
         return
     }
 
