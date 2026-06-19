@@ -106,20 +106,20 @@ $syclRuntimeAvailable = $oneApiInstalled -and ($hasDpcpp -or $hasLevelZero -or $
 # llamacpp
 if ($hasNvidia) {
     Write-Host "NVIDIA GPU detected. Optimal backend is CUDA."
-    Install-GitHubRelease -Repo "sheldonrobinson/llamacpp.install" -Match "enduser-cuda-13.3.*\.(exe|msi)$"
+    Install-GitHubRelease -Repo "sheldonrobinson/llamacpp.install" -Match "enduser-cuda-13.3.*\.msi$"
 } elseif ($hasAmd) {
     Write-Host "AMD GPU detected. Optimal backend is Vulkan/ROCm."
-    Install-GitHubRelease -Repo "sheldonrobinson/llamacpp.install" -Match "enduser-hip-radeon.*\.(exe|msi)$"
+    Install-GitHubRelease -Repo "sheldonrobinson/llamacpp.install" -Match "enduser-hip-radeon.*\.msi$"
 } elseif ($hasIntel -and $syclRuntimeAvailable) {
     Write-Host "Intel GPU + oneAPI runtime detected. Optimal backend is SYCL."
-    Install-GitHubRelease -Repo "sheldonrobinson/llamacpp.install" -Match "enduser-sycl.*\.(exe|msi)$"
+    Install-GitHubRelease -Repo "sheldonrobinson/llamacpp.install" -Match "enduser-sycl.*\.msi$"
 } elseif ($hasIntel -and -not $syclRuntimeAvailable) {
     Write-Host "Intel GPU detected, but oneAPI runtime missing. Recommend installing oneAPI for SYCL."
     Write-Host "Falling back to CPU/Vulkan."
-    Install-GitHubRelease -Repo "sheldonrobinson/llamacpp.install" -Match "enduser-vulkan.*\.(exe|msi)$"
+    Install-GitHubRelease -Repo "sheldonrobinson/llamacpp.install" -Match "enduser-vulkan.*\.msi$"
 } else {
     Write-Host "No dedicated GPU detected. Optimal backend is CPU/Vulkan."
-    Install-GitHubRelease -Repo "sheldonrobinson/llamacpp.install" -Match "enduser-cpu.*\.(exe|msi)$"
+    Install-GitHubRelease -Repo "sheldonrobinson/llamacpp.install" -Match "enduser-cpu.*\.msi$"
 }
 
 # agentgateway
