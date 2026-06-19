@@ -101,7 +101,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <span class="tag">Search & Research</span>
         <h3>Open WebSearch</h3>
         <p>A Multi-engine MCP server, CLI, and local daemon, that can also be paired with skill-guided agent workflows for live web search and content retrieval.</p>
-        <div class="cmd-preview">npx -y open-websearch@latest mcp</div>
+        <div class="cmd-preview">npx -y open-websearch@latest</div>
         <a href="goose://extension?cmd=npx&arg=-y&arg=open-websearch%40latest&id=open_websearch&name=Open%20WebSearch&description=A%20Multi-engine%20MCP%20server%2C%20CLI%2C%20and%20local%20daemon%2C%20that%20can%20also%20be%20paired%20with%20skill-guided%20agent%20workflows%20for%20live%20web%20search%20and%20content%20retrieval.&env=ENABLE_CORS%3Dtrue&env=MODE%3Dstdio" class="install-btn">➕ Install Extension</a>
     </div>
     
