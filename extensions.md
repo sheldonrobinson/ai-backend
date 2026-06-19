@@ -44,17 +44,17 @@ Browse, discover, and install extensions and skills for your Goose Agent.
     <div class="card">
         <span class="tag">Finance & Operations</span>
         <h3>SEC EDGAR</h3>
-        <p>An MCP server for connecting AI assistants SEC's Electronic Data Gathering, Analysis, and Retrieval (EDGAR) system for access to company filings, financial statements, and insider trading data.</p>
+        <p>A MCP server for connecting AI assistants SEC's Electronic Data Gathering, Analysis, and Retrieval (EDGAR) system for access to company filings, financial statements, and insider trading data.</p>
         <div class="cmd-preview">uvx sec-edgar-mcp</div>
-        <a href="goose://extension?cmd=uvx&arg=sec-edgar-mcp&id=sec_edgar&name=SEC%20EDGAR&description=An%20MCP%20server%20for%20connecting%20AI%20assistants%20SEC's%20Electronic%20Data%20Gathering%2C%20Analysis%2C%20and%20Retrieval%20(EDGAR)%20system%20for%20access%20to%20company%20filings%2C%20financial%20statements%2C%20and%20insider%20trading%20data.&env=SEC_EDGAR_USER_AGENT%3DJohn%20Doe%20(john.doe%40example.com)" class="install-btn">➕ Install Extension</a>
+        <a href="goose://extension?cmd=uvx&arg=sec-edgar-mcp&id=sec_edgar&name=SEC%20EDGAR&description=A%20MCP%20server%20for%20connecting%20AI%20assistants%20SEC's%20Electronic%20Data%20Gathering%2C%20Analysis%2C%20and%20Retrieval%20(EDGAR)%20system%20for%20access%20to%20company%20filings%2C%20financial%20statements%2C%20and%20insider%20trading%20data.&env=SEC_EDGAR_USER_AGENT%3DJohn%20Doe%20(john.doe%40example.com)" class="install-btn">➕ Install Extension</a>
     </div>
     
     <div class="card">
         <span class="tag">Finance & Operations</span>
         <h3>FRB of St. Louis FRED</h3>
-        <p>An MCP server that provides access to Federal Reserve Bank of St. Louis FRED (Federal Reserve Economic Data), including the Maps API for regional and geographic data.</p>
+        <p>A MCP server that provides access to Federal Reserve Bank of St. Louis FRED (Federal Reserve Economic Data), including the Maps API for regional and geographic data.</p>
         <div class="cmd-preview">uvx fred-mcp-server</div>
-        <a href="goose://extension?cmd=uvx&arg=fred-mcp-server&id=stlouisfed_fred&name=FRB%20of%20St.%20Louis%20FRED&description=An%20MCP%20server%20that%20provides%20access%20to%20Federal%20Reserve%20Bank%20of%20St.%20Louis%20FRED%20(Federal%20Reserve%20Economic%20Data)%2C%20including%20the%20Maps%20API%20for%20regional%20and%20geographic%20data.&env=FRED_API_KEY%3Dyour-fred-api-key" class="install-btn">➕ Install Extension</a>
+        <a href="goose://extension?cmd=uvx&arg=fred-mcp-server&id=stlouisfed_fred&name=FRB%20of%20St.%20Louis%20FRED&description=A%20MCP%20server%20that%20provides%20access%20to%20Federal%20Reserve%20Bank%20of%20St.%20Louis%20FRED%20(Federal%20Reserve%20Economic%20Data)%2C%20including%20the%20Maps%20API%20for%20regional%20and%20geographic%20data.&env=FRED_API_KEY%3Dyour-fred-api-key" class="install-btn">➕ Install Extension</a>
     </div>
     
     <div class="card">
@@ -71,6 +71,22 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <p>A full-featured Bluesky MCP server that adds search, feeds, trends, follower graph tools, thread retrieval, and rich content/engagement management for agentic workflows.</p>
         <div class="cmd-preview">npx -y @semihberkay/bluesky-mcp</div>
         <a href="goose://extension?cmd=npx&id=blueskysocial&name=Bluesky%20Social&description=A%20full-featured%20Bluesky%20MCP%20server%20that%20adds%20search%2C%20feeds%2C%20trends%2C%20follower%20graph%20tools%2C%20thread%20retrieval%2C%20and%20rich%20content/engagement%20management%20for%20agentic%20workflows.&arg=-y&arg=%40semihberkay/bluesky-mcp&env=BLUESKY_IDENTIFIER%3DBLUESKY_IDENTIFIER&env=BLUESKY_SERVICE_URL%3DBLUESKY_SERVICE_URL&env=BLUESKY_APP_PASSWORD%3DBLUESKY_APP_PASSWORD" class="install-btn">➕ Install Extension</a>
+    </div>
+
+    <div class="card">
+        <span class="tag">Media & Productivity</span>
+        <h3>Bluesky</h3>
+        <p>A MCP server that connects to Bluesky and provides tools to interact with the ATProtocol.</p>
+        <div class="cmd-preview">npx -y @brianellin/bsky-mcp-server</div>
+        <a href="goose://extension?cmd=npx&arg=-y&arg=%40brianellin%2Fbsky-mcp-server&id=bluesky&name=Bluesky&description=A%20MCP%20server%20that%20connects%20to%20Bluesky%20and%20provides%20tools%20to%20interact%20with%20the%20ATProtocol.&env=BLUESKY_IDENTIFIER%3Dyour-handle.bsky.social&env=BLUESKY_APP_PASSWORD%3Dyour-app-password&env=BLUESKY_SERVICE_URL%3Dhttps%3A%2F%2Fbsky.social" class="install-btn">➕ Install Extension</a>
+    </div>
+
+    <div class="card">
+        <span class="tag">Media & Productivity</span>
+        <h3>Discord</h3>
+        <p>A minimal Discord MCP server that exposes basic message-sending and channel-interaction tools for agentic automation.</p>
+        <div class="cmd-preview">npx -y @pasympa/discord-mcp</div>
+        <a href="goose://extension?cmd=npx&arg=-y&arg=%40pasympa%2Fdiscord-mcp&id=discord&name=Discord&description=A%20minimal%20Discord%20MCP%20server%20that%20exposes%20basic%20message-sending%20and%20channel-interaction%20tools%20for%20agentic%20automation.&env=DISCORD_TOKEN%3Dyour-discord-token" class="install-btn">➕ Install Extension</a>
     </div>
 
     <div class="card">
@@ -141,41 +157,41 @@ Browse, discover, and install extensions and skills for your Goose Agent.
     <div class="card">
         <span class="tag">Legal Services</span>
         <h3>Judicial Research Agent</h3>
-        <p>An MCP server that lets AI agents search and retrieve 3M+ U.S. court decisions and EU legislation via CourtListener and EUR-Lex for legal research.</p>
+        <p>A MCP server that lets AI agents search and retrieve 3M+ U.S. court decisions and EU legislation via CourtListener and EUR-Lex for legal research.</p>
         <div class="cmd-preview">uvx --from legal-court-mcp-server legal-court-server</div>
-        <a href="goose://extension?cmd=uvx&id=judicialresearchagent&name=Judicial%20Research%20Agent&description=An%20MCP%20server%20that%20lets%20AI%20agents%20search%20and%20retrieve%203M%2B%20U.S.%20court%20decisions%20and%20EU%20legislation%20via%20CourtListener%20and%20EUR-Lex%20for%20legal%20research.&arg=--from&arg=legal-court-mcp-server&arg=legal-court-server" class="install-btn">➕ Install Extension</a>
+        <a href="goose://extension?cmd=uvx&id=judicialresearchagent&name=Judicial%20Research%20Agent&description=A%20MCP%20server%20that%20lets%20AI%20agents%20search%20and%20retrieve%203M%2B%20U.S.%20court%20decisions%20and%20EU%20legislation%20via%20CourtListener%20and%20EUR-Lex%20for%20legal%20research.&arg=--from&arg=legal-court-mcp-server&arg=legal-court-server" class="install-btn">➕ Install Extension</a>
     </div>
     
     <div class="card">
         <span class="tag">Legal Services</span>
         <h3>Paralegal Assistant</h3>
-        <p>An MCP server analyzes legal documents, extract key clauses, summarize content, and highlight potential risks for automated legal workflows.</p>
+        <p>A MCP server analyzes legal documents, extract key clauses, summarize content, and highlight potential risks for automated legal workflows.</p>
         <div class="cmd-preview">npx -y mcp-legal-doc-analyzer@latest --templates ~/.legal-doc-analyzer/templates --db-path ~/.legal-doc-analyzer/legal.db</div>
-        <a href="goose://extension?cmd=npx&arg=-y&arg=mcp-legal-doc-analyzer%40latest&arg=--templates&arg=~%2F.legal-doc-analyzer%2Ftemplates&arg=--db-path&arg=~%2F.legal-doc-analyzer%2Flegal.db&id=paralegal&name=Paralegal%20Assistant&description=An%20MCP%20server%20analyzes%20legal%20documents%2C%20extract%20key%20clauses%2C%20summarize%20content%2C%20and%20highlight%20potential%20risks%20for%20automated%20legal%20workflows." class="install-btn">➕ Install Extension</a>
+        <a href="goose://extension?cmd=npx&arg=-y&arg=mcp-legal-doc-analyzer%40latest&arg=--templates&arg=~%2F.legal-doc-analyzer%2Ftemplates&arg=--db-path&arg=~%2F.legal-doc-analyzer%2Flegal.db&id=paralegal&name=Paralegal%20Assistant&description=A%20MCP%20server%20analyzes%20legal%20documents%2C%20extract%20key%20clauses%2C%20summarize%20content%2C%20and%20highlight%20potential%20risks%20for%20automated%20legal%20workflows." class="install-btn">➕ Install Extension</a>
     </div>
     
     <div class="card">
         <span class="tag">Finance & Operations</span>
         <h3>Real Estate Assistant</h3>
-        <p>An MCP server that gives AI agents unified access to U.S. real-estate data, including property records, valuations, and market insights for analysis and automation.</p>
+        <p>A MCP server that gives AI agents unified access to U.S. real-estate data, including property records, valuations, and market insights for analysis and automation.</p>
         <div class="cmd-preview">uvx --from real-estate-data-mcp-server real-estate-server</div>
-        <a href="goose://extension?cmd=uvx&id=realestateassistant&name=Real%20Estate%20Assistant&description=An%20MCP%20server%20that%20gives%20AI%20agents%20unified%20access%20to%20U.S.%20real-estate%20data%2C%20including%20property%20records%2C%20valuations%2C%20and%20market%20insights%20for%20analysis%20and%20automation.&arg=--from&arg=real-estate-data-mcp-server&arg=real-estate-server" class="install-btn">➕ Install Extension</a>
+        <a href="goose://extension?cmd=uvx&id=realestateassistant&name=Real%20Estate%20Assistant&description=A%20MCP%20server%20that%20gives%20AI%20agents%20unified%20access%20to%20U.S.%20real-estate%20data%2C%20including%20property%20records%2C%20valuations%2C%20and%20market%20insights%20for%20analysis%20and%20automation.&arg=--from&arg=real-estate-data-mcp-server&arg=real-estate-server" class="install-btn">➕ Install Extension</a>
     </div>
     
     <div class="card">
         <span class="tag">Finance & Operations</span>
         <h3>Job Market Analyst</h3>
-        <p>An MCP server providing global labor-market data, including unemployment rates, wages, sector employment, and occupation outlooks using official BLS (US) and Eurostat (EU) APIs.</p>
+        <p>A MCP server providing global labor-market data, including unemployment rates, wages, sector employment, and occupation outlooks using official BLS (US) and Eurostat (EU) APIs.</p>
         <div class="cmd-preview">uvx --from labor-market-mcp-server labor-market-server</div>
-        <a href="goose://extension?cmd=uvx&id=jobmarketanalyst&name=Job%20Market%20Analyst&description=An%20MCP%20server%20providing%20global%20labor-market%20data%2C%20including%20unemployment%20rates%2C%20wages%2C%20sector%20employment%2C%20and%20occupation%20outlooks%20using%20official%20BLS%20%28US%29%20and%20Eurostat%20%28EU%29%20APIs.&arg=--from&arg=labor-market-mcp-server&arg=labor-market-server" class="install-btn">➕ Install Extension</a>
+        <a href="goose://extension?cmd=uvx&id=jobmarketanalyst&name=Job%20Market%20Analyst&description=A%20MCP%20server%20providing%20global%20labor-market%20data%2C%20including%20unemployment%20rates%2C%20wages%2C%20sector%20employment%2C%20and%20occupation%20outlooks%20using%20official%20BLS%20%28US%29%20and%20Eurostat%20%28EU%29%20APIs.&arg=--from&arg=labor-market-mcp-server&arg=labor-market-server" class="install-btn">➕ Install Extension</a>
     </div>
     
     <div class="card">
         <span class="tag">Search & Research</span>
         <h3>Crossref Research Assistant</h3>
-        <p>An MCP server that lets AI agents query Crossref for academic metadata, including DOIs, authors, journals, citations, and publication records for research automation.</p>
+        <p>A MCP server that lets AI agents query Crossref for academic metadata, including DOIs, authors, journals, citations, and publication records for research automation.</p>
         <div class="cmd-preview">uvx --from crossref-academic-mcp-server crossref-server</div>
-        <a href="goose://extension?cmd=uvx&id=crossrefresearchassistant&name=Crossref%20Research%20Assistant&description=An%20MCP%20server%20that%20lets%20AI%20agents%20query%20Crossref%20for%20academic%20metadata%2C%20including%20DOIs%2C%20authors%2C%20journals%2C%20citations%2C%20and%20publication%20records%20for%20research%20automation.&arg=--from&arg=crossref-academic-mcp-server&arg=crossref-server" class="install-btn">➕ Install Extension</a>
+        <a href="goose://extension?cmd=uvx&id=crossrefresearchassistant&name=Crossref%20Research%20Assistant&description=A%20MCP%20server%20that%20lets%20AI%20agents%20query%20Crossref%20for%20academic%20metadata%2C%20including%20DOIs%2C%20authors%2C%20journals%2C%20citations%2C%20and%20publication%20records%20for%20research%20automation.&arg=--from&arg=crossref-academic-mcp-server&arg=crossref-server" class="install-btn">➕ Install Extension</a>
     </div>
     
     <div class="card">
@@ -214,9 +230,9 @@ Browse, discover, and install extensions and skills for your Goose Agent.
     <div class="card">
         <span class="tag">Media & Productivity</span>
         <h3>Email Server</h3>
-        <p>An MCP server that performs IMAP/SMTP email operations with Claude, Cursor, and other AI assistants.</p>
+        <p>A MCP server that performs IMAP/SMTP email operations with Claude, Cursor, and other AI assistants.</p>
         <div class="cmd-preview">npx -y mcp-mail-server</div>
-        <a href="goose://extension?cmd=npx&arg=-y&arg=mcp-mail-server&id=emailserver&name=Email%20Server&description=An%20MCP%20server%20that%20performs%20IMAP%2FSMTP%20email%20operations%20with%20Claude%2C%20Cursor%2C%20and%20other%20AI%20assistants.&env=IMAP_HOST%3DIMAP%20server%20address%20(e.g.%20imap.gmail.com)&env=IMAP_PORT%3DIMAP%20port%20number%20(e.g.%20993)&env=IMAP_SECURE%3DEnable%20TLS%20(e.g.%20true)&env=SMTP_HOST%3DSMTP%20server%20address%20(e.g.%20smtp.gmail.com)&env=SMTP_PORT%3DSMTP%20port%20number%09(e.g.%20465)&env=SMTP_SECURE%3DEnable%20SSL%20(e.g.%20true)&env=EMAIL_USER%3DEmail%20username%20(e.g.%20your-email%40gmail.com)&env=EMAIL_PASS%3DEmail%20password%2Fapp%20password" class="install-btn">➕ Install Extension</a>
+        <a href="goose://extension?cmd=npx&arg=-y&arg=mcp-mail-server&id=emailserver&name=Email%20Server&description=A%20MCP%20server%20that%20performs%20IMAP%2FSMTP%20email%20operations%20with%20Claude%2C%20Cursor%2C%20and%20other%20AI%20assistants.&env=IMAP_HOST%3DIMAP%20server%20address%20(e.g.%20imap.gmail.com)&env=IMAP_PORT%3DIMAP%20port%20number%20(e.g.%20993)&env=IMAP_SECURE%3DEnable%20TLS%20(e.g.%20true)&env=SMTP_HOST%3DSMTP%20server%20address%20(e.g.%20smtp.gmail.com)&env=SMTP_PORT%3DSMTP%20port%20number%09(e.g.%20465)&env=SMTP_SECURE%3DEnable%20SSL%20(e.g.%20true)&env=EMAIL_USER%3DEmail%20username%20(e.g.%20your-email%40gmail.com)&env=EMAIL_PASS%3DEmail%20password%2Fapp%20password" class="install-btn">➕ Install Extension</a>
     </div>
 
     <div class="card">
