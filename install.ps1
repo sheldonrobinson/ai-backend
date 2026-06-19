@@ -138,22 +138,41 @@ Install-GitHubRelease -Repo "sheldonrobinson/aaif-goose.install"
 # Copy start script into local user Programs folder and create per-user shortcuts (no elevation required)
 $InstallDir = Join-Path $env:LOCALAPPDATA 'Programs\Konnek\AI-Backend'
 New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
-$sourceScript = Join-Path $PSScriptRoot 'tools\start-all.ps1'
+
+$InstallDir = Join-Path $env:LOCALAPPDATA 'Programs\Konnek\AI-Backend'
+New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
+
+# URLs for your scripts
+$startUrl = "https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/tools/start-all.ps1"
+$uninstallUrl = "https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/tools/uninstall.ps1"
+
 $destScript = Join-Path $InstallDir 'start-all.ps1'
-if (Test-Path $sourceScript) {
-    Copy-Item -Path $sourceScript -Destination $destScript -Force
-    Write-Host "Copied start script to $destScript"
-} else {
-    Write-Warning "Start script $sourceScript not found in installer package. You can manually place start-all.ps1 in $InstallDir."
-}
+$destUninstall = Join-Path $InstallDir 'uninstall.ps1'
+
+# Download scripts
+Invoke-WebRequest -Uri $startUrl -OutFile $destScript -UseBasicParsing
+Invoke-WebRequest -Uri $uninstallUrl -OutFile $destUninstall -UseBasicParsing
+
+Write-Host "Downloaded start-all.ps1 to $destScript"
+Write-Host "Downloaded uninstall.ps1 to $destUninstall"
+
+
+# $sourceScript = Join-Path $PSScriptRoot 'tools\start-all.ps1'
+# $destScript = Join-Path $InstallDir 'start-all.ps1'
+# if (Test-Path $sourceScript) {
+#    Copy-Item -Path $sourceScript -Destination $destScript -Force
+#    Write-Host "Copied start script to $destScript"
+# } else {
+#     Write-Warning "Start script $sourceScript not found in installer package. You can manually place start-all.ps1 in $InstallDir."
+# }
 
 # Copy uninstall script as well if present
-$sourceUninstall = Join-Path $PSScriptRoot 'tools\uninstall.ps1'
-$destUninstall = Join-Path $InstallDir 'uninstall.ps1'
-if (Test-Path $sourceUninstall) {
-    Copy-Item -Path $sourceUninstall -Destination $destUninstall -Force
-    Write-Host "Copied uninstall script to $destUninstall"
-}
+# $sourceUninstall = Join-Path $PSScriptRoot 'tools\uninstall.ps1'
+# $destUninstall = Join-Path $InstallDir 'uninstall.ps1'
+# if (Test-Path $sourceUninstall) {
+#     Copy-Item -Path $sourceUninstall -Destination $destUninstall -Force
+#    Write-Host "Copied uninstall script to $destUninstall"
+# }
 
 # Create Start Menu and Desktop shortcuts (Current User)
 try {
@@ -166,7 +185,7 @@ try {
     $sc.TargetPath = Join-Path $env:SystemRoot 'system32\WindowsPowerShell\v1.0\powershell.exe'
     $sc.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$destScript`""
     $sc.WorkingDirectory = $InstallDir
-    $sc.IconLocation = "shell32.dll,16801"
+    $sc.IconLocation = "shell32.dll,16769"
     $sc.Save()
     Write-Host "Created Start Menu shortcut: $startMenuShortcut"
 
@@ -199,7 +218,7 @@ try {
     $scU.TargetPath = Join-Path $env:SystemRoot 'system32\WindowsPowerShell\v1.0\powershell.exe'
     $scU.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$destUninstall`""
     $scU.WorkingDirectory = $InstallDir
-    $scU.IconLocation = "shell32.dll,16801"
+    $scU.IconLocation = "shell32.dll,16769"
     $scU.Save()
     Write-Host "Created Uninstall shortcut: $uninstallShortcut"
 } catch {
