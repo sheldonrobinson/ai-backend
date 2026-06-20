@@ -25,7 +25,6 @@ winget install pnpm.pnpm --accept-package-agreements --accept-source-agreements 
 
 # pipx
 python -m pip install --quiet --user pipx
-# iex (Invoke-WebRequest -Uri "https://astral.sh/uv/install.ps1").Content
 winget install astral-sh.uv --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
 pipx.exe ensurepath
 
@@ -109,7 +108,7 @@ $syclRuntimeAvailable = $oneApiInstalled -and ($hasDpcpp -or $hasLevelZero -or $
 # llamacpp
 if ($hasNvidia) {
     Write-Host "NVIDIA GPU detected. Optimal backend is CUDA."
-    Install-GitHubRelease -Repo "sheldonrobinson/llamacpp.install" -Match "enduser-cuda-13.3.*\.msi$"
+    Install-GitHubRelease -Repo "sheldonrobinson/llamacpp.install" -Match "enduser-cuda-12.4.*\.msi$"
 } elseif ($hasAmd) {
     Write-Host "AMD GPU detected. Optimal backend is Vulkan/ROCm."
     Install-GitHubRelease -Repo "sheldonrobinson/llamacpp.install" -Match "enduser-hip-radeon.*\.msi$"
@@ -158,24 +157,6 @@ Invoke-WebRequest -Uri $uninstallUrl -OutFile $destUninstall -UseBasicParsing
 
 Write-Host "Downloaded start-all.ps1 to $destScript"
 Write-Host "Downloaded uninstall.ps1 to $destUninstall"
-
-
-# $sourceScript = Join-Path $PSScriptRoot 'tools\start-all.ps1'
-# $destScript = Join-Path $InstallDir 'start-all.ps1'
-# if (Test-Path $sourceScript) {
-#    Copy-Item -Path $sourceScript -Destination $destScript -Force
-#    Write-Host "Copied start script to $destScript"
-# } else {
-#     Write-Warning "Start script $sourceScript not found in installer package. You can manually place start-all.ps1 in $InstallDir."
-# }
-
-# Copy uninstall script as well if present
-# $sourceUninstall = Join-Path $PSScriptRoot 'tools\uninstall.ps1'
-# $destUninstall = Join-Path $InstallDir 'uninstall.ps1'
-# if (Test-Path $sourceUninstall) {
-#     Copy-Item -Path $sourceUninstall -Destination $destUninstall -Force
-#    Write-Host "Copied uninstall script to $destUninstall"
-# }
 
 # Create Start Menu and Desktop shortcuts (Current User)
 try {
