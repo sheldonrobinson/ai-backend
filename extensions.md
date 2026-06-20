@@ -235,6 +235,14 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <a href="goose://extension?cmd=npx&arg=-y&arg=mcp-mail-server&id=emailserver&name=Email%20Server&description=A%20MCP%20server%20that%20performs%20IMAP%2FSMTP%20email%20operations%20with%20Claude%2C%20Cursor%2C%20and%20other%20AI%20assistants.&env=IMAP_HOST%3DIMAP%20server%20address%20(e.g.%20imap.gmail.com)&env=IMAP_PORT%3DIMAP%20port%20number%20(e.g.%20993)&env=IMAP_SECURE%3DEnable%20TLS%20(e.g.%20true)&env=SMTP_HOST%3DSMTP%20server%20address%20(e.g.%20smtp.gmail.com)&env=SMTP_PORT%3DSMTP%20port%20number%09(e.g.%20465)&env=SMTP_SECURE%3DEnable%20SSL%20(e.g.%20true)&env=EMAIL_USER%3DEmail%20username%20(e.g.%20your-email%40gmail.com)&env=EMAIL_PASS%3DEmail%20password%2Fapp%20password" class="install-btn">➕ Install Extension</a>
     </div>
 
+   <div class="card">
+        <span class="tag">Media & Productivity</span>
+        <h3>Calendar</h3>
+        <p>A CalDAV MCP server to expose calendar operations as tools for AI assistants.</p>
+        <div class="cmd-preview">npx -y caldav-mcp</div>
+        <a href="goose://extension?cmd=npx&arg=-y&arg=caldav-mcp&id=calendar&name=Calendar&description=A%20CalDAV%20MCP%20server%20to%20expose%20calendar%20operations%20as%20tools%20for%20AI%20assistants.&env=CALDAV_BASE_URL%3DCalDAV%20Server%20URL&env=CALDAV_USERNAME%3DCalDAV%20username&env=CALDAV_PASSWORD%3DCalDAV%20password" class="install-btn">➕ Install Extension</a>
+    </div>
+
     <div class="card">
         <span class="tag">Agent Infrastructure</span>
         <h3>MCP Hub</h3>
