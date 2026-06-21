@@ -40,6 +40,14 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <div class="cmd-preview">uvx --from tradingview-mcp-server tradingview-mcp</div>
         <a href="goose://extension?cmd=uvx&id=tradingview&name=TradingView&description=AI-powered%20trading%20toolkit%20for%20Claude%20and%20MCP%20clients.%20Backtesting%20%2B%20Live%20Sentiment%20%2B%20Yahoo%20Finance%20%2B%2030%2B%20Technical%20Analysis%20Tools%20%E2%80%94%20all%20in%20one%20MCP%20server.&arg=--from&arg=tradingview-mcp-server&arg=tradingview-mcp" class="install-btn">➕ Install Extension</a>
     </div>
+
+    <div class="card">
+        <span class="tag">Finance & Operations</span>
+        <h3>ALPHA VANTAGE</h3>
+        <p>The official Alpha Vantage API MCP server enables LLMs and agentic workflows to seamlessly interact with real-time and historical stock market data.</p>
+        <div class="cmd-preview">uvx --from marketdata-mcp-server marketdata-mcp $ALPHAVANTAGE_API_KEY</div>
+        <a href="goose://extension?cmd=uvx&arg=--from&arg=marketdata-mcp-server&arg=marketdata-mcp&arg=%24ALPHAVANTAGE_API_KEY&id=alphavantage&name=ALPHA%20VANTAGE&description=The%20official%20Alpha%20Vantage%20API%20MCP%20server%20enables%20LLMs%20and%20agentic%20workflows%20to%20seamlessly%20interact%20with%20real-time%20and%20historical%20stock%20market%20data.&env=ALPHAVANTAGE_API_KEY%3Dyour-api-key" class="install-btn">➕ Install Extension</a>
+    </div>
     
     <div class="card">
         <span class="tag">Finance & Operations</span>
