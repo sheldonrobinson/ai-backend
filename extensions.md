@@ -263,16 +263,16 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <span class="tag">Agent Infrastructure</span>
         <h3>Agent Directory</h3>
         <p>Service discovery and registry for AI agents and MCP servers; useful for multi-agent orchestration and discovery.</p>
-        <div class="cmd-preview">uvx agent-directory-mcp-server</div>
-        <a href="goose://extension?cmd=uvx&id=agent-directory&name=Agent%20Directory&description=Service%20discovery%20and%20registry%20for%20AI%20agents%20and%20MCP%20servers.&arg=agent-directory-mcp-server" class="install-btn">➕ Install Extension</a>
+        <div class="cmd-preview">uvx --from agent-directory-mcp-server agent-directory-server</div>
+        <a href="goose://extension?cmd=uvx&arg=--from&arg=agent-directory-mcp-server&arg=agent-directory-server&id=agentdirectory&name=Agent%20Directory&description=Service%20discovery%20and%20registry%20for%20AI%20agents%20and%20MCP%20servers%3B%20useful%20for%20multi-agent%20orchestration%20and%20discovery." class="install-btn">➕ Install Extension</a>
     </div>
 
     <div class="card">
         <span class="tag">Agent Infrastructure</span>
         <h3>Agent Memory</h3>
         <p>Persistent memory for agents — store, retrieve and search knowledge across sessions to support long-running agent workflows.</p>
-        <div class="cmd-preview">uvx agent-memory-mcp-server</div>
-        <a href="goose://extension?cmd=uvx&id=agent-memory&name=Agent%20Memory&description=Persistent%20memory%20for%20agents%20%2D%20store%2C%20retrieve%20and%20search%20knowledge%20across%20sessions.&arg=agent-memory-mcp-server" class="install-btn">➕ Install Extension</a>
+        <div class="cmd-preview">uvx --from agent-memory-mcp-server agent-memory-server</div>
+        <a href="goose://extension?cmd=uvx&arg=--from&arg=agent-memory-mcp-server&arg=agent-memory-server&id=agentmemory&name=Agent%20Memory&description=Persistent%20memory%20for%20agents%20-%20store%2C%20retrieve%20and%20search%20knowledge%20across%20sessions." class="install-btn">➕ Install Extension</a>
     </div>
 
     <div class="card">
