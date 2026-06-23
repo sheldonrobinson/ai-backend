@@ -315,6 +315,14 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <a href="goose://extension?cmd=uvx&id=document-intelligence&name=Document%20Intelligence&description=Local%20PDF%20%26%20DOCX%20intelligence%3A%20text%20extraction%2C%20table%20detection%2C%20metadata%20and%20language%20detection.&arg=document-intelligence-mcp" class="install-btn">➕ Install Extension</a>
     </div>
 
+    <div class="card">
+        <span class="tag">Media & Productivity</span>
+        <h3>Nano Banana</h3>
+        <p>A production-ready MCP server that provides AI-powered image generation capabilities through Google's Gemini models with intelligent model selection.</p>
+        <div class="cmd-preview">uvx nanobanana-mcp-server@latest</div>
+        <a href="goose://extension?cmd=uvx&arg=nanobanana-mcp-server%40latest&id=nanobanana&name=Nano%20Banana&description=A%20production-ready%20MCP%20server%20that%20provides%20AI-powered%20image%20generation%20capabilities%20through%20Google's%20Gemini%20models%20with%20intelligent%20model%20selection.&env=GEMINI_API_KEY%3Dgemini-api-key" class="install-btn">➕ Install Extension</a>
+    </div>
+
 
     <div class="card">
         <span class="tag">Data & Utilities</span>
