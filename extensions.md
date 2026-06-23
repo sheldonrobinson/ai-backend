@@ -253,14 +253,6 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 
     <div class="card">
         <span class="tag">Agent Infrastructure</span>
-        <h3>MCP Hub</h3>
-        <p>Catalog and discovery service for MCP servers — find, browse and install many community servers from a single hub.</p>
-        <div class="cmd-preview">uvx mcp-hub-server</div>
-        <a href="goose://extension?cmd=uvx&id=mcp-hub&name=MCP%20Hub&description=Catalog%20and%20discovery%20service%20for%20MCP%20servers.%20Find%2C%20browse%20and%20install%20community%20servers.&arg=mcp-hub-server" class="install-btn">➕ Install Extension</a>
-    </div>
-
-    <div class="card">
-        <span class="tag">Agent Infrastructure</span>
         <h3>Agent Directory</h3>
         <p>Service discovery and registry for AI agents and MCP servers; useful for multi-agent orchestration and discovery.</p>
         <div class="cmd-preview">uvx --from agent-directory-mcp-server agent-directory-server</div>
