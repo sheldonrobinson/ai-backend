@@ -315,7 +315,14 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <a href="goose://extension?cmd=uvx&arg=nanobanana-mcp-server%40latest&id=nanobanana&name=Nano%20Banana&description=A%20production-ready%20MCP%20server%20that%20provides%20AI-powered%20image%20generation%20capabilities%20through%20Google's%20Gemini%20models%20with%20intelligent%20model%20selection.&env=GEMINI_API_KEY%3Dgemini-api-key" class="install-btn">➕ Install Extension</a>
     </div>
 
-
+    <div class="card">
+        <span class="tag">Media & Productivity</span>
+        <h3>NotebookLLM</h3>
+        <p>A Unified CLI and MCP server for Google NotebookLM.</p>
+        <div class="cmd-preview">uvx --from notebooklm-mcp-cli notebooklm-mcp</div>
+        <a href="goose://extension?cmd=uvx&arg=--from&arg=notebooklm-mcp-cli&arg=notebooklm-mcp&id=notebooklm-mcp&name=NotebookLLM&description=A%20Unified%20CLI%20and%20MCP%20server%20for%20Google%20NotebookLM." class="install-btn">➕ Install Extension</a>
+    </div>
+    
     <div class="card">
         <span class="tag">Data & Utilities</span>
         <h3>Germany</h3>
