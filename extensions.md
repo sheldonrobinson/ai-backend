@@ -317,10 +317,10 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 
     <div class="card">
         <span class="tag">Media & Productivity</span>
-        <h3>NotebookLLM</h3>
+        <h3>NotebookLM</h3>
         <p>A Unified CLI and MCP server for Google NotebookLM.</p>
         <div class="cmd-preview">uvx --from notebooklm-mcp-cli notebooklm-mcp</div>
-        <a href="goose://extension?cmd=uvx&arg=--from&arg=notebooklm-mcp-cli&arg=notebooklm-mcp&id=notebooklm-mcp&name=NotebookLLM&description=A%20Unified%20CLI%20and%20MCP%20server%20for%20Google%20NotebookLM." class="install-btn">➕ Install Extension</a>
+        <a href="goose://extension?cmd=uvx&arg=--from&arg=notebooklm-mcp-cli&arg=notebooklm-mcp&id=notebooklm-mcp&name=NotebookLM&description=A%20Unified%20CLI%20and%20MCP%20server%20for%20Google%20NotebookLM." class="install-btn">➕ Install Extension</a>
     </div>
     
     <div class="card">
