@@ -268,6 +268,14 @@ Browse, discover, and install extensions and skills for your Goose Agent.
     </div>
 
     <div class="card">
+        <span class="tag">Agent Infrastructure</span>
+        <h3>Agent Task Queue</h3>
+        <p>(For Linux\MacOS) Local task queuing for AI agents. Prevents multiple agents from running expensive operations concurrently and thrashing your machine.</p>
+        <div class="cmd-preview">uvx agent-task-queue@latest</div>
+        <a href="goose://extension?cmd=uvx&arg=agent-task-queue%40latest&id=agent-task-queue&name=Agent%20Task%20Queue&description=Local%20task%20queuing%20for%20AI%20agents.%20Prevents%20multiple%20agents%20from%20running%20expensive%20operations%20concurrently%20and%20thrashing%20your%20machine." class="install-btn">➕ Install Extension</a>
+    </div>
+
+    <div class="card">
         <span class="tag">Search & Research</span>
         <h3>Patents</h3>
         <p>Access US patent data, search patents, citations and trends via the PatentsView API for IP research and analysis.</p>
