@@ -133,6 +133,13 @@ Install-GitHubRelease -Repo "sheldonrobinson/mcpjungle.install"
 # goose-cli
 Write-Host "Installing goose-cli..."
 $env:Configure="false"; iex (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaif-goose/goose/main/download_cli.ps1").Content
+# Set environment variable GOOSE_BIN
+[System.Environment]::SetEnvironmentVariable("GOOSE_BIN", "%USERPROFILE%\.local\bin\goose.exe", "User")
+
+# Create the registry key if missing
+New-Item -Path "HKCU:\Software\Konnek\Goose" -Force
+# Set a string value for a registry key
+Set-ItemProperty -Path "HKCU:\Software\Konnek\Goose" -Name "Executable" -Value "%USERPROFILE%\.local\bin\goose.exe" -Type String -Force
 
 # Goose Desktop
 Install-GitHubRelease -Repo "sheldonrobinson/aaif-goose.install"
@@ -205,6 +212,10 @@ try {
     $scU.IconLocation = "shell32.dll,254"
     $scU.Save()
     Write-Host "Created Uninstall shortcut: $uninstallShortcut"
+    # Remove environment variable GOOSE_BIN
+    [System.Environment]::SetEnvironmentVariable("GOOSE_BIN", "", "User")
+    # Remove registry variable
+    Remove-ItemProperty -Path "HKCU:\Software\Konnek\Goose" -Name "Executable" -Force
 } catch {
     Write-Warning "Failed to create shortcuts: $_"
 }
