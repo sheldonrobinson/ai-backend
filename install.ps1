@@ -235,11 +235,6 @@ if (-not $serviceManagerPath) {
         $scU.IconLocation = "shell32.dll,254"
         $scU.Save()
         Write-Host "Created Uninstall shortcut: $uninstallShortcut"
-
-        # Remove environment variable GOOSE_BIN
-        [System.Environment]::SetEnvironmentVariable("GOOSE_BIN", "", "User")
-        # Remove registry variable
-        Remove-ItemProperty -Path "HKCU:\Software\Konnek\Goose" -Name "Executable" -Force
     } catch {
         Write-Warning "Failed to create shortcuts: $_"
     }
