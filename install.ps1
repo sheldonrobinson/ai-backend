@@ -40,7 +40,7 @@ winget install Git.Git --accept-package-agreements --accept-source-agreements --
 winget install GitHub.GitLFS --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
 winget install Kitware.CMake --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
 winget install Xmake-io.Xmake --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
-winget install alirezagsm.trayy --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
+winget install Oven-sh.Bun.BaselineProfile --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
 
 
 # Helper to automatically fetch and install the latest GitHub release assets (specifically enduser variant)
@@ -86,6 +86,39 @@ function Install-GitHubRelease {
     }
     catch {
         Write-Host "Failed to fetch or install release for $Repo. Error: $_"
+    }
+}
+
+# Helper to download ServiceManager.exe from GitHub release
+function Install-ServiceManager {
+    param(
+        [string]$InstallDir
+    )
+
+    Write-Host "Fetching latest ServiceManager release..."
+    $apiUrl = "https://api.github.com/repos/sheldonrobinson/ServiceManager/releases/latest"
+
+    try {
+        $release = Invoke-RestMethod -Uri $apiUrl -ErrorAction Stop
+        $asset = $release.assets | Where-Object { $_.name -eq "ServiceManager.exe" } | Select-Object -First 1
+
+        if (-not $asset) {
+            Write-Host "ServiceManager.exe not found in latest release."
+            return
+        }
+
+        $downloadUrl = $asset.browser_download_url
+        $destPath = Join-Path $InstallDir 'ServiceManager.exe'
+
+        Write-Host "Downloading ServiceManager.exe..."
+        Invoke-WebRequest -Uri $downloadUrl -OutFile $destPath -UseBasicParsing
+
+        Write-Host "ServiceManager.exe downloaded to $destPath"
+        return $destPath
+    }
+    catch {
+        Write-Host "Failed to fetch or download ServiceManager. Error: $_"
+        return $null
     }
 }
 
@@ -144,83 +177,74 @@ Set-ItemProperty -Path "HKCU:\Software\Konnek\Goose" -Name "Executable" -Value "
 # Goose Desktop
 Install-GitHubRelease -Repo "sheldonrobinson/aaif-goose.install"
 
-# Copy start script into local user Programs folder and create per-user shortcuts (no elevation required)
+# Copy ServiceManager into local user Programs folder and create per-user shortcuts (no elevation required)
 $InstallDir = Join-Path $env:LOCALAPPDATA 'Programs\Konnek\AI-Backend'
 New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
 
-$InstallDir = Join-Path $env:LOCALAPPDATA 'Programs\Konnek\AI-Backend'
-New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
+# Download and install ServiceManager.exe
+$serviceManagerPath = Install-ServiceManager -InstallDir $InstallDir
 
-# URLs for your scripts
-$startUrl = "https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/tools/start-all.ps1"
-$uninstallUrl = "https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/tools/uninstall.ps1"
+if (-not $serviceManagerPath) {
+    Write-Warning "Failed to install ServiceManager. Shortcuts will not be created."
+} else {
+    # Create Start Menu and Desktop shortcuts (Current User)
+    try {
+        $wsh = New-Object -ComObject WScript.Shell
 
-$destScript = Join-Path $InstallDir 'start-all.ps1'
-$destUninstall = Join-Path $InstallDir 'uninstall.ps1'
+        $startMenuDir = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Konnek'
+        New-Item -ItemType Directory -Path $startMenuDir -Force | Out-Null
+        $startMenuShortcut = Join-Path $startMenuDir 'AI Backend.lnk'
+        $sc = $wsh.CreateShortcut($startMenuShortcut)
+        $sc.TargetPath = $serviceManagerPath
+        $sc.WorkingDirectory = $InstallDir
+        $sc.IconLocation = $serviceManagerPath
+        $sc.Save()
+        Write-Host "Created Start Menu shortcut: $startMenuShortcut"
 
-# Download scripts
-Invoke-WebRequest -Uri $startUrl -OutFile $destScript -UseBasicParsing
-Invoke-WebRequest -Uri $uninstallUrl -OutFile $destUninstall -UseBasicParsing
+        $desktop = Join-Path $env:USERPROFILE 'Desktop'
+        $desktopShortcut = Join-Path $desktop 'AI Backend.lnk'
+        $sc2 = $wsh.CreateShortcut($desktopShortcut)
+        $sc2.TargetPath = $sc.TargetPath
+        $sc2.WorkingDirectory = $sc.WorkingDirectory
+        $sc2.IconLocation = $sc.IconLocation
+        $sc2.Save()
+        Write-Host "Created Desktop shortcut: $desktopShortcut"
 
-Write-Host "Downloaded start-all.ps1 to $destScript"
-Write-Host "Downloaded uninstall.ps1 to $destUninstall"
+        # Create Startup shortcut to auto-run ServiceManager on login
+        $startupDir = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Startup'
+        New-Item -ItemType Directory -Path $startupDir -Force | Out-Null
+        $startupShortcut = Join-Path $startupDir 'AI Backend.lnk'
+        $sc3 = $wsh.CreateShortcut($startupShortcut)
+        $sc3.TargetPath = $sc.TargetPath
+        $sc3.WorkingDirectory = $sc.WorkingDirectory
+        $sc3.IconLocation = $sc.IconLocation
+        $sc3.Save()
+        Write-Host "Created Startup shortcut: $startupShortcut"
 
-# Create Start Menu and Desktop shortcuts (Current User)
-try {
-    $wsh = New-Object -ComObject WScript.Shell
+        # Create Uninstall shortcut in Start Menu (still uses uninstall.ps1 for cleanup)
+        $uninstallUrl = "https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/tools/uninstall.ps1"
+        $destUninstall = Join-Path $InstallDir 'uninstall.ps1'
+        Invoke-WebRequest -Uri $uninstallUrl -OutFile $destUninstall -UseBasicParsing
+        Write-Host "Downloaded uninstall.ps1 to $destUninstall"
 
-    $startMenuDir = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Konnek'
-    New-Item -ItemType Directory -Path $startMenuDir -Force | Out-Null
-    $startMenuShortcut = Join-Path $startMenuDir 'AI Backend.lnk'
-    $sc = $wsh.CreateShortcut($startMenuShortcut)
-    $sc.TargetPath = Join-Path $env:SystemRoot 'system32\WindowsPowerShell\v1.0\powershell.exe'
-    $sc.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$destScript`""
-    $sc.WorkingDirectory = $InstallDir
-    $sc.IconLocation = "shell32.dll,16801"
-    $sc.Save()
-    Write-Host "Created Start Menu shortcut: $startMenuShortcut"
+        $uninstallShortcut = Join-Path $startMenuDir 'Uninstall AI Backend.lnk'
+        $scU = $wsh.CreateShortcut($uninstallShortcut)
+        $scU.TargetPath = Join-Path $env:SystemRoot 'system32\WindowsPowerShell\v1.0\powershell.exe'
+        $scU.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$destUninstall`""
+        $scU.WorkingDirectory = $InstallDir
+        $scU.IconLocation = "shell32.dll,254"
+        $scU.Save()
+        Write-Host "Created Uninstall shortcut: $uninstallShortcut"
 
-    $desktop = Join-Path $env:USERPROFILE 'Desktop'
-    $desktopShortcut = Join-Path $desktop 'AI Backend.lnk'
-    $sc2 = $wsh.CreateShortcut($desktopShortcut)
-    $sc2.TargetPath = $sc.TargetPath
-    $sc2.Arguments = $sc.Arguments
-    $sc2.WorkingDirectory = $sc.WorkingDirectory
-    $sc2.IconLocation = $sc.IconLocation
-    $sc2.Save()
-    Write-Host "Created Desktop shortcut: $desktopShortcut"
-
-    # Create Startup shortcut to auto-run the start script on login (hidden by default)
-    $startupDir = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Startup'
-    New-Item -ItemType Directory -Path $startupDir -Force | Out-Null
-    $startupShortcut = Join-Path $startupDir 'AI Backend.lnk'
-    $sc3 = $wsh.CreateShortcut($startupShortcut)
-    $sc3.TargetPath = $sc.TargetPath
-    # do not pass -Visible; default start-all.ps1 runs hidden
-    $sc3.Arguments = $sc.Arguments
-    $sc3.WorkingDirectory = $sc.WorkingDirectory
-    $sc3.IconLocation = $sc.IconLocation
-    $sc3.Save()
-    Write-Host "Created Startup shortcut: $startupShortcut"
-
-    # Create Uninstall shortcut in Start Menu
-    $uninstallShortcut = Join-Path $startMenuDir 'Uninstall AI Backend.lnk'
-    $scU = $wsh.CreateShortcut($uninstallShortcut)
-    $scU.TargetPath = Join-Path $env:SystemRoot 'system32\WindowsPowerShell\v1.0\powershell.exe'
-    $scU.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$destUninstall`""
-    $scU.WorkingDirectory = $InstallDir
-    $scU.IconLocation = "shell32.dll,254"
-    $scU.Save()
-    Write-Host "Created Uninstall shortcut: $uninstallShortcut"
-    # Remove environment variable GOOSE_BIN
-    [System.Environment]::SetEnvironmentVariable("GOOSE_BIN", "", "User")
-    # Remove registry variable
-    Remove-ItemProperty -Path "HKCU:\Software\Konnek\Goose" -Name "Executable" -Force
-} catch {
-    Write-Warning "Failed to create shortcuts: $_"
+        # Remove environment variable GOOSE_BIN
+        [System.Environment]::SetEnvironmentVariable("GOOSE_BIN", "", "User")
+        # Remove registry variable
+        Remove-ItemProperty -Path "HKCU:\Software\Konnek\Goose" -Name "Executable" -Force
+    } catch {
+        Write-Warning "Failed to create shortcuts: $_"
+    }
 }
 
 Write-Host "Installation script completed successfully."
 # Keep window open for a few seconds to see result
 Start-Sleep -Seconds 15
-
