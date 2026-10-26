@@ -24,9 +24,9 @@ This documentation summarizes the purpose of each component in the AI Backend, h
 
 ## Supporting Scripts & Installers
 
-- Windows: install.ps1 installs packages and copies per-user start scripts to `%LOCALAPPDATA%\\Programs\\Konnek\\AI-Backend` and creates Start Menu/Desktop/Startup shortcuts. Start script: `tools/start-all.ps1`.
-- Unix (Linux/macOS): Use `install-llama-server.sh`, `install-bifrost.sh`, and `install-goose.sh` (or `install-all.sh`) for the bifrost stack. Start script: `tools/start-all.sh`.
-- Uninstaller: `tools/uninstall.ps1` removes per-user shortcuts and the install folder.
+- Windows: Use `install-all.ps1` to install the bifrost stack as NSSM services.
+- Unix (Linux/macOS): Use `install-llama-server.sh`, `install-bifrost.sh`, and `install-goose.sh` (or `install-all.sh`) for the bifrost stack.
+- Uninstaller: Use `uninstall-all.sh` (or individual uninstallers) to remove the bifrost stack.
 
 ## Bifrost Stack Installers
 
@@ -242,8 +242,8 @@ curl http://127.0.0.1:3284/
 ## Files of Interest
 
 - `install-all.sh`, `install-llama-server.sh`, `install-bifrost.sh`, `install-goose.sh` — installers
-- `tools/start-all.ps1`, `tools/start-all.sh` — start scripts (hidden-by-default with -Visible/--visible option)
-- `tools/uninstall.ps1` — per-user uninstaller
+- Use `systemctl --user status <service>` (Linux) or `Get-Service -Name <service>` (Windows) to check service status
+- `uninstall-all.sh` / `uninstall-all.ps1` — per-user uninstaller
 - `extensions.md` — Goose Extensions registry
 - `install-*.sh/.ps1` — bifrost stack installers
 - `uninstall-*.sh/.ps1` — bifrost stack uninstallers

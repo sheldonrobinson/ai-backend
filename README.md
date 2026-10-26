@@ -41,7 +41,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/sheldonrobinson/ai-backe
 
 ## Installer Scripts
 
-All scripts are in `resources/inference-serving/localai-services/`.
+All scripts are in the [`resources/inference-serving/localai-services/`](https://github.com/sheldonrobinson/ai-backend/tree/main/resources/inference-serving/localai-services) directory.
 
 ### Installers
 
