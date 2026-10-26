@@ -109,8 +109,8 @@ This directory contains installers for the **llama-server → bifrost-http → g
 
 Extend your Goose Agent capabilities by installing extensions. Click the links below to install them directly (requires Goose Desktop).
 
-* [**shadcn UI**](goose://extension?name=shadcn%20UI&cmd=npx&args=-y%20shadcn%40latest%20mcp) - A shadcn/ui–native MCP server enabling structured component metadata, actions, and UI-aware tooling.
-* [**Legal Document Analyzer**](goose://extension?name=Legal%20Document%20Analyzer&cmd=npx&args=-y%20mcp-legal-doc-analyzer%40latest%20--templates%20~%2F.legal-doc-analyzer%2Ftemplates%20--db-path%20~%2F.legal-doc-analyzer%2Flegal.db) - Analyzes legal documents, extracts key clauses, and highlights risks.
+* [**shadcn UI**](goose://extension?cmd=npx&id=shadcn&name=shadcn%20UI&description=A%20shadcn%2Fui-native%20MCP%20server%20enabling%20structured%20component%20metadata%2C%20actions%2C%20and%20UI-aware%20tooling.&arg=-y&arg=shadcn%40latest&arg=mcp) - A shadcn/ui–native MCP server enabling structured component metadata, actions, and UI-aware tooling.
+* [**Legal Document Analyzer**](goose://extension?cmd=npx&id=legal-doc-analyzer&name=Legal%20Document%20Analyzer&description=Analyzes%20legal%20documents%2C%20extract%20key%20clauses%2C%20summarize%20content%2C%20and%20highlight%20potential%20risks.&arg=-y&arg=mcp-legal-doc-analyzer%40latest&arg=--templates&arg=~%2F.legal-doc-analyzer%2Ftemplates&arg=--db-path&arg=~%2F.legal-doc-analyzer%2Flegal.db) - Analyzes legal documents, extracts key clauses, and highlights risks.
 
 *(For a full list of extensions and an interactive grid, view our [Extensions Registry](extensions.html))*
 
