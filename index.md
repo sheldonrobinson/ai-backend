@@ -65,7 +65,7 @@ A consolidated installer and toolkit for running a local AI backend. This projec
 
 <div class="install-section">
     <div class="install-title">🔥 One‑Click PowerShell Installer</div>
-    <a href='powershell:Set-ExecutionPolicy Bypass -Scope Process -Force; iex (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/install-all.ps1").Content' style="text-decoration: none;">
+    <a href='powershell:Set-ExecutionPolicy Bypass -Scope Process -Force; iex (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/resources/inference-serving/localai-services/install-all.ps1").Content' style="text-decoration: none;">
         <button class="install-btn">Install AI Backend (One‑Click)</button>
     </a>
     <div class="install-note">Runs the installer directly from memory using <code>powershell:</code> URI.</div>
@@ -77,10 +77,10 @@ A consolidated installer and toolkit for running a local AI backend. This projec
     <div class="install-note">
         If your browser blocks <code>powershell:</code> links, run this manually in a PowerShell terminal:
     </div>
-    <div class="code-snippet">Set-ExecutionPolicy Bypass -Scope Process -Force; iex (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/install-all.ps1").Content</div>
+    <div class="code-snippet">Set-ExecutionPolicy Bypass -Scope Process -Force; iex (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/resources/inference-serving/localai-services/install-all.ps1").Content</div>
 </div>
 
-*Note: The script will automatically detect if you have an NVIDIA or AMD GPU and install the appropriate ggml-backend (CUDA or Vulkan) for maximum performance.*
+*Note: Installs llama-server with CPU backend by default. For CUDA/GPU acceleration, install manually with --llama-args after reviewing platform requirements.*
 
 ### Linux/MacOS
 
