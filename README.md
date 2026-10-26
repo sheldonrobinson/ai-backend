@@ -30,13 +30,13 @@ llama-server  →  bifrost-http  →  goose
 Run the all-in-one installer (elevated steps may be requested for system-wide deployment):
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -Command "iex (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/resources/inference-serving/localai-services/install-all.ps1').Content"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "iex (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/install-all.ps1').Content"
 ```
 
 ### Linux / macOS (Bash)
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/resources/inference-serving/localai-services/install-all.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/install-all.sh)"
 ```
 
 ## Installer Scripts

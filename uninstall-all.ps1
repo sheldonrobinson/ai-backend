@@ -26,7 +26,7 @@ $ErrorActionPreference = "Continue"
 # ---------------------------------------------------------------------------
 # Resolve script directory for sibling scripts
 # ---------------------------------------------------------------------------
-$RawBase = "https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/resources/inference-serving/localai-services"
+$RawBase = "https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main"
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 

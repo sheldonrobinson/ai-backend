@@ -47,7 +47,7 @@ done
 # ---------------------------------------------------------------------------
 # Resolve script directory for sibling scripts
 # ---------------------------------------------------------------------------
-RAW_BASE="https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/resources/inference-serving/localai-services"
+RAW_BASE="https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)"
 
