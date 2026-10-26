@@ -11,6 +11,48 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 
 <style>
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; margin-bottom: 40px;}
+.lookup-card { background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+.lookup-card h2 { margin-top: 0; font-size: 1.25rem; }
+.form-group { margin-bottom: 1rem; }
+label { display: block; font-weight: 600; margin-bottom: 0.3rem; font-size: 0.9rem; }
+input[type="text"], input[type="number"], select {
+  width: 100%; padding: 0.6rem; border: 1px solid #d1d5da; border-radius: 6px; font-size: 0.95rem;
+}
+button {
+  background: #0366d6; color: white; border: none; padding: 0.7rem 1.5rem;
+  border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer;
+}
+button:hover { background: #0254b3; }
+button:disabled { background: #94c1ec; cursor: not-allowed; }
+.deeplink-card { background: white; border: 1px solid #e1e4e8; border-radius: 6px; padding: 1rem; margin-bottom: 0.75rem; }
+.deeplink-card h3 { margin: 0 0 0.5rem 0; font-size: 1.1rem; }
+.deeplink-card p { margin: 0 0 0.75rem 0; color: #586069; font-size: 0.9rem; }
+.deeplink-url {
+  background: #000; color: #d4d4d4; font-family: 'SFMono-Regular', Consolas, monospace;
+  font-size: 0.85rem; padding: 0.75rem; border-radius: 4px; word-break: break-all;
+  margin-bottom: 0.5rem; overflow-x: auto; display: block;
+}
+.copy-btn { background: #24292e; font-size: 0.85rem; padding: 0.4rem 0.8rem; margin-right: 0.5rem; }
+.copy-btn:hover { background: #444c56; }
+.cmd-badge {
+  display: inline-block; background: #e1e4e8; color: #24292e; padding: 0.2rem 0.5rem;
+  border-radius: 4px; font-size: 0.8rem; font-family: monospace; margin-right: 0.4rem;
+}
+.env-badge {
+  display: inline-block; background: #f1f8ff; color: #0366d6; padding: 0.1rem 0.4rem;
+  border-radius: 3px; font-size: 0.75rem; margin-right: 0.3rem;
+}
+.loading { color: #0366d6; font-style: italic; }
+.error {
+  color: #d73a49; background: #ffeef0; border: 1px solid #feb7c2;
+  padding: 0.75rem; border-radius: 6px; margin-top: 1rem;
+}
+.examples { margin-top: 0.5rem; }
+.examples button {
+  background: #f6f8fa; border: 1px solid #d1d5da; padding: 0.2rem 0.6rem;
+  border-radius: 4px; font-size: 0.85rem; cursor: pointer; margin-right: 0.4rem;
+}
+</style>
 .card { border: 1px solid #e1e4e8; border-radius: 8px; padding: 20px; background: #fff; box-shadow: 0 1px 3px rgba(27,31,35,0.1); display: flex; flex-direction: column; justify-content: space-between; }
 .card h3 { margin-top: 0; font-size: 1.25em; color: #24292e; }
 .card p { font-size: 0.9em; color: #586069; flex-grow: 1; }
@@ -21,6 +63,33 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 .cmd-preview { background: #f6f8fa; padding: 8px; border-radius: 4px; font-family: monospace; font-size: 0.75em; overflow-x: auto; white-space: nowrap; margin-top: 10px; color: #24292e; border: 1px solid #eaecef; }
 .section-title { border-bottom: 2px solid #eaecef; padding-bottom: 10px; margin-top: 40px;}
 </style>
+
+## 🔍 Look Up MCP Server from Registry
+
+<div class="lookup-card">
+  <h2>Generate Goose Deeplink from MCP Registry</h2>
+  <p>Enter an MCP server name from the <a href="https://registry.modelcontextprotocol.io" target="_blank">official MCP Registry</a> to generate a <code>goose://extension</code> deeplink.</p>
+  <div class="form-group">
+    <label for="registry-server-name">MCP Server Name</label>
+    <input type="text" id="registry-server-name" placeholder="e.g. agency.kesey/pretrip or pretrip" value="">
+    <p style="font-size:0.8rem;color:#666;margin-top:0.2rem">Search by full name (namespace/name) or partial match</p>
+  </div>
+  <div class="form-group" style="display:flex;gap:1rem;align-items:end;">
+    <label style="margin-bottom:0;font-weight:600;font-size:0.9rem;">Max results:</label>
+    <select id="registry-max-results" style="width:auto;">
+      <option value="20">20</option>
+      <option value="50" selected>50</option>
+      <option value="100">100</option>
+    </select>
+    <label style="margin-bottom:0;font-weight:normal;font-size:0.9rem;cursor:pointer;">
+      <input type="checkbox" id="registry-dedupe" checked> Dedupe (latest version only)
+    </label>
+  </div>
+  <button id="registry-generate-btn">Generate Deeplinks</button>
+  <span class="loading" id="registry-loading" style="display:none;margin-left:0.5rem;">Fetching from MCP registry...</span>
+</div>
+<div class="error" id="registry-error" style="display:none;"></div>
+<div id="registry-results"></div>
 
 ## 📦 Extensions (MCP Servers)
 <p>Click "Install with Goose" to add these directly to Goose Desktop.</p>
@@ -480,3 +549,96 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         <div class="cmd-preview">npx skills add https://agents.stackoverflow.com/ --skill sofa --yes --agent goose cline</div>
     </div>
     </div>
+
+<script>
+// MCP Registry → Goose Deeplink Generator
+const REGISTRY_BASE = "https://registry.modelcontextprotocol.io/v0.1/servers";
+const GOOSE_ALLOWED_CMDS = new Set(["cu","docker","jbang","npx","uvx","goose","npx.cmd"]);
+const REGISTRY_TYPE_MAP = {
+  npm: { cmd: "npx", prefixArgs: ["-y"] },
+  pypi: { cmd: "uvx", prefixArgs: [] },
+  docker: { cmd: "docker", prefixArgs: ["run"] },
+  oci: { cmd: "docker", prefixArgs: ["run"] },
+};
+
+async function fetchServers(limit=100, maxPages=10) {
+  const servers = []; let cursor = null; let pages = 0;
+  while (pages < maxPages) {
+    pages++;
+    const params = new URLSearchParams({ limit: String(limit) });
+    if (cursor) params.set("cursor", cursor);
+    const url = `${REGISTRY_BASE}?${params.toString()}`;
+    try {
+      const resp = await fetch(url, { headers: { "User-Agent": "goose-mcp-deeplink-generator/1.0" } });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+      servers.push(...(data.servers || []));
+      cursor = data.metadata?.nextCursor;
+      if (!cursor || !data.servers.length) break;
+    } catch (err) { console.error(`Error page ${pages}:`, err); break; }
+  }
+  return servers;
+}
+
+function packageToGooseCmd(pkg) {
+  const m = REGISTRY_TYPE_MAP[pkg.registryType];
+  if (!m) return null;
+  return { cmd: m.cmd, args: [...m.prefixArgs, pkg.identifier || ""] };
+}
+
+function serverToDeeplinks(entry) {
+  const svr = entry.server || {};
+  const name = svr.name || ""; const title = svr.title || name.split("/").pop() || "";
+  const description = svr.description || ""; const pkgs = svr.packages || [];
+  const out = [];
+  for (const pkg of pkgs) {
+    if ((pkg.transport||{}).type !== "stdio") continue;
+    const r = packageToGooseCmd(pkg); if (!r) continue;
+    if (!GOOSE_ALLOWED_CMDS.has(r.cmd)) continue;
+    const params = [["cmd",r.cmd],["id",name],["name",title],["description",description]];
+    for (const env of (pkg.environmentVariables||[])) { if (env.name) params.push(["env",`${env.name}=${env.description||""}`]); }
+    for (const arg of r.args) params.push(["arg",arg]);
+    out.push({ name, title, description, cmd: r.cmd, args: r.args, deeplink: `goose://extension?${params.map(([k,v])=>`${k}=${encodeURIComponent(String(v))}`).join("&")}`, registryType: pkg.registryType, identifier: pkg.identifier||"" });
+  }
+  return out;
+}
+
+async function lookupServer(serverName, { limit=100, maxPages=10, dedupe=true, fuzzy=true }={}) {
+  const servers = await fetchServers(limit, maxPages);
+  const nl = serverName.toLowerCase();
+  const matches = servers.filter(e => { const s = e.server||{}; const n = s.name||""; const t = s.title||""; return fuzzy ? (n.toLowerCase().includes(nl) || t.toLowerCase().includes(nl)) : (n===serverName || t===serverName); });
+  const all = []; for (const e of matches) all.push(...serverToDeeplinks(e));
+  if (dedupe) { const seen = new Set(); const ded = []; for (const d of all) { const k = `${d.name}|${d.identifier}`; if (!seen.has(k)) { seen.add(k); ded.push(d); } } return ded; }
+  return all;
+}
+
+function buildDeeplink({cmd,args=[],id="",name="",description="",envVars=[]}) {
+  const params = [["cmd",cmd],["id",id],["name",name],["description",description]];
+  for (const env of envVars) { if (env.key) params.push(["env",`${env.key}=${env.value||""}`]); }
+  for (const arg of args) params.push(["arg",arg]);
+  return `goose://extension?${params.map(([k,v])=>`${k}=${encodeURIComponent(String(v))}`).join("&")}`;
+}
+
+document.getElementById("registry-generate-btn").addEventListener("click", async () => {
+  const btn = document.getElementById("registry-generate-btn");
+  const loading = document.getElementById("registry-loading");
+  const errorEl = document.getElementById("registry-error");
+  const resultsEl = document.getElementById("registry-results");
+  const serverName = document.getElementById("registry-server-name").value.trim();
+  if (!serverName) { errorEl.textContent = "Please enter a server name"; errorEl.style.display = "block"; return; }
+  btn.disabled = true; loading.style.display = "inline"; errorEl.style.display = "none"; resultsEl.innerHTML = "";
+  try {
+    const deeplinks = await lookupServer(serverName, { limit: parseInt(document.getElementById("registry-max-results").value), dedupe: document.getElementById("registry-dedupe").checked, fuzzy: true });
+    if (deeplinks.length === 0) { resultsEl.innerHTML = '<p style="color:#666;font-style:italic">No stdio-based MCP packages found for this server.</p>'; return; }
+    resultsEl.innerHTML = `<p><strong>${deeplinks.length}</strong> deeplink(s) generated:</p>`;
+    for (const d of deeplinks) {
+      const card = document.createElement("div"); card.className = "deeplink-card";
+      const cmdArgs = [d.cmd, ...d.args].join(" ");
+      let envHtml = ""; const envMatches = d.deeplink.match(/env=([^&]+)/g); if (envMatches) envHtml = envMatches.map(m => `<span class="env-badge">${decodeURIComponent(m.slice(4))}</span>`).join("");
+      card.innerHTML = `<h3>${d.title}</h3><p>${d.description}</p><div>${d.registryType?`<span class="cmd-badge">${d.registryType}</span>`:""}<span class="cmd-badge">${cmdArgs}</span>${envHtml}</div><span class="deeplink-url">${d.deeplink}</span><button class="copy-btn" onclick="navigator.clipboard.writeText('${d.deeplink.replace(/'/g,"\\'")}').then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500);})">Copy</button><a href="${d.deeplink}" target="_blank" style="margin-left:0.5rem;color:#0366d6;">Open in Goose</a>`;
+      resultsEl.appendChild(card);
+    }
+  } catch (err) { errorEl.textContent = err.message || "Failed to fetch from MCP registry"; errorEl.style.display = "block"; } finally { btn.disabled = false; loading.style.display = "none"; }
+});
+document.getElementById("registry-server-name").addEventListener("keypress", e => { if (e.key === "Enter") document.getElementById("registry-generate-btn").click(); });
+</script>
