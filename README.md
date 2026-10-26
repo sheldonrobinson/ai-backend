@@ -1,47 +1,149 @@
-AI Backend
-============
+AI Backend — Bifrost Stack
+==========================
 
-This repository bundles components and installers to run a local AI backend composed of:
+This repository bundles installers for running a local AI backend composed of:
 
-- llama.cpp (Llama.C++) — inference HTTP server
-- agentgateway — LLM proxy
-- MCPJungle — MCP gateway
-- Goose — AI agent / CLI
+- **llama-server** — Local inference engine serving text completions over HTTP (port 9931)
+- **bifrost-http** — AI Gateway for routing, governance, virtual keys, and MCP Gateway endpoints (port 8080)
+- **goose** — AI Agent / ACP server (port 3284)
 
 🚀 **[Visit our GitHub Pages site](https://sheldonrobinson.github.io/ai-backend/) for full documentation, extensions gallery, and skill registry!**
 
 Whether you're in **financial services**, **legal**, **supply-chain & logistics**, **healthcare**, **content creation & social media management**, or tackling **lifestyle, travel, job-seeking, or career challenges** — this AI backend empowers you to deploy private, on-device LLM agents that integrate with your workflows. No cloud vendor lock-in, no API costs, full privacy.
 
-Quick start (Windows)
+## Installation Order
 
-1. Open PowerShell as your normal user and run the installer (elevated steps may be requested by installer for system packages):
+Services are installed and configured in this order:
+
 ```
-   powershell -NoProfile -ExecutionPolicy Bypass -Command "iex (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/install.ps1')"
+llama-server  →  bifrost-http  →  goose
 ```
-2. After install, use Start Menu or Desktop shortcut "AI Backend" to start components (hidden by default). To show consoles run the start script with -Visible.
 
-Quick start (Linux / macOS)
+1. **llama-server** registers as a local inference provider
+2. **bifrost-http** configures governance, routes requests to llama-server
+3. **goose** registers bifrost and llama-server as providers, connects to bifrost MCP Gateway
 
-1. Run the installer:
+## Quick Install
+
+### Windows (PowerShell)
+
+Run the all-in-one installer (elevated steps may be requested for system-wide deployment):
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -Command "iex (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/resources/inference-serving/localai-services/install-all.ps1').Content"
 ```
-   bash -c "$(curl -fsSL https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/install.sh)"
+
+### Linux / macOS (Bash)
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/resources/inference-serving/localai-services/install-all.sh)"
 ```
-2. Start services (background, logs in ~/.local/state/ai-backend-logs):
+
+## Installer Scripts
+
+All scripts are in `resources/inference-serving/localai-services/`.
+
+### Installers
+
+| Script | Description |
+|--------|-------------|
+| `install-all.sh` / `install-all.ps1` | Installs all three services in order |
+| `install-llama-server.sh` / `.ps1` | Installs llama-server only |
+| `install-bifrost.sh` / `.ps1` | Installs bifrost-http only |
+| `install-goose.sh` / `.ps1` | Installs goose only |
+
+### Uninstallers
+
+| Script | Description |
+|--------|-------------|
+| `uninstall-all.sh` / `uninstall-all.ps1` | Removes all services in reverse order |
+| `uninstall-llama-server.sh` / `.ps1` | Removes llama-server only |
+| `uninstall-bifrost.sh` / `.ps1` | Removes bifrost-http only |
+| `uninstall-goose.sh` / `.ps1` | Removes goose only |
+
+### Common Flags
+
+| Flag | Description |
+|------|-------------|
+| `--system` | System-wide deployment (default: per-user) |
+| `--purge` | (uninstall only) Purge all data directories |
+| `--skip-llama` | (install-all only) Skip llama-server |
+| `--skip-bifrost` | (install-all only) Skip bifrost-http |
+| `--skip-goose` | (install-all only) Skip goose |
+| `--help` | Show help message |
+
+### Component-Specific Flags
+
+**install-llama-server:** `--llama-binary <path>`, `--llama-args <args>`
+
+**install-bifrost:** `--prefix <path>`, `--bifrost-binary <path>`, `--bifrost-cli-binary <path>`, `--bifrost-args <args>`, `--bifrost-version <ver>`, `--bifrost-http-version <ver>`
+
+**install-goose:** `--goose-binary <path>`, `--goose-args <args>`
+
+## Ports
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| llama-server | 9931 | Local inference (`/v1/models`, `/v1/chat/completions`) |
+| bifrost-http | 8080 | AI Gateway API (`/api/config`, `/api/v1/*`, `/mcp`) |
+| goose | 3284 | ACP server |
+
+## Service Management
+
+### Linux (systemd)
+
+Per-user services (default):
+```bash
+systemctl --user status llama-server.service
+systemctl --user status bifrost-http.service
+systemctl --user status goose.service
 ```
-   ~/.local/share/Konnek/AI-Backend/start-all.sh
+
+System-wide services (`--system`):
+```bash
+sudo systemctl status llama-server.service
+sudo systemctl status bifrost-http.service
+sudo systemctl status goose.service
 ```
-   To show terminals: ~/.local/share/Konnek/AI-Backend/start-all.sh --visible
 
-Logs
+### Windows (NSSM)
 
-- Windows: `%TEMP%\AI-Backend-Logs`
-- Linux/macOS: `${XDG_STATE_HOME:-$HOME/.local/state}/ai-backend-logs`
+```powershell
+Get-Service -Name llama-server -ErrorAction SilentlyContinue
+Get-Service -Name bifrost-http -ErrorAction SilentlyContinue
+Get-Service -Name goose -ErrorAction SilentlyContinue
+```
 
-Uninstall
+## Uninstall
 
-- Windows: Start Menu -> Konnek -> Uninstall AI Backend or run %LOCALAPPDATA%\Programs\Konnek\AI-Backend\uninstall.ps1
-- Linux/macOS: remove ~/.konnek and delete installed binaries as appropriate; tools/uninstall.ps1 exists for Windows only.
+Reverse order: goose → bifrost-http → llama-server
 
-Contributing
+```bash
+./uninstall-all.sh          # per-user
+./uninstall-all.sh --system # system-wide
+./uninstall-all.sh --system --purge  # purge all data
+```
 
-Contributions welcome. Open issues or PRs for improvements, additional service supervision (systemd/launchd), or packaging.
+```powershell
+.\uninstall-all.ps1          # per-user
+.\uninstall-all.ps1 -System  # system-wide
+.\uninstall-all.ps1 -System -Purge  # purge all data
+```
+
+## Logs
+
+- **Linux:** `journalctl --user -u <service-name>.service -f`
+- **Windows:** NSSM log files in `%APPDATA%\<service>\` or `%PROGRAMDATA%\<service>\`
+
+## Idempotency
+
+All installers are idempotent and non-destructive:
+
+- Existing binary files are preserved (not overwritten)
+- Existing configuration files are preserved (not overwritten)
+- Existing service files are preserved (not recreated)
+- Bifrost-http API calls use GET-before-POST/PUT guards to avoid duplicate registrations
+
+## Contributing
+
+Contributions welcome. Open issues or PRs for improvements, additional service supervision, or packaging.
