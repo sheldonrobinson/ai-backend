@@ -1,190 +1,237 @@
-#!/bin/bash
-set -e
+[ "$LLAMA_BUCKET" ] || LLAMA_BUCKET="ggml-org/install.sh"
+REPO="https://huggingface.co/buckets/$LLAMA_BUCKET/resolve"
 
-echo "Installing AI Backend components for Linux/MacOS..."
+die() {
+	printf "%s\n" "$@" >&2
+	exit 111
+}
 
-if ! command -v brew &> /dev/null
-then
-    echo "Homebrew not found. Please install it first from https://brew.sh/"
-    exit 1
-fi
+info() {
+	printf "%s\n" "$@" >&2
+}
 
-brew install make
-brew install python@3.14
-brew install pnpm@11
-brew install node@24
-brew install wget
-brew install ninja
-brew install git
-brew install git-lfs
-brew install cmake
-brew install xmake
-brew install llama.cpp
+check_bin() {
+	command -v "$1" >/dev/null 2>/dev/null
+}
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    brew install pipx
-    pipx ensurepath
-else
-    python3 -m pip install --user pipx
-    python3 -m pipx ensurepath
-fi
+check_path() {
+	case ":$1:" in
+	(*":$HOME/.local/bin:"*) return 0 ;;
+	esac
+	return 1
+}
 
-pipx install sugarai
+curl() {
+	if [ -n "$HF_TOKEN" ]
+	then command curl -H "Authorization: Bearer $HF_TOKEN" "$@"
+	else command curl "$@"
+	fi
+}
 
-echo "Installing agentgateway..."
-curl -sL https://agentgateway.dev/install | bash
+dl_bin() {
+	[ -x "$1" ] && return
+	check_bin curl || die "Please install curl"
+	info "Downloading $1..."
+	case "$2" in
+	(*.zst) curl -fsSL "$REPO/$LLAMA_VERSION/$2" | unzstd ;;
+	(*)     curl -fsSL "$REPO/$LLAMA_VERSION/$2" ;;
+	esac > "$1.tmp" 2>/dev/null &&
+	chmod +x "$1.tmp" && mv "$1.tmp" "$1" && return
+	info "Failed to download"
+	return 1
+}
 
-echo "Installing mcpjungle..."
-brew install mcpjungle/mcpjungle/mcpjungle
+unzstd() (
+	command -v zstd >/dev/null 2>/dev/null && exec zstd -d
+	dl_bin unzstd "$ARCH/$OS/unzstd"
+	exec ./unzstd
+)
 
-echo "Installing goose-cli..."
-curl -fsSL https://github.com/aaif-goose/goose/releases/download/stable/download_cli.sh | CONFIGURE=false bash
+probe_cuda() {
+	[ -z "$SKIP_CUDA" ] && info "Probing CUDA..." &&
+	dl_bin cuda-probe "$ARCH/$OS/cuda/probe/probe.zst" &&
+	CONFIG=$(./cuda-probe) 2>/dev/null &&
+	info "Found: $CONFIG" &&
+	CONFIG=${CONFIG%% *} &&
+	dl_bin llama "$ARCH/$OS/cuda/$CONFIG/llama-app.zst"
+}
 
-echo "Installing Goose Desktop..."
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    brew install --cask block-goose
-else
-    echo "Fetching latest Goose Desktop release for Linux..."
-    LATEST_API="https://api.github.com/repos/aaif-goose/goose/releases/latest"
-    
-    if command -v dpkg &> /dev/null; then
-        ASSET_URL=$(curl -s $LATEST_API | grep "browser_download_url.*\.deb" | cut -d '"' -f 4 | head -n 1)
-        if [ -n "$ASSET_URL" ]; then
-            echo "Downloading $ASSET_URL..."
-            wget -qO /tmp/goose.deb "$ASSET_URL"
-            sudo dpkg -i /tmp/goose.deb || sudo apt-get install -f -y
-        else
-            echo "Could not find .deb asset for Goose Desktop."
-        fi
-    elif command -v rpm &> /dev/null; then
-        ASSET_URL=$(curl -s $LATEST_API | grep "browser_download_url.*\.rpm" | cut -d '"' -f 4 | head -n 1)
-        if [ -n "$ASSET_URL" ]; then
-            echo "Downloading $ASSET_URL..."
-            wget -qO /tmp/goose.rpm "$ASSET_URL"
-            sudo rpm -i /tmp/goose.rpm || sudo dnf install -y /tmp/goose.rpm
-        else
-            echo "Could not find .rpm asset for Goose Desktop."
-        fi
-    else
-        echo "Unsupported Linux package manager. Please install Goose Desktop manually."
-    fi
-fi
+probe_rocm() {
+	[ -z "$SKIP_ROCM" ] && info "Probing ROCm..." &&
+	dl_bin rocm-probe "$ARCH/$OS/rocm/probe/probe.zst" &&
+	CONFIG=$(./rocm-probe) 2>/dev/null &&
+	info "Found: $CONFIG" &&
+	dl_bin llama "$ARCH/$OS/rocm/$CONFIG/llama-app.zst"
+}
 
-echo "Setting up local-mcp configuration..."
-if command -v npx &> /dev/null; then
-    export LMCP_REF="67df72f4"
-    npx -y local-mcp@latest setup || echo "local-mcp setup failed, but continuing..."
-else
-    echo "npx not found, skipping local-mcp setup."
-fi
+probe_vulkan() {
+	[ -z "$SKIP_VULKAN" ] && info "Probing Vulkan..." &&
+	dl_bin vulkan-probe "$ARCH/$OS/vulkan/probe/probe.zst" &&
+	dl_bin featcode "$ARCH/$OS/featcode" &&
+	CONFIG=$(./vulkan-probe && ./featcode) 2>/dev/null &&
+	for F in $(./featcode "$CONFIG"); do info "Found: $F"; done &&
+	dl_bin llama "$ARCH/$OS/vulkan/$CONFIG/llama-app.zst"
+}
 
-# Post-install configuration for Llama.C++
-echo "Configuring Llama.C++ post-install..."
-# Ensure user config directory
-mkdir -p "$HOME/.konnek/llamacpp"
+probe_cpu() {
+	info "Probing CPU..." &&
+	dl_bin featcode "$ARCH/$OS/featcode" &&
+	CONFIG=$(./featcode) 2>/dev/null &&
+	for F in $(./featcode "$CONFIG"); do info "Found: $F"; done &&
+	dl_bin llama "$ARCH/$OS/cpu/$CONFIG/llama-app.zst"
+}
 
-# Download models.ini if not present
-MODELS_INI="$HOME/.konnek/llamacpp/models.ini"
-MODELS_URL_RAW="https://raw.githubusercontent.com/sheldonrobinson/llamacpp.install/main/installer/config/models.ini"
-if [ ! -f "$MODELS_INI" ]; then
-  if command -v curl >/dev/null 2>&1; then
-    curl -fsSL "$MODELS_URL_RAW" -o "$MODELS_INI" && echo "Downloaded models.ini to $MODELS_INI"
-  elif command -v wget >/dev/null 2>&1; then
-    wget -qO "$MODELS_INI" "$MODELS_URL_RAW" && echo "Downloaded models.ini to $MODELS_INI"
-  else
-    # Fallback: create template
-    cat > "$MODELS_INI" <<'EOF'
-# Llama.C++ models configuration
-# Define models as key=value pairs: name=/absolute/path/to/ggml-model.bin
-# Example:
-# gpt4all=/home/user/.local/share/llama/models/gpt4all.bin
+probe_metal_cpu() {
+	read -r apple cpu _
+	[ "$apple" = Apple ] &&
+	case "$cpu" in
+	(M[12345]|A18) echo "$cpu" | tr '[:upper:]' '[:lower:]' ;;
+	(*) return 1 ;;
+	esac
+}
 
-# Add your models below
+probe_metal() {
+	info "Probing Metal..." &&
+	CONFIG=$(sysctl -n machdep.cpu.brand_string 2>/dev/null | probe_metal_cpu) &&
+	info "Found: $CONFIG" &&
+	dl_bin llama "$ARCH/$OS/metal/$CONFIG/llama-app.zst"
+}
 
-EOF
-    echo "Created template $MODELS_INI (curl/wget not available to download default file)"
-  fi
-else
-  echo "$MODELS_INI already exists; leaving unchanged."
-fi
+main() {
+	# Parse deployment mode
+	DEPLOY_MODE="--system"
+	if [ "$1" = "--system" ] || [ "$1" = "--user" ]; then
+		DEPLOY_MODE="$1"
+		shift
+	fi
 
-# Set LLAMA_* environment variables and add to user shells if not present
-LLAMA_HOST_VAL="localhost"
-LLAMA_PORT_VAL="11434"
-LLAMA_TOOLS_VAL="all"
-LLAMA_UI_MCP_PROXY_VAL="true"
-LLAMA_MODELS_PRESET_VAL="$HOME/.konnek/llamacpp/models.ini"
+	# Set directories based on mode
+	if [ "$DEPLOY_MODE" = "--system" ]; then
+				# Check if running as root
+		if [ "$(id -u)" -eq 0 ] || [ -n "$SUDO_USER" ]; then
+			APP_DIR="/opt/llama-app"
+			BIN_DIR="/usr/local/bin"
+		else
+			APP_DIR="/usr/local/share/llama-app"
+			BIN_DIR="/usr/local/bin"
+		fi
+		BIN_DIR="/usr/local/bin"
+	else
+		APP_DIR="$HOME/.llama-app"
+		BIN_DIR="$HOME/.local/bin"
+	fi
+	case "$(uname -m)" in
+	(arm64|aarch64) ARCH=aarch64 ;;
+	(amd64|x86_64)  ARCH=x86_64  ;;
+	(*) die "Arch not supported"
+	esac
 
-for profile in "$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.zshrc"; do
-  if [ -f "$profile" ]; then
-    grep -qxF "export LLAMA_ARG_HOST=$LLAMA_HOST_VAL" "$profile" || echo "export LLAMA_ARG_HOST=$LLAMA_HOST_VAL" >> "$profile"
-    grep -qxF "export LLAMA_ARG_PORT=$LLAMA_PORT_VAL" "$profile" || echo "export LLAMA_ARG_PORT=$LLAMA_PORT_VAL" >> "$profile"
-    grep -qxF "export LLAMA_ARG_TOOLS=$LLAMA_TOOLS_VAL" "$profile" || echo "export LLAMA_ARG_TOOLS=$LLAMA_TOOLS_VAL" >> "$profile"
-    grep -qxF "export LLAMA_ARG_UI_MCP_PROXY=$LLAMA_UI_MCP_PROXY_VAL" "$profile" || echo "export LLAMA_ARG_UI_MCP_PROXY=$LLAMA_UI_MCP_PROXY_VAL" >> "$profile"
-    grep -qxF "export LLAMA_ARG_MODELS_PRESET=$LLAMA_MODELS_PRESET_VAL" "$profile" || echo "export LLAMA_ARG_MODELS_PRESET=$LLAMA_MODELS_PRESET_VAL" >> "$profile"
-  fi
-done
+	case "$(uname -s)" in
+	(Linux)   OS=linux ;;
+	(FreeBSD) OS=freebsd ;;
+	(Darwin)  OS=macos ;;
+	(*) die "OS not supported"
+	esac
 
-# Export for current session
-export LLAMA_ARG_HOST="$LLAMA_HOST_VAL"
-export LLAMA_ARG_PORT="$LLAMA_PORT_VAL"
-export LLAMA_ARG_TOOLS="$LLAMA_TOOLS_VAL"
-export LLAMA_ARG_UI_MCP_PROXY="$LLAMA_UI_MCP_PROXY_VAL"
-export LLAMA_ARG_MODELS_PRESET="$LLAMA_MODELS_PRESET_VAL"
+	[ "$HOME" ] || die "No HOME, please check your OS"
 
-# Post-install configuration for agentgateway
-echo "Configuring agentgateway post-install..."
-mkdir -p "$HOME/.konnek/agentgateway"
-GATEWAY_YML="$HOME/.konnek/agentgateway/gateway.yml"
-GATEWAY_URL_RAW="https://raw.githubusercontent.com/sheldonrobinson/agentgateway.install/main/installer/config/gateway.yml"
-if [ ! -f "$GATEWAY_YML" ]; then
-  if command -v curl >/dev/null 2>&1; then
-    curl -fsSL "$GATEWAY_URL_RAW" -o "$GATEWAY_YML" && echo "Downloaded gateway.yml to $GATEWAY_YML"
-  elif command -v wget >/dev/null 2>&1; then
-    wget -qO "$GATEWAY_YML" "$GATEWAY_URL_RAW" && echo "Downloaded gateway.yml to $GATEWAY_YML"
-  else
-    echo "Warning: curl/wget not available; please place gateway.yml at $GATEWAY_YML"
-  fi
-else
-  echo "$GATEWAY_YML already exists; leaving unchanged."
-fi
+	[ "$LLAMA_VERSION" ] || LLAMA_VERSION=$(curl -fsSL "$REPO/latest")
+	[ "$LLAMA_VERSION" ] || die "No version found"
+	info "Version: $LLAMA_VERSION"
 
-# Export LOCAL_XDS_PATH in user shells
-for profile in "$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.zshrc"; do
-  if [ -f "$profile" ]; then
-    grep -qxF "export LOCAL_XDS_PATH=$GATEWAY_YML" "$profile" || echo "export LOCAL_XDS_PATH=$GATEWAY_YML" >> "$profile"
-  fi
-done
-export LOCAL_XDS_PATH="$GATEWAY_YML"
+	(
+		rm -rf "$APP_DIR"
+		mkdir -p "$APP_DIR"
+		cd "$APP_DIR" || exit 1
 
-# Post-install configuration for MCPJungle
-echo "Configuring MCPJungle post-install..."
-mkdir -p "$HOME/.konnek/mcpjungle"
-MCP_DB="$HOME/.konnek/mcpjungle/mcpjungle.db"
-MCP_DB_URL_RAW="https://raw.githubusercontent.com/sheldonrobinson/mcpjungle.install/main/installer/config/mcpjungle.db"
-if [ ! -f "$MCP_DB" ]; then
-  if command -v curl >/dev/null 2>&1; then
-    curl -fsSL "$MCP_DB_URL_RAW" -o "$MCP_DB" && echo "Downloaded mcpjungle.db to $MCP_DB"
-  elif command -v wget >/dev/null 2>&1; then
-    wget -qO "$MCP_DB" "$MCP_DB_URL_RAW" && echo "Downloaded mcpjungle.db to $MCP_DB"
-  else
-    echo "Warning: curl/wget not available; please place mcpjungle.db at $MCP_DB"
-  fi
-else
-  echo "$MCP_DB already exists; leaving unchanged."
-fi
+		case "$OS" in
+		(macos)   [ -x llama ] || probe_metal ;;
+		(linux)   [ -x llama ] || probe_cuda
+		          [ -x llama ] || probe_rocm
+		          [ -x llama ] || probe_vulkan
+		          [ -x llama ] || probe_cpu ;;
+		(freebsd) [ -x llama ] || probe_cpu ;;
+		esac
 
-# Record recommended MCPJungle args in a small wrapper file for start scripts
-MCP_ARGS_FILE="$HOME/.konnek/mcpjungle/args.txt"
-echo "--port 9000 --sqlite-db-path $MCP_DB" > "$MCP_ARGS_FILE"
+		[ -x llama ] || die \
+			"No prebuilt llama binary is available for your system." \
+			"Please compile llama.cpp from source instead."
+	) || exit
 
-# Also export a convenience variable for start scripts
-for profile in "$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.zshrc"; do
-  if [ -f "$profile" ]; then
-    grep -qxF "export MCPJUNGLE_ARGS='--sqlite-db-path $MCP_DB'" "$profile" || echo "export MCPJUNGLE_ARGS='--sqlite-db-path $MCP_DB'" >> "$profile"
-  fi
-done
-export MCPJUNGLE_ARGS="--sqlite-db-path $MCP_DB"
+	if [ "$SKIP_INSTALL" ]; then
+		info "Installation skipped, SKIP_INSTALL is set"
+		return
+	fi
 
+	VERSION=$("$APP_DIR"/llama version) || die \
+		"Downloaded llama binary failed to run"
 
-echo "Installation completed successfully."
+	case "$VERSION" in
+	(*"build ${LLAMA_VERSION#b}"*) ;;
+	(*) die "Version mismatch: expected $LLAMA_VERSION, got $VERSION" ;;
+	esac
+
+	mkdir -p "$BIN_DIR" &&
+	cp "$APP_DIR"/llama "$BIN_DIR"/llama.tmp &&
+	mv "$BIN_DIR"/llama.tmp "$BIN_DIR"/llama || die \
+		"Couldn't install llama to "$BIN_DIR""
+
+	info "Installation completed successfully" ""
+
+	if check_path "$PATH"; then
+		cat <<-EOF
+		Run the following command to start it:
+
+		  llama serve
+
+		EOF
+		return
+	fi
+
+	LOGIN_SHELL="${SHELL:-/bin/sh}"
+	LOGIN_PATH=$("$LOGIN_SHELL" -l -c 'echo $PATH' 2>/dev/null)
+
+	if check_path "$LOGIN_PATH"; then
+		cat <<-'EOF'
+		Please open a new terminal window or restart your shell.
+
+		  llama serve
+
+		EOF
+	else
+		RC_FILE=
+		case "${SHELL##*/}" in
+		(bash) RC_FILE=".bash_profile" ;;
+		(zsh)  RC_FILE=".zprofile" ;;
+		esac
+		if [ "$RC_FILE" ]; then
+			cat <<-EOF
+			To make llama available in future sessions, add "$BIN_DIR" to your PATH by running:
+
+			  echo 'export PATH="\$HOME/.local/bin:\$PATH"' >> ~/${RC_FILE}
+
+			EOF
+		else
+			cat <<-EOF
+			Add this line to your shell profile to include "$BIN_DIR" to your PATH:
+
+			  export PATH="\$HOME/.local/bin:\$PATH"
+
+			EOF
+		fi
+		cat <<-EOF
+		Then open a new terminal and run:
+
+		  llama serve
+
+		EOF
+	fi
+	cat <<-EOF
+	To start it now without modifying your PATH, run:
+
+	  "$APP_DIR"/llama serve
+
+	EOF
+}
+
+main "$@"

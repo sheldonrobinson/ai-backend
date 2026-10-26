@@ -1,0 +1,16 @@
+# Template for logrotate of __SERVICE_NAME__
+__LOG_PATH__ {
+    su root root
+    daily
+    rotate 7
+    maxsize 100M
+    missingok
+    notifempty
+    copytruncate
+    compress
+    delaycompress
+    create 644 __SERVICE_USER__ __SERVICE_GROUP__
+    postrotate
+        echo "Log rotated for __SERVICE_NAME__"
+    endscript
+}

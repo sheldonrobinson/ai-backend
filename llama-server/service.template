@@ -1,0 +1,19 @@
+[Unit]
+Description=__SERVICE_NAME__
+After=network.target
+
+[Service]
+Type=simple
+USER=__SERVICE_USER__
+GROUP=__SERVICE_GROUP__
+WorkingDirectory=__WORKING_DIR__
+EnvironmentFile=__ENV_FILE__
+ExecStart=__BINARY_PATH__ __ARGS__
+Restart=__RESTART_MODE__
+RestartSec=__RESTART_SECONDS__
+StandardOutput=journal
+StandardError=journal
+ReadWritePaths=__WORKING_DIR__ __LOG_PATH__
+
+[Install]
+WantedBy=multi-user.target

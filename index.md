@@ -7,9 +7,8 @@ title: Home
 
 A consolidated installer and toolkit for running a local AI backend. This project sets up:
 1. **Llama.C++** - The core inference engine ([docs](https://github.com/ggml-org/llama.cpp/tree/master/tools/server))
-2. **AgentGateway** - LLM Proxy for routing and management ([docs](https://github.com/agentgateway/agentgateway))
-3. **MCPJungle** - MCP Gateway for tooling integration ([docs](https://github.com/mcpjungle/MCPJungle))
-4. **Goose** - AI Agent ([docs](https://github.com/aaif-goose/goose/))
+2. **Bifrost** - AI Gateway for routing, governance, and MCP Gateway endpoints
+3. **Goose** - AI Agent ([docs](https://github.com/aaif-goose/goose/))
 
 ---
 
@@ -66,7 +65,7 @@ A consolidated installer and toolkit for running a local AI backend. This projec
 
 <div class="install-section">
     <div class="install-title">🔥 One‑Click PowerShell Installer</div>
-    <a href='powershell:Set-ExecutionPolicy Bypass -Scope Process -Force; iex (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/install.ps1").Content' style="text-decoration: none;">
+    <a href='powershell:Set-ExecutionPolicy Bypass -Scope Process -Force; iex (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/install-all.ps1").Content' style="text-decoration: none;">
         <button class="install-btn">Install AI Backend (One‑Click)</button>
     </a>
     <div class="install-note">Runs the installer directly from memory using <code>powershell:</code> URI.</div>
@@ -78,7 +77,7 @@ A consolidated installer and toolkit for running a local AI backend. This projec
     <div class="install-note">
         If your browser blocks <code>powershell:</code> links, run this manually in a PowerShell terminal:
     </div>
-    <div class="code-snippet">Set-ExecutionPolicy Bypass -Scope Process -Force; iex (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/install.ps1").Content</div>
+    <div class="code-snippet">Set-ExecutionPolicy Bypass -Scope Process -Force; iex (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/install-all.ps1").Content</div>
 </div>
 
 *Note: The script will automatically detect if you have an NVIDIA or AMD GPU and install the appropriate ggml-backend (CUDA or Vulkan) for maximum performance.*
@@ -88,12 +87,23 @@ A consolidated installer and toolkit for running a local AI backend. This projec
 Run the automated bash script from your terminal:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/install.sh | bash
+curl -sL https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/resources/inference-serving/localai-services/install-all.sh | bash
 ```
 
 Ensure you have [Homebrew](https://brew.sh/) installed before running the script.
 
 ---
+
+## Bifrost Stack Installers
+
+The [`resources/inference-serving/localai-services/`](/resources/inference-serving/localai-services/) directory contains installers for the **llama-server → bifrost-http → goose** stack:
+
+- **Installers**: `install-llama-server`, `install-bifrost`, `install-goose`, `install-all`
+- **Uninstallers**: `uninstall-llama-server`, `uninstall-bifrost`, `uninstall-goose`, `uninstall-all`
+- **Platforms**: Linux (bash/systemd) and Windows (PowerShell/NSSM)
+- **Flags**: `--system`, `--purge` (uninstall), `--skip-*` (install-all), `--*-binary`, `--*-args`
+- **Idempotent**: Non-destructive file creation, GET-before-POST/PUT API guards
+- **Docs**: See [documentation.md](documentation.md) for full usage
 
 ## Goose Extensions
 
