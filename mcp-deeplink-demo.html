@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCP Server → Goose Deeplink Generator</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fafafa;
+    color: #333;
+  }
+  h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+  .subtitle { color: #666; margin-bottom: 2rem; }
+  .card {
+    background: white;
+    border: 1px solid #e1e4e8;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(27,31,35,0.1);
+  }
+  .form-group { margin-bottom: 1rem; }
+  label { display: block; font-weight: 600; margin-bottom: 0.3rem; font-size: 0.9rem; }
+  input[type="text"], input[type="number"], select {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #d1d5da;
+    border-radius: 6px;
+    font-size: 0.95rem;
+  }
+  button {
+    background: #0366d6;
+    color: white;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 0.5rem;
+  }
+  button:hover { background: #0254b3; }
+  button:disabled { background: #94c1ec; cursor: not-allowed; }
+  .result { margin-top: 1rem; }
+  .deeplink-card {
+    background: #f6f8fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  .deeplink-card h3 { margin: 0 0 0.5rem 0; font-size: 1.1rem; }
+  .deeplink-card p { margin: 0 0 0.75rem 0; color: #586069; font-size: 0.9rem; }
+  .deeplink-url {
+    background: #000;
+    color: #d4d4d4;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 0.85rem;
+    padding: 0.75rem;
+    border-radius: 4px;
+    word-break: break-all;
+    margin-bottom: 0.5rem;
+    overflow-x: auto;
+    display: block;
+  }
+  .copy-btn {
+    background: #24292e;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+    margin-right: 0.5rem;
+  }
+  .copy-btn:hover { background: #444c56; }
+  .cmd-badge {
+    display: inline-block;
+    background: #e1e4e8;
+    color: #24292e;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-family: monospace;
+    margin-right: 0.4rem;
+  }
+  .env-badge {
+    display: inline-block;
+    background: #f1f8ff;
+    color: #0366d6;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    margin-right: 0.3rem;
+  }
+  .loading {
+    display: none;
+    color: #0366d6;
+    font-style: italic;
+  }
+  .error {
+    color: #d73a49;
+    background: #ffeef0;
+    border: 1px solid #feb7c2;
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-top: 1rem;
+  }
+  .empty {
+    color: #666;
+    font-style: italic;
+  }
+  .meta { font-size: 0.8rem; color: #666; margin-top: 1rem; }
+</style>
+</head>
+<body>
+
+<h1>🔗 MCP Server → Goose Deeplink</h1>
+<p class="subtitle">Look up an MCP server from the official registry and generate a Goose extension deeplink.</p>
+
+<div class="card">
+  <div class="form-group">
+    <label for="serverName">MCP Server Name</label>
+    <input
+      type="text"
+      id="serverName"
+      placeholder="e.g. agency.kesey/pretrip or pretrip"
+      value="pretrip"
+    >
+    <p style="font-size:0.8rem;color:#666;margin-top:0.2rem">
+      Search by full name (namespace/name) or partial match
+    </p>
+  </div>
+
+  <div class="form-group" style="display:flex;gap:1rem;align-items:end;">
+    <label style="margin-bottom:0;font-weight:600;font-size:0.9rem;">
+      Max results:
+    </label>
+    <select id="maxResults" style="width:auto;">
+      <option value="20">20</option>
+      <option value="50" selected>50</option>
+      <option value="100">100</option>
+    </select>
+    <label style="margin-bottom:0;font-weight:normal;font-size:0.9rem;cursor:pointer;">
+      <input type="checkbox" id="dedupe" checked> Dedupe (latest version only)
+    </label>
+  </div>
+
+  <button id="generateBtn">Generate Deeplinks</button>
+  <span class="loading" id="loading">Fetching from MCP registry...</span>
+</div>
+
+<div class="error" id="error" style="display:none;"></div>
+
+<div class="result" id="results"></div>
+
+<div class="meta">
+  Powered by <a href="https://registry.modelcontextprotocol.io" target="_blank">Official MCP Registry</a> •
+  Deeplink format per <a href="https://goose-docs.ai/deeplink-generator" target="_blank">Goose Deeplink Generator</a>
+</div>
+
+<script src="gen-mcp-deeplinks.js"></script>
+<script>
+  const serverNameInput = document.getElementById('serverName');
+  const maxResultsSelect = document.getElementById('maxResults');
+  const dedupeCheckbox = document.getElementById('dedupe');
+  const generateBtn = document.getElementById('generateBtn');
+  const loading = document.getElementById('loading');
+  const errorEl = document.getElementById('error');
+  const resultsEl = document.getElementById('results');
+
+  // Example server names
+  const examples = [
+    'agency.kesey/pretrip',
+    'ai.2kw/mcp-server',
+    'ai.achromat/mcp-server',
+    'ai.adeu/adeu',
+    'ai.adtest/adtest-mcp',
+  ];
+
+  // Add example chips
+  const examplesContainer = document.createElement('div');
+  examplesContainer.style.marginBottom = '1rem';
+  examplesContainer.innerHTML = '<strong>Examples:</strong> ';
+  examples.forEach(ex => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = ex;
+    btn.style.cssText = 'background:#f6f8fa;border:1px solid#d1d5da;padding:0.2rem 0.6rem;border-radius:4px;font-size:0.85rem;cursor:pointer;margin-right:0.4rem;';
+    btn.onclick = () => { serverNameInput.value = ex; };
+    examplesContainer.appendChild(btn);
+  });
+  serverNameInput.parentNode.insertBefore(examplesContainer, serverNameInput.nextSibling);
+
+  async function generate() {
+    const serverName = serverNameInput.value.trim();
+    if (!serverName) {
+      showError('Please enter a server name');
+      return;
+    }
+
+    generateBtn.disabled = true;
+    loading.style.display = 'inline';
+    errorEl.style.display = 'none';
+    resultsEl.innerHTML = '';
+
+    try {
+      const deeplinks = await lookupServer(serverName, {
+        limit: parseInt(maxResultsSelect.value),
+        dedupe: dedupeCheckbox.checked,
+        fuzzy: true,
+      });
+
+      if (deeplinks.length === 0) {
+        resultsEl.innerHTML = '<p class="empty">No stdio-based MCP packages found for this server. Try a different name.</p>';
+        return;
+      }
+
+      renderResults(deeplinks);
+    } catch (err) {
+      showError(err.message || 'Failed to fetch from MCP registry');
+    } finally {
+      generateBtn.disabled = false;
+      loading.style.display = 'none';
+    }
+  }
+
+  function renderResults(deeplinks) {
+    resultsEl.innerHTML = `<p><strong>${deeplinks.length}</strong> deeplink(s) generated:</p>`;
+
+    for (const d of deeplinks) {
+      const card = document.createElement('div');
+      card.className = 'deeplink-card';
+
+      const cmdArgs = [d.cmd, ...d.args].join(' ');
+
+      let envHtml = '';
+      // Parse env vars from deeplink for display
+      const envMatches = d.deeplink.match(/env=([^&]+)/g);
+      if (envMatches) {
+        envHtml = envMatches.map(m => {
+          const decoded = decodeURIComponent(m.slice(4));
+          return `<span class="env-badge">${decoded}</span>`;
+        }).join(' ');
+      }
+
+      card.innerHTML = `
+        <h3>${escapeHtml(d.title)}</h3>
+        <p>${escapeHtml(d.description)}</p>
+        <div>
+          ${d.registryType ? `<span class="cmd-badge">${d.registryType}</span>` : ''}
+          <span class="cmd-badge">${cmdArgs}</span>
+          ${envHtml}
+        </div>
+        <span class="deeplink-url">${escapeHtml(d.deeplink)}</span>
+        <button class="copy-btn" onclick="copyToClipboard(this, '${d.deeplink.replace(/'/g, "\\'")}')">Copy</button>
+        <a href="${d.deeplink}" target="_blank" style="margin-left:0.5rem;color:#0366d6;">Open in Goose</a>
+      `;
+      resultsEl.appendChild(card);
+    }
+  }
+
+  function showError(msg) {
+    errorEl.textContent = msg;
+    errorEl.style.display = 'block';
+  }
+
+  function copyToClipboard(btn, text) {
+    navigator.clipboard.writeText(text).then(() => {
+      const original = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = original; }, 1500);
+    });
+  }
+
+  generateBtn.addEventListener('click', generate);
+  serverNameInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') generate();
+  });
+</script>
+
+</body>
+</html>
