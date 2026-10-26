@@ -96,7 +96,7 @@ Ensure you have [Homebrew](https://brew.sh/) installed before running the script
 
 ## Bifrost Stack Installers
 
-The [`resources/inference-serving/localai-services/`](/resources/inference-serving/localai-services/) directory contains installers for the **llama-server → bifrost-http → goose** stack:
+This directory contains installers for the **llama-server → bifrost-http → goose** stack:
 
 - **Installers**: `install-llama-server`, `install-bifrost`, `install-goose`, `install-all`
 - **Uninstallers**: `uninstall-llama-server`, `uninstall-bifrost`, `uninstall-goose`, `uninstall-all`

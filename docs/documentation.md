@@ -28,7 +28,7 @@ This documentation summarizes the purpose of each component in the AI Backend, h
 - Unix (Linux/macOS): Use `install-llama-server.sh`, `install-bifrost.sh`, and `install-goose.sh` (or `install-all.sh`) for the bifrost stack. Start script: `tools/start-all.sh`.
 - Uninstaller: `tools/uninstall.ps1` removes per-user shortcuts and the install folder.
 
-## Bifrost Stack Installers (`resources/inference-serving/localai-services/`)
+## Bifrost Stack Installers
 
 The bifrost stack installs and configures three services in a fixed order:
 
@@ -245,7 +245,7 @@ curl http://127.0.0.1:3284/
 - `tools/start-all.ps1`, `tools/start-all.sh` — start scripts (hidden-by-default with -Visible/--visible option)
 - `tools/uninstall.ps1` — per-user uninstaller
 - `extensions.md` — Goose Extensions registry
-- `resources/inference-serving/localai-services/install-*.sh/.ps1` — bifrost stack installers
-- `resources/inference-serving/localai-services/uninstall-*.sh/.ps1` — bifrost stack uninstallers
+- `install-*.sh/.ps1` — bifrost stack installers
+- `uninstall-*.sh/.ps1` — bifrost stack uninstallers
 
 If you want, add a dedicated troubleshooting or operations page with step-by-step checks for failures (ports, logs, process supervision).
