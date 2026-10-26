@@ -25,7 +25,7 @@ This documentation summarizes the purpose of each component in the AI Backend, h
 ## Supporting Scripts & Installers
 
 - Windows: install.ps1 installs packages and copies per-user start scripts to `%LOCALAPPDATA%\\Programs\\Konnek\\AI-Backend` and creates Start Menu/Desktop/Startup shortcuts. Start script: `tools/start-all.ps1`.
-- Unix (Linux/macOS): install.sh performs package installs and post-install configuration and writes env vars to user shell profiles. Start script: `tools/start-all.sh`.
+- Unix (Linux/macOS): Use `install-llama-server.sh`, `install-bifrost.sh`, and `install-goose.sh` (or `install-all.sh`) for the bifrost stack. Start script: `tools/start-all.sh`.
 - Uninstaller: `tools/uninstall.ps1` removes per-user shortcuts and the install folder.
 
 ## Bifrost Stack Installers (`resources/inference-serving/localai-services/`)
@@ -241,7 +241,7 @@ curl http://127.0.0.1:3284/
 
 ## Files of Interest
 
-- `install.ps1`, `install.sh` — installers
+- `install-all.sh`, `install-llama-server.sh`, `install-bifrost.sh`, `install-goose.sh` — installers
 - `tools/start-all.ps1`, `tools/start-all.sh` — start scripts (hidden-by-default with -Visible/--visible option)
 - `tools/uninstall.ps1` — per-user uninstaller
 - `extensions.md` — Goose Extensions registry
