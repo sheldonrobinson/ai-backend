@@ -23,7 +23,33 @@ if ($Help) {
 
 $ErrorActionPreference = "Continue"
 
+# ---------------------------------------------------------------------------
+# Resolve script directory for sibling scripts
+# ---------------------------------------------------------------------------
+$RawBase = "https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/resources/inference-serving/localai-services"
+
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+
+# Detect if running from a remote download (iex Invoke-WebRequest) where
+# MyInvocation.MyCommand.Definition is empty or the directory doesn't
+# contain the sibling scripts
+if ([string]::IsNullOrEmpty($ScriptDir) -or -not (Test-Path (Join-Path $ScriptDir "uninstall-goose.ps1"))) {
+  Write-Host "Running from remote download, fetching sibling scripts to temp directory..." -ForegroundColor Yellow
+  $ScriptDir = Join-Path $env:TEMP "bifrost-uninstall-$(Get-Random)"
+  New-Item -ItemType Directory -Path $ScriptDir -Force | Out-Null
+
+  foreach ($script in @("uninstall-goose.ps1", "uninstall-bifrost.ps1", "uninstall-llama-server.ps1")) {
+    $dest = Join-Path $ScriptDir $script
+    try {
+      $ProgressPreference = "SilentlyContinue"
+      Invoke-WebRequest -Uri "$RawBase/$script" -OutFile $dest -UseBasicParsing -ErrorAction Stop
+      $ProgressPreference = "Continue"
+    } catch {
+      Write-Host "Error: Failed to download $script from $RawBase" -ForegroundColor Red
+      exit 1
+    }
+  }
+}
 
 Write-Host "==============================================" -ForegroundColor Cyan
 Write-Host "  All-in-One Bifrost Stack Uninstallation (Windows)" -ForegroundColor Cyan

@@ -44,7 +44,30 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# ---------------------------------------------------------------------------
+# Resolve script directory for sibling scripts
+# ---------------------------------------------------------------------------
+RAW_BASE="https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main/resources/inference-serving/localai-services"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)"
+
+# Detect if running from a URL download (curl | bash) where BASH_SOURCE is empty
+# or the directory doesn't contain the sibling scripts
+if [ -z "${SCRIPT_DIR}" ] || [ ! -f "${SCRIPT_DIR}/uninstall-goose.sh" ]; then
+  echo "Running from remote download, fetching sibling scripts to temp directory..."
+  TMP_SCRIPT_DIR=$(mktemp -d)
+  trap 'rm -rf "${TMP_SCRIPT_DIR}"' EXIT
+  
+  for script in uninstall-goose.sh uninstall-bifrost.sh uninstall-llama-server.sh; do
+    if ! curl -fsSL "${RAW_BASE}/${script}" -o "${TMP_SCRIPT_DIR}/${script}"; then
+      echo "Error: Failed to download ${script} from ${RAW_BASE}" >&2
+      exit 1
+    fi
+    chmod +x "${TMP_SCRIPT_DIR}/${script}"
+  done
+  
+  SCRIPT_DIR="${TMP_SCRIPT_DIR}"
+fi
 
 echo "============================================="
 echo "  All-in-One Bifrost Stack Uninstallation"
