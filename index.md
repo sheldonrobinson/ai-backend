@@ -109,8 +109,8 @@ This directory contains installers for the **llama-server → bifrost-http → g
 
 Extend your Goose Agent capabilities by installing extensions. Click the links below to install them directly (requires Goose Desktop).
 
-* [**shadcn UI**](goose://extension?name=shadcn%20UI&cmd=npx%20-y%20shadcn%40latest%20mcp) - A shadcn/ui–native MCP server enabling structured component metadata, actions, and UI-aware tooling.
-* [**Legal Document Analyzer**](goose://extension?name=Legal%20Document%20Analyzer&cmd=npx%20-y%20mcp-legal-doc-analyzer%40latest%20--templates%20~%2F.legal-doc-analyzer%2Ftemplates%20--db-path%20~%2F.legal-doc-analyzer%2Flegal.db) - Analyzes legal documents, extracts key clauses, and highlights risks.
+* [**shadcn UI**](goose://extension?name=shadcn%20UI&cmd=npx&args=-y%20shadcn%40latest%20mcp) - A shadcn/ui–native MCP server enabling structured component metadata, actions, and UI-aware tooling.
+* [**Legal Document Analyzer**](goose://extension?name=Legal%20Document%20Analyzer&cmd=npx&args=-y%20mcp-legal-doc-analyzer%40latest%20--templates%20~%2F.legal-doc-analyzer%2Ftemplates%20--db-path%20~%2F.legal-doc-analyzer%2Flegal.db) - Analyzes legal documents, extracts key clauses, and highlights risks.
 
 *(For a full list of extensions and an interactive grid, view our [Extensions Registry](extensions.html))*
 
