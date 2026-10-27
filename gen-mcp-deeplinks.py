@@ -3,10 +3,17 @@
 Generate Goose extension deeplinks from MCP servers in the official MCP registry.
 
 Fetches servers from https://registry.modelcontextprotocol.io/v0.1/servers,
-filters for stdio-based packages, and generates goose://extension deeplinks.
+filters for stdio-based packages and streamable-http remotes, and generates
+goose://extension deeplinks.
 
 Goose deeplink format (validated against goose-docs.ai/deeplink-generator):
+
+  Stdio package:
     goose://extension?cmd=<command>&arg=<arg1>&arg=<arg2>&id=<id>&name=<name>&description=<description>
+
+  Streamable-http remote:
+    goose://extension?type=streamable_http&url=<url>&id=<id>&name=<name>&description=<description>
+      [&env=<name>=<desc>...] [&header=<name>=<desc>...]
 
 Where cmd must be one of: cu, docker, jbang, npx, uvx, goose, npx.cmd
 
@@ -17,9 +24,12 @@ Registry type → Goose command mapping:
     oci   → docker with args: run <identifier>
 
 Usage:
-    python3 gen-mcp-deeplinks.py [limit] [format]
+    python3 gen-mcp-deeplinks.py [limit] [format] [max_pages]
     limit   - Max servers to fetch per page (default: 100)
     format  - markdown | json | links (default: markdown)
+    max_pages - Max pages to fetch (default: 10)
+
+    Also supports --dedupe to keep only the latest version per server+package.
 """
 
 import json
@@ -93,16 +103,20 @@ def package_to_goose_cmd(pkg):
 
 def server_to_deeplinks(server_entry):
     """
-    Convert an MCP registry server entry to a list of Goose deeplinks
-    (one per stdio package).
+    Convert an MCP registry server entry to a list of Goose deeplinks.
+    Generates one deeplink per runnable stdio package, plus one per
+    streamable-http remote.
     """
     svr = server_entry.get("server", {})
     name = svr.get("name", "")
     title = svr.get("title", "") or name.split("/")[-1]
     description = svr.get("description", "")
     pkgs = svr.get("packages") or []
+    remotes = svr.get("remotes") or []
 
     deeplinks = []
+
+    # --- 1) stdio package ---------------------------------------------------
     for pkg in pkgs:
         # Only stdio transport can be run as a local command
         transport = pkg.get("transport", {})
@@ -127,7 +141,7 @@ def server_to_deeplinks(server_entry):
             ("description", description),
         ]
 
-        # Add environment variables as env=KEY params
+        # Add environment variables as env=KEY=VALUE
         env_vars = pkg.get("environmentVariables") or []
         for env in env_vars:
             env_name = env.get("name", "")
@@ -148,9 +162,53 @@ def server_to_deeplinks(server_entry):
             "description": description,
             "cmd": cmd,
             "args": args,
+            "type": "stdio",
             "deeplink": deeplink,
             "registryType": pkg.get("registryType"),
             "identifier": pkg.get("identifier", ""),
+        })
+
+    # --- 2) streamable-http remote ------------------------------------------
+    for rem in remotes:
+        if not rem or rem.get("type") != "streamable-http" or not rem.get("url"):
+            continue
+
+        params = [
+            ("type", "streamable_http"),
+            ("url", rem.get("url", "")),
+            ("id", name),
+            ("name", title),
+            ("description", description),
+        ]
+
+        # Environment variables (per-remote, fallback to server-level)
+        env_vars = rem.get("environmentVariables") or svr.get("environmentVariables") or []
+        for env in env_vars:
+            env_name = env.get("name", "")
+            env_desc = env.get("description", "")
+            if env_name:
+                params.append(("env", f"{env_name}={env_desc}"))
+
+        # Request headers
+        headers = rem.get("headers") or []
+        for header in headers:
+            h_name = header.get("name", "")
+            h_desc = header.get("description", "")
+            if h_name:
+                params.append(("header", f"{h_name}={h_desc}"))
+
+        # Build query string
+        query = "&".join(f"{k}={urllib.parse.quote(str(v), safe='')}" for k, v in params)
+        deeplink = f"goose://extension?{query}"
+        deeplinks.append({
+            "name": name,
+            "title": title,
+            "description": description,
+            "type": "streamable_http",
+            "url": rem.get("url", ""),
+            "registryType": "remote",
+            "identifier": rem.get("url", ""),
+            "deeplink": deeplink,
         })
 
     return deeplinks
@@ -171,7 +229,7 @@ def main():
         deeplinks = server_to_deeplinks(entry)
         all_deeplinks.extend(deeplinks)
 
-    # Deduplicate by server name + package identifier (keep first/latest)
+    # Deduplicate by server name + package/remote identifier (keep first/latest)
     if dedupe:
         seen = set()
         deduped = []
@@ -182,17 +240,22 @@ def main():
                 deduped.append(d)
         all_deeplinks = deduped
 
-    print(f"Generated {len(all_deeplinks)} Goose deeplinks from stdio packages.", file=sys.stderr)
+    print(f"Generated {len(all_deeplinks)} Goose deeplinks.", file=sys.stderr)
 
     if output_format == "markdown":
         print("\n# MCP Servers → Goose Deeplinks\n")
         print("Generated from https://registry.modelcontextprotocol.io\n")
-        print("| Server | Registry | Package | Goose Command | Deeplink |")
-        print("|--------|----------|---------|--------------|----------|")
+        print("| Server | Type | Package/Remote | Goose Command | Deeplink |")
+        print("|--------|------|----------------|--------------|----------|")
         for d in all_deeplinks:
-            cmd_str = f"`{d['cmd']} {' '.join(d['args'])}`"
+            if d["type"] == "stdio":
+                cmd_str = f"`{d['cmd']} {' '.join(d['args'])}`"
+                pkg_col = d["identifier"]
+            else:
+                cmd_str = "`streamable_http`"
+                pkg_col = d["url"]
             link_text = f"[Install]({d['deeplink']})"
-            print(f"| {d['title']} | {d['registryType']} | {d['identifier']} | {cmd_str} | {link_text} |")
+            print(f"| {d['title']} | {d['type']} | {pkg_col} | {cmd_str} | {link_text} |")
 
     elif output_format == "json":
         print(json.dumps(all_deeplinks, indent=2))
