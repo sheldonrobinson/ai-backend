@@ -16,52 +16,7 @@ A consolidated installer and toolkit for running a local AI backend. This projec
 
 ### Windows
 
-<!-- ONE-CLICK INSTALL SECTION -->
-<style>
-    .install-section {
-        font-family: system-ui, sans-serif;
-        margin: 40px 0;
-        padding: 20px;
-        border: 1px solid #e5e5e5;
-        border-radius: 12px;
-        background: #fafafa;
-    }
-    .install-title {
-        font-size: 22px;
-        font-weight: 600;
-        margin-bottom: 16px;
-    }
-    .install-btn {
-        display: inline-block;
-        padding: 12px 20px;
-        margin: 8px 0;
-        font-size: 16px;
-        border-radius: 8px;
-        cursor: pointer;
-        border: none;
-        color: white;
-        background: #0078d4;
-        transition: background 0.2s ease;
-        text-decoration: none;
-    }
-    .install-btn:hover {
-        background: #005ea6;
-    }
-    .install-note {
-        font-size: 14px;
-        color: #555;
-        margin-top: 6px;
-    }
-    .code-snippet {
-        background: #1e1e1e;
-        color: #dcdcdc;
-        padding: 12px;
-        border-radius: 6px;
-        font-family: Consolas, monospace;
-        margin-top: 10px;
-        white-space: pre-wrap;
-    }
-</style>
+
 
 <div class="install-section">
     <div class="install-title">🔥 One‑Click PowerShell Installer</div>

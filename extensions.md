@@ -9,36 +9,6 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 - **Extensions** run external MCP servers to give the agent new capabilities.
 - **Skills** add specialized prompt logic and workflow instructions directly to Goose.
 
-<style>
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; margin-bottom: 40px;}
-.card { border: 1px solid #e1e4e8; border-radius: 8px; padding: 20px; background: #fff; box-shadow: 0 1px 3px rgba(27,31,35,0.1); display: flex; flex-direction: column; justify-content: space-between; }
-.card h3 { margin-top: 0; font-size: 1.25em; color: #24292e; }
-.card p { font-size: 0.9em; color: #586069; flex-grow: 1; }
-.install-btn { display: block; text-align: center; padding: 10px; background-color: #0366d6; color: #fff !important; text-decoration: none !important; border-radius: 6px; font-weight: 600; margin-top: 15px; transition: background-color 0.2s; }
-.install-btn:hover { background-color: #005cc5; }
-.tag { display: inline-block; padding: 4px 8px; background-color: #f1f8ff; color: #0366d6; border-radius: 12px; font-size: 0.75em; font-weight: 600; margin-bottom: 12px; align-self: flex-start; }
-.tag.skill { background-color: #e6ffed; color: #0366d6; border: 1px solid #0366d6; }
-.cmd-preview { background: #f6f8fa; padding: 8px; border-radius: 4px; font-family: monospace; font-size: 0.75em; overflow-x: auto; white-space: nowrap; margin-top: 10px; color: #24292e; border: 1px solid #eaecef; }
-.section-title { border-bottom: 2px solid #eaecef; padding-bottom: 10px; margin-top: 40px; }
-.lookup-card { background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; }
-.lookup-card h2 { margin-top: 0; font-size: 1.25rem; }
-.lookup-card label { display: block; font-weight: 600; margin-bottom: 0.3rem; font-size: 0.9rem; }
-.lookup-card input[type="text"] { width: 100%; padding: 0.6rem; border: 1px solid #d1d5da; border-radius: 6px; font-size: 0.95rem; box-sizing: border-box; }
-.lookup-card button { background: #0366d6; color: white; border: none; padding: 0.6rem 1.4rem; border-radius: 6px; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 0.75rem; }
-.lookup-card button:hover { background: #0254b3; }
-.lookup-card button:disabled { background: #94c1ec; cursor: not-allowed; }
-.deeplink-card { background: #fff; border: 1px solid #e1e4e8; border-radius: 6px; padding: 1rem; margin-top: 1rem; }
-.deeplink-card h3 { margin: 0 0 0.5rem 0; font-size: 1.1rem; }
-.deeplink-card p { margin: 0 0 0.75rem 0; color: #586069; font-size: 0.9rem; }
-.deeplink-url { background: #24292e; color: #e1e4e8; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.8rem; padding: 0.75rem; border-radius: 4px; word-break: break-all; margin: 0.5rem 0; display: block; }
-.copy-btn { background: #24292e; color: #fff; border: none; font-size: 0.85rem; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; }
-.copy-btn:hover { background: #444c56; }
-.cmd-badge { display: inline-block; background: #e1e4e8; color: #24292e; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-family: monospace; margin-right: 0.4rem; }
-.env-badge { display: inline-block; background: #f1f8ff; color: #0366d6; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.75rem; margin-right: 0.3rem; margin-bottom: 0.3rem; }
-.registry-loading { color: #0366d6; font-style: italic; margin-left: 0.5rem; }
-.registry-error { color: #d73a49; background: #ffeef0; border: 1px solid #feb7c2; padding: 0.75rem; border-radius: 6px; margin-top: 1rem; }
-</style>
-
 ## 🔍 Generate Goose Deeplink from MCP Registry
 
 {% raw %}
