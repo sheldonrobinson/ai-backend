@@ -361,12 +361,11 @@ Write-Host "Creating Windows service..."
 
 $NssmPath = Get-Command nssm -ErrorAction SilentlyContinue
 if (-not $NssmPath) {
-  $NssmZip = Join-Path $env:TEMP "nssm.zip"
-  $NssmUrl = "https://nssm.cc/download/nssm-2.24.zip"
-  if (Download-File -Url $NssmUrl -Destination $NssmZip) {
-    Expand-Archive -Path $NssmZip -DestinationPath $env:TEMP -Force
-    $NssmExe = Get-ChildItem -Path $env:TEMP -Filter "nssm.exe" -Recurse | Select-Object -First 1
-    if ($NssmExe) { $NssmPath = $NssmExe.FullName }
+  Write-Host "NSSM not found. Installing via winget..." -ForegroundColor Yellow
+  winget install nssm --accept-package-agreements --accept-source-agreements 2>$null
+  $NssmPath = Get-Command nssm -ErrorAction SilentlyContinue
+  if (-not $NssmPath) {
+    Write-Host "Warning: NSSM installation via winget failed. Service will not be created automatically." -ForegroundColor Yellow
   }
 }
 
@@ -403,7 +402,7 @@ if ($NssmPath) {
   }
 } else {
   Write-Host "  NSSM not available. Service not created automatically." -ForegroundColor Yellow
-  Write-Host "  To create the service manually, download NSSM from https://nssm.cc and run:"
+  Write-Host "  To create the service manually, install NSSM (winget install nssm) and run:"
   Write-Host "    nssm install $ServerName `"$BinaryPath`" serve --dangerously-unauthenticated --host 127.0.0.1 --port $GoosePort"
   Write-Host "    nssm start $ServerName"
 }
