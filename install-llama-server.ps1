@@ -248,7 +248,7 @@ LOG_LEVEL=info
     if ($System) {
       winget install nssm --scope machine --accept-package-agreements --accept-source-agreements 2>$null
     } else {
-      winget install nssm --scope user --accept-package-agreements --accept-source-agreements 2>$null
+      winget install nssm --accept-package-agreements --accept-source-agreements 2>$null
     }
     $NssmPath = Get-Command nssm -ErrorAction SilentlyContinue
     if (-not $NssmPath) {
