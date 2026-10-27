@@ -522,12 +522,15 @@ Browse, discover, and install extensions and skills for your Goose Agent.
     return { cmd: m.cmd, args: m.prefixArgs.concat([pkg.identifier || ""]) };
   }
 
-  // Build ONE goose deeplink from a server entry (first runnable stdio package).
+  // Build ONE goose deeplink from a server entry:
+  //   first runnable stdio package, else first streamable-http remote.
   function buildDeeplink(entry) {
     var svr = entry.server || {};
     var name = svr.name || "";
     var title = svr.title || name.split("/").pop() || "";
     var description = svr.description || "";
+
+    // --- 1) stdio package ---------------------------------------------------
     var pkgs = svr.packages || [];
     for (var i = 0; i < pkgs.length; i++) {
       var pkg = pkgs[i];
@@ -548,16 +551,57 @@ Browse, discover, and install extensions and skills for your Goose Agent.
 
       return {
         name: name, title: title, description: description,
-        cmd: r.cmd, args: r.args, deeplink: "goose://extension?" + query,
-        registryType: pkg.registryType, identifier: pkg.identifier || ""
+        cmd: r.cmd, args: r.args, type: "stdio",
+        registryType: pkg.registryType, identifier: pkg.identifier || "",
+        deeplink: "goose://extension?" + query
       };
     }
+
+    // --- 2) streamable-http remote -----------------------------------------
+    var remotes = svr.remotes || [];
+    for (var i = 0; i < remotes.length; i++) {
+      var rem = remotes[i];
+      if (!rem || rem.type !== "streamable-http") continue;
+      if (!rem.url) continue;
+
+      var params = [
+        ["type", "streamable_http"],
+        ["url", rem.url],
+        ["id", name],
+        ["name", title],
+        ["description", description]
+      ];
+      var envs = rem.environmentVariables || pkgEnvironmentVariables(svr) || [];
+      for (var j = 0; j < envs.length; j++) {
+        if (envs[j].name) params.push(["env", envs[j].name + "=" + (envs[j].description || "")]);
+      }
+      var headers = rem.headers || [];
+      for (var j = 0; j < headers.length; j++) {
+        if (headers[j].name) params.push(["header", headers[j].name + "=" + (headers[j].description || "")]);
+      }
+
+      var query = params.map(function (p) {
+        return p[0] + "=" + encodeURIComponent(String(p[1]));
+      }).join("&");
+
+      return {
+        name: name, title: title, description: description,
+        type: "streamable_http", url: rem.url,
+        registryType: "remote", identifier: rem.url,
+        deeplink: "goose://extension?" + query
+      };
+    }
+
     return null;
+  }
+
+  // Some servers expose env vars at top level rather than per-remote.
+  function pkgEnvironmentVariables(svr) {
+    return svr.environmentVariables || null;
   }
 
   function renderResult(d) {
     var resultEl = document.getElementById("registry-result");
-    var cmdArgs = [d.cmd].concat(d.args).join(" ");
     var envHtml = "";
     var envMatches = d.deeplink.match(/env=([^&]+)/g);
     if (envMatches) {
@@ -565,14 +609,23 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         return '<span class="env-badge">' + decodeURIComponent(m.slice(4)) + "</span>";
       }).join("");
     }
+    var headerHtml = "";
+    var headerMatches = d.deeplink.match(/header=([^&]+)/g);
+    if (headerMatches) {
+      headerHtml = headerMatches.map(function (m) {
+        return '<span class="env-badge">' + decodeURIComponent(m.slice(7)) + "</span>";
+      }).join("");
+    }
+    var typeBadge = d.type === "streamable_http"
+      ? '<span class="cmd-badge">remote:' + escapeHtml(d.url) + "</span>"
+      : '<span class="cmd-badge">' + escapeHtml([d.cmd].concat(d.args || []).join(" ")) + "</span>";
+    var registryBadge = d.registryType ? '<span class="cmd-badge">' + escapeHtml(d.registryType) + "</span>" : "";
+
     resultEl.innerHTML =
       '<div class="deeplink-card">' +
         "<h3>" + escapeHtml(d.title) + "</h3>" +
         "<p>" + escapeHtml(d.description) + "</p>" +
-        "<div>" +
-          (d.registryType ? '<span class="cmd-badge">' + escapeHtml(d.registryType) + "</span>" : "") +
-          '<span class="cmd-badge">' + escapeHtml(cmdArgs) + "</span>" + envHtml +
-        "</div>" +
+        "<div>" + registryBadge + typeBadge + envHtml + headerHtml + "</div>" +
         '<span class="deeplink-url">' + escapeHtml(d.deeplink) + "</span>" +
         '<button class="copy-btn" id="registry-copy-btn">Copy</button>' +
         ' <a href="' + d.deeplink + '" style="margin-left:0.5rem;color:#0366d6;">Open in Goose</a>' +
@@ -624,7 +677,7 @@ Browse, discover, and install extensions and skills for your Goose Agent.
         }
         var d = buildDeeplink(entry);
         if (!d) {
-          showError('Server "' + entry.server.name + '" has no stdio package runnable by Goose.');
+          showError('Server "' + entry.server.name + '" has no runnable stdio package or streamable-http remote.');
           return;
         }
         renderResult(d);

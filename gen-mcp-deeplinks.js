@@ -88,9 +88,11 @@ function serverToDeeplinks(entry) {
   const title = svr.title || name.split("/").pop() || "";
   const description = svr.description || "";
   const pkgs = svr.packages || [];
+  const remotes = svr.remotes || [];
 
   const deeplinks = [];
 
+  // --- 1) stdio package ----------------------------------------------------
   for (const pkg of pkgs) {
     // Only stdio transport can run as a local command
     const transport = pkg.transport || {};
@@ -137,9 +139,59 @@ function serverToDeeplinks(entry) {
       description,
       cmd,
       args,
-      deeplink: `goose://extension?${query}`,
+      type: "stdio",
       registryType: pkg.registryType,
       identifier: pkg.identifier || "",
+      deeplink: `goose://extension?${query}`,
+    });
+  }
+
+  // --- 2) streamable-http remote ------------------------------------------
+  // One deeplink per remote URL (mirrors Goose's streamable_http generator).
+  for (const rem of remotes) {
+    if (!rem || rem.type !== "streamable-http" || !rem.url) continue;
+
+    const params = [
+      ["type", "streamable_http"],
+      ["url", rem.url],
+      ["id", name],
+      ["name", title],
+      ["description", description],
+    ];
+
+    // Environment variables (per-remote, fallback to server-level)
+    const envVars = rem.environmentVariables || svr.environmentVariables || [];
+    for (const env of envVars) {
+      const envName = env.name || "";
+      const envDesc = env.description || "";
+      if (envName) {
+        params.push(["env", `${envName}=${envDesc}`]);
+      }
+    }
+
+    // Request headers
+    const headers = rem.headers || [];
+    for (const header of headers) {
+      const hName = header.name || "";
+      const hDesc = header.description || "";
+      if (hName) {
+        params.push(["header", `${hName}=${hDesc}`]);
+      }
+    }
+
+    const query = params
+      .map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`)
+      .join("&");
+
+    deeplinks.push({
+      name,
+      title,
+      description,
+      type: "streamable_http",
+      url: rem.url,
+      registryType: "remote",
+      identifier: rem.url,
+      deeplink: `goose://extension?${query}`,
     });
   }
 
