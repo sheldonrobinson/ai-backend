@@ -252,7 +252,11 @@ Write-Host "Creating Windows service..."
 $NssmPath = Get-Command nssm -ErrorAction SilentlyContinue
 if (-not $NssmPath) {
   Write-Host "NSSM not found. Installing via winget..." -ForegroundColor Yellow
-  winget install nssm --accept-package-agreements --accept-source-agreements 2>$null
+    if ($System) {
+      winget install nssm --global --accept-package-agreements --accept-source-agreements 2>$null
+    } else {
+      winget install nssm --accept-package-agreements --accept-source-agreements 2>$null
+    }
   $NssmPath = Get-Command nssm -ErrorAction SilentlyContinue
   if (-not $NssmPath) {
     Write-Host "Warning: NSSM installation via winget failed. Service will not be created automatically." -ForegroundColor Yellow
