@@ -184,8 +184,9 @@ document.addEventListener("DOMContentLoaded", function() {
             target = wrapper;
         }
 
-        // Button goes inside .cmd-preview or .code-snippet, or target itself
-        var btnTarget = target.querySelector('.cmd-preview') || target.querySelector('.code-snippet') || target;
+        // Button goes inside .code-container (the scrolling container) so it
+        // stays fixed relative to the container when scrolling horizontally.
+        var btnTarget = target;
         if (btnTarget.querySelector('.copy-btn')) return;
 
         // SVG icons for copy / copied states
