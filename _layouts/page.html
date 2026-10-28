@@ -30,8 +30,12 @@ layout: default
 /* Copy button styles */
 .code-container {
     position: relative;
-    overflow-x: auto;
     margin-top: 10px;
+}
+.code-scroll {
+    overflow-x: auto;
+    width: 100%;
+    display: block;
 }
 .code-container pre,
 .code-snippet,
@@ -195,11 +199,23 @@ document.addEventListener("DOMContentLoaded", function() {
             target = wrapper;
         }
 
-        // Button goes inside .code-container at top-right so it stays fixed
-        // when scrolling horizontally through code.
-        if (target.querySelector('.copy-btn')) return;
+        // Wrap .cmd-preview / .code-snippet / pre inside .code-scroll so
+        // .code-container itself does not scroll.
+        var content = target.querySelector('.cmd-preview') || target.querySelector('.code-snippet') || target.querySelector('pre') || target;
+        var scrollDiv = target.querySelector('.code-scroll');
+        if (!scrollDiv) {
+            scrollDiv = document.createElement('div');
+            scrollDiv.className = 'code-scroll';
+            scrollDiv.style.overflowX = 'auto';
+            if (content.parentNode === target) {
+                scrollDiv.appendChild(content);
+            }
+            target.appendChild(scrollDiv);
+        }
 
-        var btnTarget = target;
+        // Button goes inside .code-container (NOT inside scrollDiv) so it
+        // stays fixed relative to the container when scrolling horizontally.
+        if (target.querySelector('.copy-btn')) return;
 
         // SVG icons for copy / copied states
         var COPY_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M7 9.667A2.667 2.667 0 0 1 9.667 7h8.666A2.667 2.667 0 0 1 21 9.667v8.666A2.667 2.667 0 0 1 18.333 21H9.667A2.667 2.667 0 0 1 7 18.333z"></path><path d="M4.012 16.737A2 2 0 0 1 3 15V5c0-1.1.9-2 2-2h10c.75 0 1.158.385 1.5 1"></path></g></svg>';
