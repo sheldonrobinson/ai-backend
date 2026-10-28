@@ -82,19 +82,20 @@ layout: default
 .card h3 { margin-top: 0; font-size: 1.25em; color: #24292e; }
 .card p { font-size: 0.9em; color: #586069; flex-grow: 1; }
 .install-btn {
-    display: block;
+    display: inline-block;
     text-align: center;
-    padding: 10px;
+    padding: 10px 16px;
     background-color: #0366d6;
     color: white !important;
     text-decoration: none !important;
-    border-radius: 8px;
+    border-radius: 6px;
     border: none;
     cursor: pointer;
     font-weight: 600;
-    font-size: 1.0rem;
-    margin: 8px;
-    transition: background-color 0.2s; 
+    font-size: 0.95rem;
+    margin: 4px 0;
+    transition: background-color 0.2s;
+    white-space: nowrap;
 }
 .install-btn:hover {
     background-color: #005cc5;
@@ -117,18 +118,18 @@ layout: default
 .copy-btn {
     top: 8px;
     right: 8px;
-    background: #24292e;
-    border: 1px solid #d1d5da;
+    background: #0366d6;
+    color: white;
+    border: none;
     border-radius: 4px;
-    padding: 0.4rem 0.8rem;
+    padding: 0.35rem 0.7rem;
     font-size: 0.85rem;
     cursor: pointer;
-    color: white;
     transition: background 0.2s;
     z-index: 10;
 }
-.copy-btn:hover { background: #21252a; }
-.copy-btn:active { background: #262b21; }
+.copy-btn:hover { background: #005cc5; }
+.copy-btn:active { background: #004494; }
 .cmd-badge { display: inline-block; background: #e1e4e8; color: #24292e; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-family: monospace; margin-right: 0.4rem; }
 .env-badge { display: inline-block; background: #f1f8ff; color: #0366d6; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.75rem; margin-right: 0.3rem; margin-bottom: 0.3rem; }
 .registry-loading { color: #0366d6; font-style: italic; margin-left: 0.5rem; }
