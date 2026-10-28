@@ -80,7 +80,7 @@ layout: default
     white-space: pre-wrap;
 }
 
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; margin-bottom: 40px;}
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minwidth: 300px); gap: 20px; margin-top: 20px; margin-bottom: 40px;}
 .card { border: 1px solid #e1e4e8; border-radius: 8px; padding: 20px; background: #fff; box-shadow: 0 1px 3px rgba(27,31,35,0.1); display: flex; flex-direction: column; justify-content: space-between; }
 .card h3 { margin-top: 0; font-size: 1.25em; color: #24292e; }
 .card p { font-size: 0.9em; color: #586069; flex-grow: 1; }
@@ -179,18 +179,25 @@ document.addEventListener("DOMContentLoaded", function() {
         if (node.tagName === 'CODE' && node.parentNode && node.parentNode.tagName === 'PRE') {
             target = node.parentNode; // pre
             // Skip if pre is inside .cmd-preview or .code-snippet
-            // (it will be handled when we process the parent .cmd-preview)
-            if (target.closest('.cmd-preview, .code-snippet') !== target) return;
+            if (target.closest('.cmd-preview, .code-snippet')) return;
         } else {
             target = node; // .cmd-preview or .code-snippet
         }
         if (seen.has(target)) return;
         seen.add(target);
 
-        // Skip if target is already inside a .code-container (but not the container itself)
-        if (target.closest('.code-container') && target.closest('.code-container') !== target) return;
+        // Skip if target is already inside a .code-container
+        if (target.closest('.code-container')) return;
 
-        // If not already wrapped, wrap in .code-container
+        // Determine the content element to put inside .code-scroll
+        var contentEl = target;
+        if (target.classList.contains('cmd-preview') || target.classList.contains('code-snippet')) {
+            contentEl = target; // target itself is the content
+        } else {
+            contentEl = target.querySelector('.cmd-preview') || target.querySelector('.code-snippet') || target.querySelector('pre') || target;
+        }
+
+        // Wrap target in .code-container
         if (!target.classList.contains('code-container')) {
             var wrapper = document.createElement('div');
             wrapper.className = 'code-container';
@@ -199,17 +206,14 @@ document.addEventListener("DOMContentLoaded", function() {
             target = wrapper;
         }
 
-        // Wrap .cmd-preview / .code-snippet / pre inside .code-scroll so
-        // .code-container itself does not scroll.
-        var content = target.querySelector('.cmd-preview') || target.querySelector('.code-snippet') || target.querySelector('pre') || target;
+        // Wrap code content in .code-scroll
         var scrollDiv = target.querySelector('.code-scroll');
         if (!scrollDiv) {
             scrollDiv = document.createElement('div');
             scrollDiv.className = 'code-scroll';
             scrollDiv.style.overflowX = 'auto';
-            if (content.parentNode === target) {
-                scrollDiv.appendChild(content);
-            }
+            contentEl.parentNode.insertBefore(scrollDiv, contentEl);
+            scrollDiv.appendChild(contentEl);
             target.appendChild(scrollDiv);
         }
 
@@ -225,8 +229,7 @@ document.addEventListener("DOMContentLoaded", function() {
         btn.className = 'copy-btn';
         btn.innerHTML = COPY_SVG;
 
-        // Store the exact text to copy on the button element so it's
-        // never confused with the button's own label text.
+        // Store the exact text to copy on the button element
         var codeToCopy = '';
         var preview = target.querySelector('.cmd-preview');
         if (preview) {
@@ -241,7 +244,6 @@ document.addEventListener("DOMContentLoaded", function() {
         btn.addEventListener('click', function() {
             var text = btn.dataset.copyText;
             if (!navigator.clipboard) {
-                // fallback
                 var ta = document.createElement('textarea');
                 ta.value = text;
                 document.body.appendChild(ta);
@@ -257,7 +259,7 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         });
 
-        btnTarget.appendChild(btn);
+        target.appendChild(btn);
     });
 });
 </script>
