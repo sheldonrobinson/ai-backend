@@ -180,7 +180,7 @@ document.addEventListener("DOMContentLoaded", function() {
             target = node.parentNode; // pre
             // Skip if pre is inside .cmd-preview or .code-snippet
             // (it will be handled when we process the parent .cmd-preview)
-            if (target.closest('.cmd-preview, .code-snippet')) return;
+            if (target.closest('.cmd-preview, .code-snippet') !== target) return;
         } else {
             target = node; // .cmd-preview or .code-snippet
         }
