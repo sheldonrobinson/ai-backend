@@ -175,12 +175,19 @@ document.addEventListener("DOMContentLoaded", function() {
 
     candidates.forEach(function(node) {
         // target element to wrap: for pre>code use the parent PRE
-        var target = (node.tagName === 'CODE' && node.parentNode && node.parentNode.tagName === 'PRE') ? node.parentNode : node;
+        var target;
+        if (node.tagName === 'CODE' && node.parentNode && node.parentNode.tagName === 'PRE') {
+            target = node.parentNode; // pre
+            // Skip if pre is inside .cmd-preview or .code-snippet
+            // (it will be handled when we process the parent .cmd-preview)
+            if (target.closest('.cmd-preview, .code-snippet')) return;
+        } else {
+            target = node; // .cmd-preview or .code-snippet
+        }
         if (seen.has(target)) return;
         seen.add(target);
 
-        // Skip if target is already inside a .code-container (prevents
-        // double-processing pre>code nested inside .cmd-preview)
+        // Skip if target is already inside a .code-container
         if (target.closest('.code-container') !== target) return;
 
         // If not already wrapped, wrap in .code-container
