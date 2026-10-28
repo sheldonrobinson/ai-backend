@@ -173,33 +173,37 @@ document.addEventListener("DOMContentLoaded", function() {
 
         var btn = document.createElement('button');
         btn.className = 'copy-btn';
-        btn.innerText = 'Copy';
+        btn.textContent = 'Copy';
+
+        // Store the exact text to copy on the button element so it's
+        // never confused with the button's own label text.
+        var codeToCopy = '';
+        var preview = target.querySelector('.cmd-preview');
+        if (preview) {
+            codeToCopy = preview.textContent;
+        } else {
+            var pre = target.querySelector('pre');
+            if (pre) codeToCopy = pre.textContent;
+            else codeToCopy = target.textContent;
+        }
+        btn.dataset.copyText = codeToCopy.trim();
 
         btn.addEventListener('click', function() {
-            var codeToCopy = '';
-            // prefer .cmd-preview inside container
-            var preview = target.querySelector('.cmd-preview');
-            if (preview) {
-                codeToCopy = preview.innerText;
-            } else {
-                var pre = target.querySelector('pre');
-                if (pre) codeToCopy = pre.innerText;
-                else codeToCopy = target.innerText;
-            }
+            var text = btn.dataset.copyText;
             if (!navigator.clipboard) {
                 // fallback
                 var ta = document.createElement('textarea');
-                ta.value = codeToCopy.trim();
+                ta.value = text;
                 document.body.appendChild(ta);
                 ta.select();
-                try { document.execCommand('copy'); btn.innerText = 'Copied!'; } catch (e) { alert('Copy failed'); }
+                try { document.execCommand('copy'); btn.textContent = 'Copied!'; } catch (e) { alert('Copy failed'); }
                 document.body.removeChild(ta);
-                setTimeout(function(){ btn.innerText = 'Copy'; }, 2000);
+                setTimeout(function(){ btn.textContent = 'Copy'; }, 2000);
                 return;
             }
-            navigator.clipboard.writeText(codeToCopy.trim()).then(function() {
-                btn.innerText = 'Copied!';
-                setTimeout(function() { btn.innerText = 'Copy'; }, 2000);
+            navigator.clipboard.writeText(text).then(function() {
+                btn.textContent = 'Copied!';
+                setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
             });
         });
 
