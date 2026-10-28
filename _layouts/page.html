@@ -30,6 +30,7 @@ layout: default
 /* Copy button styles */
 .code-container {
     position: relative;
+    overflow-x: auto;
     margin-top: 10px;
 }
 .code-container pre,
@@ -40,12 +41,10 @@ layout: default
     border-radius: 4px;
     font-family: monospace;
     font-size: 0.85em;
-    overflow-x: auto;
     white-space: pre-wrap;
     color: #24292e;
     border: 1px solid #eaecef;
     margin-top: 0;
-    position: relative; /* For absolute-positioned copy button */
 }
 
 
@@ -102,7 +101,7 @@ layout: default
 }
 .tag { display: inline-block; padding: 4px 8px; background-color: #f1f8ff; color: #0366d6; border-radius: 12px; font-size: 0.75em; font-weight: 600; margin-bottom: 12px; align-self: flex-start; }
 .tag.skill { background-color: #e6ffed; color: #0366d6; border: 1px solid #0366d6; }
-.cmd-preview { background: #f6f8fa; padding: 8px; border-radius: 4px; font-family: monospace; font-size: 0.75em; overflow-x: auto; white-space: nowrap; margin-top: 10px; color: #24292e; border: 1px solid #eaecef; position: relative; }
+.cmd-preview { background: #f6f8fa; padding: 8px; border-radius: 4px; font-family: monospace; font-size: 0.75em; white-space: nowrap; margin-top: 10px; color: #24292e; border: 1px solid #eaecef; }
 .section-title { border-bottom: 2px solid #eaecef; padding-bottom: 10px; margin-top: 40px; }
 .lookup-card { background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; }
 .lookup-card h2 { margin-top: 0; font-size: 1.25rem; }
