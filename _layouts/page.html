@@ -199,6 +199,8 @@ document.addEventListener("DOMContentLoaded", function() {
         // when scrolling horizontally through code.
         if (target.querySelector('.copy-btn')) return;
 
+        var btnTarget = target;
+
         // SVG icons for copy / copied states
         var COPY_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M7 9.667A2.667 2.667 0 0 1 9.667 7h8.666A2.667 2.667 0 0 1 21 9.667v8.666A2.667 2.667 0 0 1 18.333 21H9.667A2.667 2.667 0 0 1 7 18.333z"></path><path d="M4.012 16.737A2 2 0 0 1 3 15V5c0-1.1.9-2 2-2h10c.75 0 1.158.385 1.5 1"></path></g></svg>';
         var CHECK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M0 0v1200h1200V424.289l-196.875 196.875v381.961h-806.25v-806.25h381.961L775.711 0zm1030.008 15.161l-434.18 434.25L440.7 294.283L281.618 453.438L595.821 767.57l159.082-159.082l434.18-434.25l-159.082-159.081z"></path></svg>';
