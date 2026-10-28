@@ -30,12 +30,8 @@ layout: default
 /* Copy button styles */
 .code-container {
     position: relative;
-    margin-top: 10px;
-}
-.code-scroll {
     overflow-x: auto;
-    width: 100%;
-    display: block;
+    margin-top: 10px;
 }
 .code-container pre,
 .code-snippet,
@@ -199,28 +195,8 @@ document.addEventListener("DOMContentLoaded", function() {
             target = wrapper;
         }
 
-        // Wrap the code content (.cmd-preview or .code-snippet) in an inner
-        // scrollable div, so .code-container itself does not scroll.
-        var content = target;
-        // If target IS .cmd-preview or .code-snippet, use it directly.
-        // Otherwise look for .cmd-preview or .code-snippet child.
-        if (!target.classList.contains('cmd-preview') && !target.classList.contains('code-snippet')) {
-            content = target.querySelector('.cmd-preview') || target.querySelector('.code-snippet') || target.querySelector('pre') || target;
-        }
-        var scrollDiv = target.querySelector('.code-scroll');
-        if (!scrollDiv) {
-            scrollDiv = document.createElement('div');
-            scrollDiv.className = 'code-scroll';
-            scrollDiv.style.overflowX = 'auto';
-            // Move content into scrollDiv (only if it's a direct child of target)
-            if (content.parentNode === target) {
-                scrollDiv.appendChild(content);
-            }
-            target.appendChild(scrollDiv);
-        }
-
-        // Button goes inside .code-container (NOT inside scrollDiv) so it
-        // stays fixed relative to the container when scrolling horizontally.
+        // Button goes inside .code-container at top-right so it stays fixed
+        // when scrolling horizontally through code.
         if (target.querySelector('.copy-btn')) return;
 
         // SVG icons for copy / copied states
