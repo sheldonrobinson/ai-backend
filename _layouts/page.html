@@ -179,6 +179,10 @@ document.addEventListener("DOMContentLoaded", function() {
         if (seen.has(target)) return;
         seen.add(target);
 
+        // Skip if target is already inside a .code-container (prevents
+        // double-processing pre>code nested inside .cmd-preview)
+        if (target.closest('.code-container') !== target) return;
+
         // If not already wrapped, wrap in .code-container
         if (!target.classList.contains('code-container')) {
             var wrapper = document.createElement('div');
