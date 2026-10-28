@@ -183,8 +183,8 @@ document.addEventListener("DOMContentLoaded", function() {
         if (seen.has(target)) return;
         seen.add(target);
 
-        // Skip if target is already inside a .code-container
-        if (target.closest('.code-container') !== target) return;
+        // Skip if target is already inside a .code-container (but not the container itself)
+        if (target.closest('.code-container') && target.closest('.code-container') !== target) return;
 
         // If not already wrapped, wrap in .code-container
         if (!target.classList.contains('code-container')) {
