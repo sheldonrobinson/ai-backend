@@ -14,7 +14,7 @@ param(
   [string]$BifrostCliBinary,
   [string]$BifrostArgs,
   [string]$BifrostVersion = "latest",
-  [string]$BifrostHttpVersion = "v2.3.2",
+  [string]$BifrostHttpVersion = "latest",
   [switch]$Help
 )
 
