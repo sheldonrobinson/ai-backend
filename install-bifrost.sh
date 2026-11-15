@@ -23,7 +23,7 @@ TemplateDir="/resources/inference-serving/localai-services/bifrost"
 
 BASE_URL="https://downloads.getmaxim.ai"
 BifrostVersion="latest"
-BifrostHttpVersion="v2.3.2"
+BifrostHttpVersion="latest"
 
 # Platform detection
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
