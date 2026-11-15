@@ -27,7 +27,7 @@ if ($Help) {
   Write-Host "  --bifrost-cli-binary Path to existing bifrost CLI binary (skip download)"
   Write-Host "  --bifrost-args      Extra arguments to pass to bifrost-http"
   Write-Host "  --bifrost-version   Bifrost CLI version (default: latest)"
-  Write-Host "  --bifrost-http-version Bifrost-http version (default: v2.3.2)"
+  Write-Host "  --bifrost-http-version Bifrost-http version (default: latest)"
   Write-Host "  --help              Show this help message"
   Write-Host ""
   Write-Host "Ports:"
