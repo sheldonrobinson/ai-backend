@@ -11,6 +11,8 @@ ServiceGroup="llama"
 WorkingDir="${HOME}/.local/share/llama"
 BinaryPath=""
 LogPath="${HOME}/.local/state/llama/llama-server.log"
+RestartMode="on-failure"
+RestartSeconds="5"
 SystemDeployment=false
 
 # ---------------------------------------------------------------------------
