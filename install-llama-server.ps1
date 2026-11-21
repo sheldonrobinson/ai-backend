@@ -235,7 +235,7 @@ LOG_LEVEL=info
   $ContextSize = $env:CONTEXT_SIZE
   if (-not $ContextSize) { $ContextSize = "0" }
 
-  $ExecStartCmd = """$BinaryPath"" serve --host ""$LlamaHost"" --port ""$LlamaPortEnv"" -ngl ""$NglLevel"" --ctx-size ""$ContextSize"" --log-file ""$LogPath"" --log-timestamps $LlamaArgsStr"
+  $ExecStartCmd = """$BinaryPath"" serve --host ""$LlamaHost"" --port ""$LlamaPortEnv"" --agent -ngl ""$NglLevel"" --ctx-size ""$ContextSize"" --log-file ""$LogPath"" --log-timestamps $LlamaArgsStr"
   
   #==============================================================================
   # Create Windows service using NSSM
@@ -264,7 +264,7 @@ LOG_LEVEL=info
     & $NssmPath remove $ServerName -confirm 2>$null
     
     # Create service
-    & $NssmPath install $ServerName $BinaryPath "serve --host 127.0.0.1 --port $LlamaPort -ngl auto --ctx-size 0 --log-file $LogPath --log-timestamps $LlamaArgsStr"
+    & $NssmPath install $ServerName $BinaryPath "serve --host 127.0.0.1 --port $LlamaPort --agent -ngl auto --ctx-size 0 --log-file $LogPath --log-timestamps $LlamaArgsStr"
     & $NssmPath set $ServerName DisplayName "llama-server"
     & $NssmPath set $ServerName Description "llama.cpp server (llama-app) - local inference endpoint"
     & $NssmPath set $ServerName Start SERVICE_AUTO_START

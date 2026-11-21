@@ -274,6 +274,7 @@ NGL_LEVEL=auto
 CONTEXT_SIZE=0
 JINJA_ENABLED=true
 AGENT_MODE_ENABLED=true
+ALLOW_UNAUTHENTICATED=true
 EMBEDDINGS_ENABLED=true
 EMBEDDINGS_POOLING_TYPE=mean
 SLEEP_IDLE_SECONDS=
@@ -289,7 +290,7 @@ chmod 644 "${EnvFile}"
 # Build extra args string if provided
 LlamaArgsStr="${LlamaArgs:-}"
 
-ExecStartCmd="bash -c 'source ${EnvFile}; ${BinaryPath} serve --host \"\${LLAMA_ARG_HOST:-127.0.0.1}\" --port \"\${LLAMA_ARG_PORT:-9931}\" -ngl \"\${NGL_LEVEL}\" --ctx-size \"\${CONTEXT_SIZE}\" --log-file \"${LogPath}\" --log-timestamps \$([ \"\${JINJA_ENABLED}\" = \"true\" ] && echo \"--jinja\" || true) \$([ \"\${AGENT_MODE_ENABLED}\" = \"true\" ] && echo \"--agent\" || true) \$([ \"\${EMBEDDINGS_ENABLED}\" = \"true\" ] && echo \"--embeddings\" || true) \$([ \"\${EMBEDDINGS_ENABLED}\" = \"true\" ] && [ -n \"\${EMBEDDINGS_POOLING_TYPE}\" ] && echo \"--pooling \${EMBEDDINGS_POOLING_TYPE}\" || true) \$([ -n \"\${SLEEP_IDLE_SECONDS}\" ] && echo \"--sleep-idle-seconds \${SLEEP_IDLE_SECONDS}\"  || true) ${LlamaArgsStr}'"
+ExecStartCmd="bash -c 'source ${EnvFile}; ${BinaryPath} serve --host \"\${LLAMA_ARG_HOST:-127.0.0.1}\" --port \"\${LLAMA_ARG_PORT:-9931}\" -ngl \"\${NGL_LEVEL}\" --ctx-size \"\${CONTEXT_SIZE}\" --log-file \"${LogPath}\" --log-timestamps \$([ \"\${JINJA_ENABLED}\" = \"true\" ] && echo \"--jinja\" || true) \$([ \"\${AGENT_MODE_ENABLED}\" = \"true\" ] && echo \"--agent\" || true) \$([ \"\${ALLOW_UNAUTHENTICATED}\" = \"true\" ] && echo \"--allow-unauthenticated-tools\" || true) \$([ \"\${EMBEDDINGS_ENABLED}\" = \"true\" ] && echo \"--embeddings\" || true) \$([ \"\${EMBEDDINGS_ENABLED}\" = \"true\" ] && [ -n \"\${EMBEDDINGS_POOLING_TYPE}\" ] && echo \"--pooling \${EMBEDDINGS_POOLING_TYPE}\" || true) \$([ -n \"\${SLEEP_IDLE_SECONDS}\" ] && echo \"--sleep-idle-seconds \${SLEEP_IDLE_SECONDS}\"  || true) ${LlamaArgsStr}'"
 
 # ---------------------------------------------------------------------------
 # Create systemd service file (only if it doesn't exist)
