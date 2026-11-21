@@ -396,7 +396,7 @@ fi
 if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   echo "Creating system user ${ServiceUser} and setting ownership..."
   if ! id "${ServiceUser}" >/dev/null 2>&1; then
-    sudo useradd -r -s /bin/false -m -d /srv/llama "${ServiceUser}" 2>/dev/null || true
+    sudo useradd -r -s /bin/false -m "${ServiceUser}" 2>/dev/null || true
   fi
 
   sudo mkdir -p "${WorkingDir}"
