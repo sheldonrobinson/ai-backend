@@ -44,6 +44,7 @@ done
 if [ "${SystemDeployment}" = true ] || [ "$(id -u)" -eq 0 ] || [ -n "${SUDO_USER:-}" ]; then
   SYSTEM_DEPLOYMENT=true
   WorkingDir="/var/lib/llama"
+  ModelsDir="/var/lib/llama/models"
   if [ -z "${BinaryPath}" ]; then
     BinaryPath="/usr/local/bin/llama"
   fi
@@ -253,6 +254,12 @@ echo "llama binary found at ${BinaryPath} (installed from llama-app)"
 # ---------------------------------------------------------------------------
 mkdir -p "${WorkingDir}"
 mkdir -p "$(dirname "${LogPath}")"
+# Checks if variable is unset or empty
+if [ -z "${ModelsDir+x}" ]; then
+    echo "Using default LLAMA_CACHE"
+else
+    mkdir -p "${ModelsDir}"
+fi
 
 # ---------------------------------------------------------------------------
 # Create service environment file (only if it doesn't exist)
@@ -279,6 +286,8 @@ EMBEDDINGS_ENABLED=true
 EMBEDDINGS_POOLING_TYPE=mean
 SLEEP_IDLE_SECONDS=
 LOG_LEVEL=info
+SET_MODEL_DIR=false
+LLAMA_MODELS_DIR=/var/lib/llama/models
 EOF
 fi
 
@@ -290,7 +299,7 @@ chmod 644 "${EnvFile}"
 # Build extra args string if provided
 LlamaArgsStr="${LlamaArgs:-}"
 
-ExecStartCmd="bash -c 'source ${EnvFile}; ${BinaryPath} serve --host \"\${LLAMA_ARG_HOST:-127.0.0.1}\" --port \"\${LLAMA_ARG_PORT:-9931}\" -ngl \"\${NGL_LEVEL}\" --ctx-size \"\${CONTEXT_SIZE}\" --log-file \"${LogPath}\" --log-timestamps \$([ \"\${JINJA_ENABLED}\" = \"true\" ] && echo \"--jinja\" || true) \$([ \"\${AGENT_MODE_ENABLED}\" = \"true\" ] && echo \"--agent\" || true) \$([ \"\${ALLOW_UNAUTHENTICATED}\" = \"true\" ] && echo \"--allow-unauthenticated-tools\" || true) \$([ \"\${EMBEDDINGS_ENABLED}\" = \"true\" ] && echo \"--embeddings\" || true) \$([ \"\${EMBEDDINGS_ENABLED}\" = \"true\" ] && [ -n \"\${EMBEDDINGS_POOLING_TYPE}\" ] && echo \"--pooling \${EMBEDDINGS_POOLING_TYPE}\" || true) \$([ -n \"\${SLEEP_IDLE_SECONDS}\" ] && echo \"--sleep-idle-seconds \${SLEEP_IDLE_SECONDS}\"  || true) ${LlamaArgsStr}'"
+ExecStartCmd="bash -c 'source ${EnvFile}; ${BinaryPath} serve --host \"\${LLAMA_ARG_HOST:-127.0.0.1}\" --port \"\${LLAMA_ARG_PORT:-9931}\" -ngl \"\${NGL_LEVEL}\" --ctx-size \"\${CONTEXT_SIZE}\" --log-file \"${LogPath}\" --log-timestamps \$([ \"\${JINJA_ENABLED}\" = \"true\" ] && echo \"--jinja\" || true) \$([ \"\${AGENT_MODE_ENABLED}\" = \"true\" ] && echo \"--agent\" || true) \$([ \"\${ALLOW_UNAUTHENTICATED}\" = \"true\" ] && echo \"--allow-unauthenticated-tools\" || true) \$([ \"\${SET_MODEL_DIR}\" = \"true\" ] && [ -n \"\${LLAMA_MODELS_DIR}\" ] && echo \"--models-dir ${LLAMA_MODELS_DIR}\" || true) \$([ \"\${EMBEDDINGS_ENABLED}\" = \"true\" ] && echo \"--embeddings\" || true) \$([ \"\${EMBEDDINGS_ENABLED}\" = \"true\" ] && [ -n \"\${EMBEDDINGS_POOLING_TYPE}\" ] && echo \"--pooling \${EMBEDDINGS_POOLING_TYPE}\" || true) \$([ -n \"\${SLEEP_IDLE_SECONDS}\" ] && echo \"--sleep-idle-seconds \${SLEEP_IDLE_SECONDS}\"  || true) ${LlamaArgsStr}'"
 
 # ---------------------------------------------------------------------------
 # Create systemd service file (only if it doesn't exist)
@@ -404,6 +413,13 @@ if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   sudo chown "${ServiceUser}:${ServiceGroup}" "$(dirname "${LogPath}")" 2>/dev/null || true
   sudo touch "${LogPath}" 2>/dev/null || true
   sudo chown "${ServiceUser}:${ServiceGroup}" "${LogPath}" 2>/dev/null || true
+  # Checks if variable is unset or empty
+  if [ -z "${ModelsDir+x}" ]; then
+    echo "Using default LLAMA_CACHE"
+  else
+    mkdir -p "${ModelsDir}"
+    sudo chown -R "${ServiceUser}:${ServiceGroup}" "${ModelsDir}" 2>/dev/null || true
+  fi
 else
   if [ "$(id -u)" -eq 0 ] || [ -n "${SUDO_USER:-}" ]; then
     echo "Creating system user ${ServiceUser} (running with privileges)"
@@ -414,6 +430,13 @@ else
     chown "${ServiceUser}:${ServiceGroup}" "$(dirname "${LogPath}")" 2>/dev/null || true
     touch "${LogPath}" 2>/dev/null || true
     chown "${ServiceUser}:${ServiceGroup}" "${LogPath}" 2>/dev/null || true
+    # Checks if variable is unset or empty
+    if [ -z "${ModelsDir+x}" ]; then
+      echo "Using default LLAMA_CACHE"
+    else
+      mkdir -p "${ModelsDir}"
+      chown -R "${ServiceUser}:${ServiceGroup}" "${ModelsDir}" 2>/dev/null || true
+    fi
   else
     echo "Running as user: $(whoami). Service will run as current user via systemd user service."
     echo "To run as a dedicated 'llama' user, re-run with --system or as root."
@@ -424,6 +447,13 @@ else
   chown "$(whoami):$(id -gn)" "$(dirname "${LogPath}")" 2>/dev/null || true
   touch "${LogPath}" 2>/dev/null || true
   chown "$(whoami):$(id -gn)" "${LogPath}" 2>/dev/null || true
+  # Checks if variable is unset or empty
+  if [ -z "${ModelsDir+x}" ]; then
+    echo "Using default LLAMA_CACHE"
+  else
+    mkdir -p "${ModelsDir}"
+    chown -R "$(whoami):$(id -gn)" "${ModelsDir}" 2>/dev/null || true
+  fi
 fi
 
 # ---------------------------------------------------------------------------
