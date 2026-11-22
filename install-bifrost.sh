@@ -14,7 +14,6 @@ BinaryDir="${PREFIX}/bin"
 BinaryPath="${BinaryDir}/bifrost-http"
 BinaryCliPath="${BinaryDir}/bifrost"
 WorkingDir="${HOME}/.config/bifrost"
-AppDir="${WorkingDir}"
 LogPath="${HOME}/.local/state/bifrost/bifrost.log"
 EnvFile="${WorkingDir}/service.env"
 RestartMode="always"
@@ -60,7 +59,6 @@ while [[ $# -gt 0 ]]; do
       BinaryPath="${BinaryDir}/bifrost-http"
       BinaryCliPath="${BinaryDir}/bifrost"
       WorkingDir="${HOME}/.config/bifrost"
-      AppDir="${WorkingDir}"
       LogPath="${HOME}/.local/state/bifrost/bifrost.log"
       EnvFile="${WorkingDir}/service.env"
       shift 2
@@ -96,22 +94,11 @@ if [ "${SystemDeployment}" = true ] || [ "$(id -u)" -eq 0 ] || [ -n "${SUDO_USER
   BinaryDir="${PREFIX}/bin"
   BinaryPath="${BinaryDir}/bifrost-http"
   BinaryCliPath="${BinaryDir}/bifrost"
-  AppDir="/var/lib/bifrost"
-  WorkingDir="${AppDir}"
+  WorkingDir="/var/lib/bifrost"
   LogPath="/var/lib/bifrost/bifrost.log"
-  EnvFile="${AppDir}/service.env"
+  EnvFile="${WorkingDir}/service.env"
 fi
 
-# ---------------------------------------------------------------------------
-# Detect database paths based on user context
-# ---------------------------------------------------------------------------
-if [ "${SystemDeployment}" = true ]; then
-  ConfigStorePath="${AppDir}/config.db"
-  LogsStorePath="${AppDir}/logs.db"
-else
-  ConfigStorePath="config.db"
-  LogsStorePath="logs.db"
-fi
 
 # ---------------------------------------------------------------------------
 # Detect bifrost version from latest-release endpoint
@@ -137,7 +124,6 @@ echo "Downloading bifrost binaries..."
 
 # Create installation directories
 mkdir -p "${BinaryDir}"
-mkdir -p "${AppDir}"
 mkdir -p "$(dirname "${LogPath}")"
 
 # Download bifrost CLI
@@ -194,14 +180,6 @@ echo "Creating service environment file at ${EnvFile}..."
 if [ -f "${EnvFile}" ]; then
   echo "  Service environment file already exists, preserving existing config."
 else
-  # Determine BIFROST_APP_DIR: check if config.db exists in AppDir
-  if [ -f "${AppDir}/config.db" ]; then
-    BIFROST_APP_DIR="${AppDir}"
-  else
-    BIFROST_APP_DIR="/tmp/bifrost-app"
-    mkdir -p "${BIFROST_APP_DIR}"
-  fi
-
   cat > "${EnvFile}" << EOF
 # Environment variables for ${ServerName}
 # These are sourced by the systemd service ExecStart
@@ -211,7 +189,6 @@ BIFROST_PORT=8080
 BIFROST_SETUP_TOKEN=${BIFROST_SETUP_TOKEN}
 BIFROST_ADMIN_USERNAME="bifrost"
 BIFROST_ADMIN_PASSWORD="ChangeMe"
-BIFROST_APP_DIR=${BIFROST_APP_DIR}
 LLAMA_ARG_HOST=127.0.0.1
 LLAMA_ARG_PORT=9931
 LOG_LEVEL=info
@@ -219,9 +196,6 @@ BINARY_PATH=${BinaryPath}
 HTTP_BINARY_PATH=${BinaryPath}
 WORKING_DIR=${WorkingDir}
 LOG_PATH=${LogPath}
-APP_DIR=${AppDir}
-CONFIG_STORE_PATH=${ConfigStorePath}
-LOGS_STORE_PATH=${LogsStorePath}
 GOVERNANCE_ADMIN_USERNAME="bifrost"
 GOVERNANCE_ADMIN_PASSWORD="ChangeMe"
 GOVERNANCE_CHANGE_ON_LOGON=true
@@ -239,7 +213,7 @@ BifrostArgsStr="${BifrostArgs:-}"
 ExecStartCmd="bash -c 'source ${EnvFile}; ${BinaryPath} -port \${BIFROST_PORT:-8080}'"
 
 if [ "${SystemDeployment}" = true ]; then
-  ExecStartCmd="bash -c 'source ${EnvFile}; ${BinaryPath} -port \${BIFROST_PORT:-8080} --app-dir ${AppDir}'"
+  ExecStartCmd="bash -c 'source ${EnvFile}; ${BinaryPath} -port \${BIFROST_PORT:-8080}'"
 fi
 
 # ---------------------------------------------------------------------------
@@ -247,7 +221,15 @@ fi
 # ---------------------------------------------------------------------------
 echo "Creating systemd service..."
 
-SERVICE_FILE="/etc/systemd/system/${ServerName}.service"
+if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
+  ServiceFile="/etc/systemd/system/${ServerName}.service"
+  echo "Installing system service"
+else
+  ServiceFile="${HOME}/.config/systemd/user/${ServerName}.service"
+  echo "Installing user service"
+fi
+
+echo "Creating service file at ${ServiceFile}"
 
 if [ ! -f "${ServiceFile}" ] && [ -f "${TemplateDir}/service.template" ]; then
   cp "${TemplateDir}/service.template" "${ServiceFile}.tmp"
@@ -375,8 +357,6 @@ if [ "${SystemDeployment}" = true ]; then
     sudo useradd -r -s /bin/false -m -d /srv/bifrost "${ServiceUser}" 2>/dev/null || true
   fi
 
-  sudo mkdir -p "${AppDir}"
-  sudo chown -R "${ServiceUser}:${ServiceGroup}" "${AppDir}" 2>/dev/null || true
   sudo chown "${ServiceUser}:${ServiceGroup}" "$(dirname "${LogPath}")" 2>/dev/null || true
   sudo touch "${LogPath}" 2>/dev/null || true
   sudo chown "${ServiceUser}:${ServiceGroup}" "${LogPath}" 2>/dev/null || true
@@ -384,11 +364,26 @@ if [ "${SystemDeployment}" = true ]; then
     sudo chown "${ServiceUser}:${ServiceGroup}" "${EnvFile}" 2>/dev/null || true
   fi
 else
-  mkdir -p "${AppDir}"
-  chown -R "${ServiceUser}:${ServiceGroup}" "${WorkingDir}" 2>/dev/null || true
-  chown "${ServiceUser}:${ServiceGroup}" "$(dirname "${LogPath}")" 2>/dev/null || true
-  touch "${LogPath}" 2>/dev/null || true
-  chown "${ServiceUser}:${ServiceGroup}" "${LogPath}" 2>/dev/null || true
+  if [ "$(id -u)" -eq 0 ] || [ -n "${SUDO_USER:-}" ]; then
+    echo "Creating system user ${ServiceUser} (running with privileges)"
+    if ! id "${ServiceUser}" >/dev/null 2>&1; then
+      useradd -r -s /bin/false -m -d /srv/bifrost "${ServiceUser}" 2>/dev/null || true
+    fi
+
+    chown "${ServiceUser}:${ServiceGroup}" "$(dirname "${LogPath}")" 2>/dev/null || true
+    touch "${LogPath}" 2>/dev/null || true
+    chown "${ServiceUser}:${ServiceGroup}" "${LogPath}" 2>/dev/null || true
+    if [ -f "${EnvFile}" ]; then
+      chown "${ServiceUser}:${ServiceGroup}" "${EnvFile}" 2>/dev/null || true
+    fi
+  else
+    echo "Running as user: $(whoami). Service will run as current user via systemd user service."
+    echo "To run as a dedicated 'bifrost' user, re-run with --system or as root."
+
+    chown "$(whoami):$(id -gn)" "$(dirname "${LogPath}")" 2>/dev/null || true
+    touch "${LogPath}" 2>/dev/null || true
+    chown "$(whoami):$(id -gn)" "${LogPath}" 2>/dev/null || true
+  fi
 fi
 
 # ---------------------------------------------------------------------------
@@ -631,12 +626,9 @@ echo "Installation summary:"
 echo "  Binary:          ${BinaryPath}"
 echo "  CLI Binary:      ${BinaryCliPath}"
 echo "  Working Dir:     ${WorkingDir}"
-echo "  App Dir:         ${AppDir}"
-echo "  Config Store:    ${ConfigStorePath}"
-echo "  Logs Store:      ${LogsStorePath}"
 echo "  Log Path:        ${LogPath}"
 echo "  Env File:        ${EnvFile}"
-echo "  Service File:    ${SERVICE_FILE}"
+echo "  Service File:    ${ServiceFile}"
 echo "  Setup Token:     ${BIFROST_SETUP_TOKEN}"
 echo "  Admin User:      bifrost"
 echo "  Admin Password:  ChangeMe"

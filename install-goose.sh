@@ -54,8 +54,8 @@ done
 if [ "${SystemDeployment}" = true ] || [ "$(id -u)" -eq 0 ] || [ -n "${SUDO_USER:-}" ]; then
   SystemDeployment=true
   PREFIX="/usr/local"
-  WorkingDir="/var/lib/goose"
-  ConfigDir="/etc/goose"
+  WorkingDir="/srv/goose/.local/share/goose/"
+  ConfigDir="/srv/goose/.config/goose"
   ConfigFile="${ConfigDir}/config.yaml"
   LogPath="/var/lib/goose/goose.log"
 fi
@@ -204,7 +204,7 @@ fi
 echo "BIFROST_VK: ${BIFROST_VK}"
 
 # Discover llama-server model from /v1/models endpoint
-LlamaModel="JetBrains/Mellum2.1-12B-A2.5B-Thinking-GGUF:Q4_K_M"
+LlamaModel="ggml-org/gemma-4-E2B-it-GGUF:Q4_0"
 LlamaBaseUrl="http://127.0.0.1:${LlamaPort}"
 
 if command -v curl >/dev/null 2>&1; then
@@ -229,7 +229,7 @@ except:
   fi
 fi
 
-echo "Llama model: ${LlamaModel}"
+echo "Llama model: ${LlamaModel:-NOT_FOUND}"
 
 # ---------------------------------------------------------------------------
 # Create service environment file (only if it doesn't exist)
@@ -247,9 +247,7 @@ else
 
 GOOSE_PORT=${GoosePort}
 GOOSE_HOST=127.0.0.1
-GOOSE_PATH_ROOT=${WorkingDir}
 GOOSE_WORKING_DIR=${WorkingDir}
-GOOSE_CONFIG_DIR=${ConfigDir}
 GOOSE_LOG_PATH=${LogPath}
 BIFROST_HOST=127.0.0.1
 BIFROST_PORT=${BifrostPort}
@@ -332,11 +330,9 @@ echo "Creating systemd service..."
 
 if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   ServiceFile="/etc/systemd/system/${ServerName}.service"
-  SUDO_CMD="sudo"
   echo "Installing system service"
 else
   ServiceFile="${HOME}/.config/systemd/user/${ServerName}.service"
-  SUDO_CMD=""
   echo "Installing user service"
 fi
 
@@ -435,9 +431,7 @@ if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
     sudo useradd -r -s /bin/false -m -d /srv/goose "${ServiceUser}" 2>/dev/null || true
   fi
 
-  sudo mkdir -p "${WorkingDir}"
   sudo mkdir -p "${ConfigDir}"
-  sudo chown -R "${ServiceUser}:${ServiceGroup}" "${WorkingDir}" 2>/dev/null || true
   sudo chown -R "${ServiceUser}:${ServiceGroup}" "${ConfigDir}" 2>/dev/null || true
   sudo chown "${ServiceUser}:${ServiceGroup}" "$(dirname "${LogPath}")" 2>/dev/null || true
   sudo touch "${LogPath}" 2>/dev/null || true
@@ -445,11 +439,11 @@ if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
 else
   if [ "$(id -u)" -eq 0 ] || [ -n "${SUDO_USER:-}" ]; then
     echo "Creating system user ${ServiceUser} (running with privileges)"
-    useradd -r -s /bin/false -m -d /srv/goose "${ServiceUser}" 2>/dev/null || true
+    if ! id "${ServiceUser}" >/dev/null 2>&1; then
+      useradd -r -s /bin/false -m -d /srv/goose "${ServiceUser}" 2>/dev/null || true
+    fi
 
-    mkdir -p "${WorkingDir}"
     mkdir -p "${ConfigDir}"
-    chown -R "${ServiceUser}:${ServiceGroup}" "${WorkingDir}" 2>/dev/null || true
     chown -R "${ServiceUser}:${ServiceGroup}" "${ConfigDir}" 2>/dev/null || true
     chown "${ServiceUser}:${ServiceGroup}" "$(dirname "${LogPath}")" 2>/dev/null || true
     touch "${LogPath}" 2>/dev/null || true
@@ -457,15 +451,12 @@ else
   else
     echo "Running as user: $(whoami). Service will run as current user via systemd user service."
     echo "To run as a dedicated 'goose' user, re-run with --system or as root."
+    mkdir -p "${ConfigDir}"
+    chown -R "$(whoami):$(id -gn)" "${ConfigDir}" 2>/dev/null || true
+    chown "$(whoami):$(id -gn)" "$(dirname "${LogPath}")" 2>/dev/null || true
+    touch "${LogPath}" 2>/dev/null || true
+    chown "$(whoami):$(id -gn)" "${LogPath}" 2>/dev/null || true
   fi
-
-  mkdir -p "${WorkingDir}"
-  mkdir -p "${ConfigDir}"
-  chown -R "$(whoami):$(id -gn)" "${WorkingDir}" 2>/dev/null || true
-  chown -R "$(whoami):$(id -gn)" "${ConfigDir}" 2>/dev/null || true
-  chown "$(whoami):$(id -gn)" "$(dirname "${LogPath}")" 2>/dev/null || true
-  touch "${LogPath}" 2>/dev/null || true
-  chown "$(whoami):$(id -gn)" "${LogPath}" 2>/dev/null || true
 fi
 
 # ---------------------------------------------------------------------------
