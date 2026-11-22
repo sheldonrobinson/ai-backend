@@ -90,7 +90,11 @@ echo "============================================="
 echo "  All-in-One Bifrost Stack Installation"
 echo "============================================="
 echo ""
-echo "Mode: ${SystemDeployment:+system}user"
+if [ "${SystemDeployment}" = true ]; then
+  echo "Mode: system"
+else
+  echo "Mode: user"
+fi
 echo "Script dir: ${SCRIPT_DIR}"
 echo ""
 

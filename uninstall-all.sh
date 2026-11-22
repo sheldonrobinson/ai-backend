@@ -73,7 +73,17 @@ echo "============================================="
 echo "  All-in-One Bifrost Stack Uninstallation"
 echo "============================================="
 echo ""
-echo "Mode: ${SystemDeployment:+system}user ${Purge:+purge}"
+if [ "${SystemDeployment}" = true ]; then
+  ModeStr="system"
+else
+  ModeStr="user"
+fi
+if [ "${Purge}" = true ]; then
+  PurgeStr=" purge"
+else
+  PurgeStr=""
+fi
+echo "Mode: ${ModeStr}${PurgeStr}"
 echo ""
 
 # ---------------------------------------------------------------------------

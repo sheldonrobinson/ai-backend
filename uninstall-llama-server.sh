@@ -11,7 +11,7 @@ ServiceGroup="llama"
 WorkingDir="${HOME}/.local/share/llama"
 ConfigDir="${HOME}/.config/llama-server"
 BinaryPath="/usr/local/bin/llama"
-LogPath="/home/sheldon/.local/state/llama/llama-server.log"
+LogPath="${HOME}/.local/state/llama/llama-server.log"
 SystemDeployment=false
 Purge=false
 

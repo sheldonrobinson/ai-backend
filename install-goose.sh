@@ -27,6 +27,20 @@ RestartSeconds="10s"
 # ---------------------------------------------------------------------------
 # Parse command line arguments
 # ---------------------------------------------------------------------------
+usage() {
+  echo "Usage: $0 [--system] [--goose-binary <path>] [--goose-args <args>] [--help]"
+  echo ""
+  echo "  --system         System-wide deployment (default: user deployment)"
+  echo "  --goose-binary   Path to existing goose binary (skip download)"
+  echo "  --goose-args     Extra arguments to pass to goose serve"
+  echo "  --help           Show this help message"
+  echo ""
+  echo "Ports:"
+  echo "  goose:        3284"
+  echo "  bifrost-http: 8080"
+  echo "  llama-server: 9931"
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --system)
@@ -40,6 +54,10 @@ while [[ $# -gt 0 ]]; do
     --goose-args)
       GooseArgs="$2"
       shift 2
+      ;;
+    --help|-h)
+      usage
+      exit 0
       ;;
     *)
       shift
