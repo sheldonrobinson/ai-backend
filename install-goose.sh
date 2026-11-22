@@ -52,7 +52,7 @@ done
 # Adjust paths for system deployment
 # ---------------------------------------------------------------------------
 if [ "${SystemDeployment}" = true ] || [ "$(id -u)" -eq 0 ] || [ -n "${SUDO_USER:-}" ]; then
-  SystemDeployment=true
+  SYSTEM_DEPLOYMENT=true
   PREFIX="/usr/local"
   WorkingDir="/srv/goose/.local/share/goose/"
   ConfigDir="/srv/goose/.config/goose"
@@ -128,7 +128,7 @@ echo "Goose binary: ${GOOSE_BINARY}"
 # ---------------------------------------------------------------------------
 echo "Installing goose binary..."
 
-if [ "${SystemDeployment}" = true ]; then
+if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   InstallDir="/usr/local/bin"
   BinaryPath="${InstallDir}/goose"
   echo "Installing goose (superuser) to ${BinaryPath}..."

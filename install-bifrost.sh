@@ -89,7 +89,7 @@ done
 # Adjust paths for system deployment
 # ---------------------------------------------------------------------------
 if [ "${SystemDeployment}" = true ] || [ "$(id -u)" -eq 0 ] || [ -n "${SUDO_USER:-}" ]; then
-  SystemDeployment=true
+  SYSTEM_DEPLOYMENT=true
   PREFIX="/usr/local"
   BinaryDir="${PREFIX}/bin"
   BinaryPath="${BinaryDir}/bifrost-http"
@@ -212,7 +212,7 @@ BifrostArgsStr="${BifrostArgs:-}"
 
 ExecStartCmd="bash -c 'source ${EnvFile}; ${BinaryPath} -port \${BIFROST_PORT:-8080}'"
 
-if [ "${SystemDeployment}" = true ]; then
+if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   ExecStartCmd="bash -c 'source ${EnvFile}; ${BinaryPath} -port \${BIFROST_PORT:-8080}'"
 fi
 
@@ -240,7 +240,7 @@ if [ ! -f "${ServiceFile}" ] && [ -f "${TemplateDir}/service.template" ]; then
   sed_cmd="${sed_cmd}; s|__LOG_PATH__|${LogPath}|g"
   sed_cmd="${sed_cmd}; s|__ENV_FILE__|${EnvFile}|g"
 
-  if [ "${SystemDeployment}" = true ]; then
+  if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
     sed_cmd="${sed_cmd}; s|USER=__SERVICE_USER__|User=${ServiceUser}|g"
     sed_cmd="${sed_cmd}; s|GROUP=__SERVICE_GROUP__|Group=${ServiceGroup}|g"
     sed_cmd="${sed_cmd}; s|__RESTART_MODE__|${RestartMode}|g"
@@ -259,7 +259,7 @@ if [ ! -f "${ServiceFile}" ] && [ -f "${TemplateDir}/service.template" ]; then
   rm -f "${ServiceFile}.tmp"
 else
   # Create basic service file from scratch (only if it doesn't exist)
-  if [ "${SystemDeployment}" = true ]; then
+  if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
     if [ ! -f "${ServiceFile}" ]; then
       sudo tee "${ServiceFile}" > /dev/null << EOF
 [Unit]
@@ -315,7 +315,7 @@ echo "Creating logrotate configuration..."
 
 LOGROTATE_FILE="/etc/logrotate.d/${ServerName}"
 
-if [ "${SystemDeployment}" = true ]; then
+if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   if [ ! -f "${LOGROTATE_FILE}" ]; then
     if [ -f "${TemplateDir}/logrotate.template" ]; then
       sudo cp "${TemplateDir}/logrotate.template" "${LOGROTATE_FILE}"
@@ -351,7 +351,7 @@ fi
 # ---------------------------------------------------------------------------
 # Create service account if needed
 # ---------------------------------------------------------------------------
-if [ "${SystemDeployment}" = true ]; then
+if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   echo "Creating service account..."
   if ! id "${ServiceUser}" >/dev/null 2>&1; then
     sudo useradd -r -s /bin/false -m -d /srv/bifrost "${ServiceUser}" 2>/dev/null || true
@@ -391,7 +391,7 @@ fi
 # ---------------------------------------------------------------------------
 echo "Enabling and starting service..."
 
-if [ "${SystemDeployment}" = true ]; then
+if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   sudo systemctl --system daemon-reload
   sudo systemctl enable "${ServerName}.service"
   sudo systemctl start "${ServerName}.service"
@@ -641,7 +641,7 @@ echo "    -d '{\"\$schema\": \"https://www.getbifrost.ai/schema\", \"setup_token
 echo ""
 if command -v systemctl >/dev/null 2>&1; then
   echo "Service status:"
-  if [ "${SystemDeployment}" = true ]; then
+  if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
     sudo systemctl status "${ServerName}" --no-pager 2>/dev/null || echo "Could not retrieve service status"
   else
     systemctl --user status "${ServerName}" --no-pager 2>/dev/null || echo "Could not retrieve service status"

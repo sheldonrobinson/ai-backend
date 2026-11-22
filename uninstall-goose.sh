@@ -39,7 +39,7 @@ done
 # Adjust paths for system deployment
 # ---------------------------------------------------------------------------
 if [ "${SystemDeployment}" = true ] || [ "$(id -u)" -eq 0 ] || [ -n "${SUDO_USER:-}" ]; then
-  SystemDeployment=true
+  SYSTEM_DEPLOYMENT=true
   WorkingDir="/var/lib/goose"
   ConfigDir="/etc/goose"
   BinaryPath="/usr/local/bin/goose"
@@ -54,7 +54,7 @@ echo "goose uninstallation mode: ${SYSTEM_DEPLOYMENT:+system} ${Purge:+purge}"
 echo "Stopping and disabling goose service..."
 
 if command -v systemctl >/dev/null 2>&1; then
-  if [ "${SystemDeployment}" = true ]; then
+  if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
     sudo systemctl stop "${ServerName}.service" 2>/dev/null || true
     sudo systemctl disable "${ServerName}.service" 2>/dev/null || true
   else
@@ -68,7 +68,7 @@ fi
 # ---------------------------------------------------------------------------
 echo "Removing service file..."
 
-if [ "${SystemDeployment}" = true ]; then
+if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   sudo rm -f "/etc/systemd/system/${ServerName}.service" 2>/dev/null || true
   sudo systemctl daemon-reload 2>/dev/null || true
 else
@@ -81,7 +81,7 @@ fi
 # ---------------------------------------------------------------------------
 echo "Removing logrotate configuration..."
 
-if [ "${SystemDeployment}" = true ]; then
+if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   sudo rm -f "/etc/logrotate.d/${ServerName}" 2>/dev/null || true
 else
   rm -f "/etc/logrotate.d/${ServerName}" 2>/dev/null || true
@@ -92,7 +92,7 @@ fi
 # ---------------------------------------------------------------------------
 echo "Removing binary..."
 
-if [ "${SystemDeployment}" = true ]; then
+if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   sudo rm -f "${BinaryPath}" 2>/dev/null || true
 else
   rm -f "${BinaryPath}" 2>/dev/null || true
@@ -103,7 +103,7 @@ fi
 # ---------------------------------------------------------------------------
 echo "Removing directories and configuration..."
 
-if [ "${SystemDeployment}" = true ]; then
+if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   sudo rm -rf "${WorkingDir}" 2>/dev/null || true
   sudo rm -rf "${ConfigDir}" 2>/dev/null || true
   sudo rm -f "${LogPath}" 2>/dev/null || true
@@ -119,7 +119,7 @@ fi
 if [ "${Purge}" = true ]; then
   echo "Purging all data directories..."
 
-  if [ "${SystemDeployment}" = true ]; then
+  if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
     sudo rm -rf "${WorkingDir}" 2>/dev/null || true
     sudo rm -rf "${ConfigDir}" 2>/dev/null || true
     sudo rm -f "${LogPath}" 2>/dev/null || true
@@ -139,7 +139,7 @@ fi
 # ---------------------------------------------------------------------------
 # Remove service account (system deployment only)
 # ---------------------------------------------------------------------------
-if [ "${SystemDeployment}" = true ]; then
+if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   echo "Removing service account ${ServiceUser}..."
   sudo userdel "${ServiceUser}" 2>/dev/null || true
 fi
@@ -160,6 +160,6 @@ if [ "${Purge}" = true ]; then
   echo "  All data directories purged"
 fi
 echo ""
-if [ "${SystemDeployment}" = true ]; then
+if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   echo "Service account ${ServiceUser} removed."
 fi
