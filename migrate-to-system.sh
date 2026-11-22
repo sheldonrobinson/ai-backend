@@ -16,12 +16,12 @@ sudo useradd -r -s /bin/false bifrost || true
 
 # 2. Copy binaries to /usr/local/bin
 echo "Copying binaries to /usr/local/bin..."
-sudo cp /home/sheldon/.local/bin/goose /usr/local/bin/goose || true
-sudo cp /home/sheldon/.local/bin/llama /usr/local/bin/llama || true
+sudo cp ${HOME}/.local/bin/goose /usr/local/bin/goose || true
+sudo cp ${HOME}/.local/bin/llama /usr/local/bin/llama || true
 
-# Note: bifrost is in /home/sheldon/.cache/bifrost/v2.3.2/bin/bifrost-http-0
+# Note: bifrost is in ${HOME}/.cache/bifrost/v2.3.2/bin/bifrost-http-0
 # Need to copy that specific binary
-sudo cp /home/sheldon/.cache/bifrost/v2.3.2/bin/bifrost-http-0 /usr/local/bin/bifrost || true
+sudo cp ${HOME}/.cache/bifrost/v2.3.2/bin/bifrost-http-0 /usr/local/bin/bifrost || true
 
 # 3. Create service files in /etc/systemd/system
 echo "Creating service files in /etc/systemd/system..."
@@ -37,8 +37,8 @@ sudo cp ~/.config/systemd/user/bifrost.service /etc/systemd/system/bifrost.servi
 
 # 4. Adjust service files for system paths
 echo "Adjusting service file paths..."
-sudo sed -i "s|/home/sheldon/.local/bin|/usr/local/bin|g" /etc/systemd/system/goose.service || true
-sudo sed -i "s|/home/sheldon/.local/bin|/usr/local/bin|g" /etc/systemd/system/llama.service || true
+sudo sed -i "s|${HOME}/.local/bin|/usr/local/bin|g" /etc/systemd/system/goose.service || true
+sudo sed -i "s|${HOME}/.local/bin|/usr/local/bin|g" /etc/systemd/system/llama.service || true
 
 # For bifrost, might need to adjust paths differently
 

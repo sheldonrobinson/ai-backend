@@ -15,7 +15,7 @@ BinaryPath="${BinaryDir}/bifrost-http"
 BinaryCliPath="${BinaryDir}/bifrost"
 WorkingDir="${HOME}/.config/bifrost"
 AppDir="${WorkingDir}"
-LogPath="/home/sheldon/.local/state/bifrost/bifrost.log"
+LogPath="${HOME}/.local/state/bifrost/bifrost.log"
 EnvFile="${WorkingDir}/service.env"
 RestartMode="always"
 RestartSeconds="10s"
@@ -61,7 +61,7 @@ while [[ $# -gt 0 ]]; do
       BinaryCliPath="${BinaryDir}/bifrost"
       WorkingDir="${HOME}/.config/bifrost"
       AppDir="${WorkingDir}"
-      LogPath="/home/sheldon/.local/state/bifrost/bifrost.log"
+      LogPath="${HOME}/.local/state/bifrost/bifrost.log"
       EnvFile="${WorkingDir}/service.env"
       shift 2
       ;;
@@ -372,7 +372,7 @@ fi
 if [ "${SystemDeployment}" = true ]; then
   echo "Creating service account..."
   if ! id "${ServiceUser}" >/dev/null 2>&1; then
-    sudo useradd -r -s /bin/false "${ServiceUser}" 2>/dev/null || true
+    sudo useradd -r -s /bin/false -m -d /srv/bifrost "${ServiceUser}" 2>/dev/null || true
   fi
 
   sudo mkdir -p "${AppDir}"

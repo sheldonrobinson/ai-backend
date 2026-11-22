@@ -13,7 +13,7 @@ ServiceGroup="goose"
 WorkingDir="${HOME}/.local/share/goose"
 ConfigDir="${HOME}/.config/goose"
 ConfigFile="${ConfigDir}/config.yaml"
-LogPath="/home/sheldon/.local/state/goose/goose.log"
+LogPath="${HOME}/.local/state/goose/goose.log"
 SystemDeployment=false
 
 # Service ports
@@ -432,7 +432,7 @@ fi
 if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   echo "Creating system user ${ServiceUser} and setting ownership..."
   if ! id "${ServiceUser}" >/dev/null 2>&1; then
-    sudo useradd -r -s /bin/false "${ServiceUser}" 2>/dev/null || true
+    sudo useradd -r -s /bin/false -m -d /srv/goose "${ServiceUser}" 2>/dev/null || true
   fi
 
   sudo mkdir -p "${WorkingDir}"
@@ -445,7 +445,7 @@ if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
 else
   if [ "$(id -u)" -eq 0 ] || [ -n "${SUDO_USER:-}" ]; then
     echo "Creating system user ${ServiceUser} (running with privileges)"
-    useradd -r -s /bin/false "${ServiceUser}" 2>/dev/null || true
+    useradd -r -s /bin/false -m -d /srv/goose "${ServiceUser}" 2>/dev/null || true
 
     mkdir -p "${WorkingDir}"
     mkdir -p "${ConfigDir}"
