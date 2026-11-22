@@ -1,5 +1,5 @@
 #!/bin/bash
-# All-in-One Uninstall Script for goose → bifrost-http → llama-server
+# All-in-One Uninstall Script for goose + bifrost-http + llama-server
 # Removes the complete stack in the correct reverse order
 set -euo pipefail
 

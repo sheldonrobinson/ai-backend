@@ -47,7 +47,7 @@ if [ "${SystemDeployment}" = true ] || [ "$(id -u)" -eq 0 ] || [ -n "${SUDO_USER
   if [ -z "${BinaryPath}" ]; then
     BinaryPath="/usr/local/bin/llama"
   fi
-  LogPath="${WorkingDir}/llama-server.log"
+  LogPath="/var/log/llama/llama-server.log"
 fi
 
 echo "llama-server installation mode: ${SYSTEM_DEPLOYMENT:+system}"

@@ -11,7 +11,7 @@ ServiceGroup="goose"
 WorkingDir="${HOME}/.local/share/goose"
 ConfigDir="${HOME}/.config/goose"
 BinaryPath="/usr/local/bin/goose"
-LogPath="/var/log/goose.log"
+LogPath="${HOME}/.local/state/goose/goose.log"
 SystemDeployment=false
 Purge=false
 GoosePort="3284"
@@ -40,10 +40,10 @@ done
 # ---------------------------------------------------------------------------
 if [ "${SystemDeployment}" = true ] || [ "$(id -u)" -eq 0 ] || [ -n "${SUDO_USER:-}" ]; then
   SYSTEM_DEPLOYMENT=true
-  WorkingDir="/var/lib/goose"
-  ConfigDir="/etc/goose"
+  WorkingDir="/srv/goose/.local/share/goose/"
+  ConfigDir="/srv/goose/.config/goose"
   BinaryPath="/usr/local/bin/goose"
-  LogPath="/var/log/goose.log"
+  LogPath="/var/log/goose/goose.log"
 fi
 
 echo "goose uninstallation mode: ${SYSTEM_DEPLOYMENT:+system} ${Purge:+purge}"
@@ -120,19 +120,14 @@ if [ "${Purge}" = true ]; then
   echo "Purging all data directories..."
 
   if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
-    sudo rm -rf "${WorkingDir}" 2>/dev/null || true
-    sudo rm -rf "${ConfigDir}" 2>/dev/null || true
-    sudo rm -f "${LogPath}" 2>/dev/null || true
     sudo rm -rf "/var/lib/goose" 2>/dev/null || true
+    sudo rm -rf "/srv/goose" 2>/dev/null || true
     sudo rm -rf "/etc/goose" 2>/dev/null || true
     sudo rm -rf "/var/log/goose" 2>/dev/null || true
   else
-    rm -rf "${WorkingDir}" 2>/dev/null || true
-    rm -rf "${ConfigDir}" 2>/dev/null || true
-    rm -f "${LogPath}" 2>/dev/null || true
-    rm -rf "/home/sheldon/.local/share/goose" 2>/dev/null || true
-    rm -rf "/home/sheldon/.config/goose" 2>/dev/null || true
-    rm -rf "/home/sheldon/.local/state/goose" 2>/dev/null || true
+    rm -rf "${HOME}/.local/share/goose" 2>/dev/null || true
+    rm -rf "${HOME}/.config/goose" 2>/dev/null || true
+    rm -rf "${HOME}/.local/state/goose" 2>/dev/null || true
   fi
 fi
 

@@ -47,7 +47,6 @@ if ($IsSystem) {
   $WorkingDir = "C:\ProgramData\llama"
   $LogPath = Join-Path $WorkingDir "llama-server.log"
   $EnvFile = Join-Path $WorkingDir "service.env"
-  $ServiceFile = Join-Path $env:SystemRoot "System32\services"  # placeholder, NSSM manages services
 } else {
   $BinaryDir = Join-Path $env:LOCALAPPDATA "bin"
   $BinaryPath = Join-Path $BinaryDir "llama.exe"

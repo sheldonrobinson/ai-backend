@@ -1,5 +1,5 @@
 #!/bin/bash
-# All-in-One Installation Script for llama-server → bifrost-http → goose
+# All-in-One Installation Script for llama-server + bifrost-http + goose
 # Installs and configures the complete stack in the correct order
 set -euo pipefail
 

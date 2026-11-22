@@ -9,11 +9,10 @@ ServerName="bifrost-http"
 ServiceUser="bifrost"
 ServiceGroup="bifrost"
 WorkingDir="${HOME}/.config/bifrost"
-AppDir="${WorkingDir}"
 BinaryPath="/usr/local/bin/bifrost-http"
 CLIPath="/usr/local/bin/bifrost"
-LogPath="/var/log/bifrost.log"
-EnvFile="${AppDir}/service.env"
+LogPath="${HOME}/.local/state/bifrost/bifrost.log"
+EnvFile="${WorkingDir}/service.env"
 SystemDeployment=false
 Purge=false
 BifrostPort="8080"
@@ -42,12 +41,11 @@ done
 # ---------------------------------------------------------------------------
 if [ "${SystemDeployment}" = true ] || [ "$(id -u)" -eq 0 ] || [ -n "${SUDO_USER:-}" ]; then
   SYSTEM_DEPLOYMENT=true
-  WorkingDir="/var/lib/bifrost"
-  AppDir="/var/lib/bifrost"
   BinaryPath="/usr/local/bin/bifrost-http"
   CLIPath="/usr/local/bin/bifrost"
-  EnvFile="${AppDir}/service.env"
-  LogPath="/var/log/bifrost.log"
+  WorkingDir="/var/lib/bifrost"
+  LogPath="/var/log/bifrost/bifrost.log"
+  EnvFile="${WorkingDir}/service.env"
 fi
 
 echo "bifrost-http uninstallation mode: ${SYSTEM_DEPLOYMENT:+system} ${Purge:+purge}"
@@ -111,11 +109,9 @@ echo "Removing environment file and directories..."
 
 if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   sudo rm -f "${EnvFile}" 2>/dev/null || true
-  sudo rm -rf "${AppDir}" 2>/dev/null || true
   sudo rm -f "${LogPath}" 2>/dev/null || true
 else
   rm -f "${EnvFile}" 2>/dev/null || true
-  rm -rf "${AppDir}" 2>/dev/null || true
   rm -f "${LogPath}" 2>/dev/null || true
 fi
 
@@ -126,19 +122,16 @@ if [ "${Purge}" = true ]; then
   echo "Purging all data directories..."
 
   if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
-    sudo rm -rf "${AppDir}" 2>/dev/null || true
     sudo rm -rf "/var/lib/bifrost" 2>/dev/null || true
-    sudo rm -f "${LogPath}" 2>/dev/null || true
     sudo rm -rf "/var/lib/bifrost-http" 2>/dev/null || true
     sudo rm -rf "/var/log/bifrost" 2>/dev/null || true
+    sudo rm -rf "/srv/bifrost" 2>/dev/null || true
     sudo rm -rf "/tmp/bifrost-app" 2>/dev/null || true
     sudo rm -rf "/tmp/bifrost-http" 2>/dev/null || true
   else
-    rm -rf "${AppDir}" 2>/dev/null || true
-    rm -rf "/home/sheldon/.config/bifrost" 2>/dev/null || true
-    rm -f "${LogPath}" 2>/dev/null || true
-    rm -rf "/home/sheldon/.local/share/bifrost" 2>/dev/null || true
-    rm -rf "/home/sheldon/.local/state/bifrost" 2>/dev/null || true
+    rm -rf "${HOME}/.config/bifrost" 2>/dev/null || true
+    rm -rf "${HOME}/.local/share/bifrost" 2>/dev/null || true
+    rm -rf "${HOME}/.local/state/bifrost" 2>/dev/null || true
     rm -rf "/tmp/bifrost-app" 2>/dev/null || true
     rm -rf "/tmp/bifrost-http" 2>/dev/null || true
   fi

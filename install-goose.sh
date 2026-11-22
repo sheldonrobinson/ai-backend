@@ -6,7 +6,6 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 # Default configuration
 # ---------------------------------------------------------------------------
-PREFIX="/usr/local"
 ServerName="goose"
 ServiceUser="goose"
 ServiceGroup="goose"
@@ -53,11 +52,10 @@ done
 # ---------------------------------------------------------------------------
 if [ "${SystemDeployment}" = true ] || [ "$(id -u)" -eq 0 ] || [ -n "${SUDO_USER:-}" ]; then
   SYSTEM_DEPLOYMENT=true
-  PREFIX="/usr/local"
   WorkingDir="/srv/goose/.local/share/goose/"
   ConfigDir="/srv/goose/.config/goose"
   ConfigFile="${ConfigDir}/config.yaml"
-  LogPath="/var/lib/goose/goose.log"
+  LogPath="/var/log/goose/goose.log"
 fi
 
 echo "Goose installation mode: ${SYSTEM_DEPLOYMENT:+system}"

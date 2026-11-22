@@ -95,7 +95,7 @@ if [ "${SystemDeployment}" = true ] || [ "$(id -u)" -eq 0 ] || [ -n "${SUDO_USER
   BinaryPath="${BinaryDir}/bifrost-http"
   BinaryCliPath="${BinaryDir}/bifrost"
   WorkingDir="/var/lib/bifrost"
-  LogPath="/var/lib/bifrost/bifrost.log"
+  LogPath="/var/log/bifrost/bifrost.log"
   EnvFile="${WorkingDir}/service.env"
 fi
 
@@ -404,7 +404,7 @@ fi
 # ---------------------------------------------------------------------------
 # Wait for bifrost-http to be ready
 # ---------------------------------------------------------------------------
-echo "Waiting for bifrost-http to be ready on port ${BifrostPort}..."
+echo "Waiting for bifrost-http to be ready on port ${BIFROST_PORT:-8080}..."
 BifrostPort="${BIFROST_PORT:-8080}"
 for i in $(seq 1 30); do
   if curl -fsS "http://localhost:${BifrostPort}/api/config" >/dev/null 2>&1; then
@@ -432,6 +432,19 @@ CONFIG_PAYLOAD=$(cat << EOF
   "client": {
     "enforce_auth_on_inference": true,
     "log_retention_days": 365
+  },
+  "config_store": {
+    "enabled": true,
+    "type": "sqlite",
+    "config": {
+      "path": "./config.db"
+    }
+  },
+  "logs_store": {
+    "enabled": true,
+    "type": "sqlite",
+    "config": {
+      "path": "./logs.db"
   },
   "governance": {
     "auth_config": {
@@ -613,7 +626,7 @@ api_call "POST" "/api/v1/governance/virtual-key-provider-configs" "${VkProviderP
 
 echo "llama-server provider registration attempted via bifrost-http API"
 echo "  Virtual key: ${VK_VALUE}"
-echo "  Provider: llama-server (http://127.0.0.1:${LlamaPort}/v1)"
+echo "  Provider: llama-server (http://${LLAMA_ARG_HOST:-127.0.0.1}:${LLAMA_ARG_PORT:-9931}/v1)"
 echo "  Models: ${ModelNames} discovered and registered"
 
 # ---------------------------------------------------------------------------

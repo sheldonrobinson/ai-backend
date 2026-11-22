@@ -41,7 +41,7 @@ if [ "${SystemDeployment}" = true ] || [ "$(id -u)" -eq 0 ] || [ -n "${SUDO_USER
   SYSTEM_DEPLOYMENT=true
   WorkingDir="/var/lib/llama"
   BinaryPath="/usr/local/bin/llama"
-  LogPath="/var/log/llama-server.log"
+  LogPath="/var/log/llama/llama-server.log"
 fi
 
 echo "llama-server uninstallation mode: ${SYSTEM_DEPLOYMENT:+system} ${Purge:+purge}"
@@ -116,24 +116,21 @@ if [ "${Purge}" = true ]; then
   echo "Purging all data directories..."
 
   if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
-    sudo rm -rf "${WorkingDir}" 2>/dev/null || true
     sudo rm -rf "/var/lib/llama" 2>/dev/null || true
-    sudo rm -f "${LogPath}" 2>/dev/null || true
     sudo rm -rf "/var/log/llama" 2>/dev/null || true
+    sudo rm -rf "/srv/llama" 2>/dev/null || true
     # Remove any additional model/data directories
     sudo rm -rf "/usr/local/share/llama" 2>/dev/null || true
     sudo rm -rf "/usr/local/etc/llama" 2>/dev/null || true
     sudo rm -rf "/usr/local/var/llama" 2>/dev/null || true
   else
-    rm -rf "${WorkingDir}" 2>/dev/null || true
-    rm -rf "/home/sheldon/.local/share/llama" 2>/dev/null || true
-    rm -f "${LogPath}" 2>/dev/null || true
-    rm -rf "/home/sheldon/.local/state/llama" 2>/dev/null || true
+    rm -rf "${HOME}/.local/share/llama" 2>/dev/null || true
+    rm -rf "${HOME}/.local/state/llama" 2>/dev/null || true
     # Remove any additional model/data directories
-    rm -rf "/home/sheldon/.local/share/llama.cpp" 2>/dev/null || true
-    rm -rf "/home/sheldon/.local/share/llama.cpp-server" 2>/dev/null || true
-    rm -rf "/home/sheldon/.cache/llama" 2>/dev/null || true
-    rm -rf "/home/sheldon/.cache/llama.cpp" 2>/dev/null || true
+    rm -rf "${HOME}/.local/share/llama.cpp" 2>/dev/null || true
+    rm -rf "${HOME}/.local/share/llama.cpp-server" 2>/dev/null || true
+    rm -rf "${HOME}/.cache/llama" 2>/dev/null || true
+    rm -rf "${HOME}/.cache/llama.cpp" 2>/dev/null || true
   fi
 fi
 

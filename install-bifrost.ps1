@@ -650,7 +650,7 @@ $setupBody = @{
         }
     }
 } | ConvertTo-Json -Depth 10
-Write-Host "  Invoke-WebRequest -Method PUT -Uri http://localhost:$BifrostPort/api_config"
+Write-Host "  Invoke-WebRequest -Method PUT -Uri http://localhost:$BifrostPort/api/config"
 Write-Host "    -Headers @{`"X-Bifrost-Setup-Token`"=`"$BifrostSetupToken`";`"Content-Type`"=`"application/json`"}"
 Write-Host "    -Body $setupBody"
 Write-Host ""
