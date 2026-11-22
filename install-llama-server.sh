@@ -410,7 +410,7 @@ else
     echo "Creating system user ${ServiceUser} (running with privileges)"
     if ! id "${ServiceUser}" >/dev/null 2>&1; then
         useradd -r -s /bin/false -m -d /srv/llama "${ServiceUser}" 2>/dev/null || true
-    if
+    fi
 
     mkdir -p "${WorkingDir}"
     chown -R "${ServiceUser}:${ServiceGroup}" "${WorkingDir}" 2>/dev/null || true
