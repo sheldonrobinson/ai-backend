@@ -232,10 +232,10 @@ BifrostArgsStr="${BifrostArgs:-}"
 # Build ExecStart command
 # Note: systemd expands ${VAR} from the unit's environment (EnvironmentFile
 # provides BIFROST_PORT); shell-style ${VAR:-default} is not supported.
-ExecStartCmd="bash -c 'source ${EnvFile}; exec ${BinaryPath} -port \${BIFROST_PORT}'"
+ExecStartCmd="bash -c 'source ${EnvFile}; exec ${BinaryPath} -host \${BIFROST_HOST} -port \${BIFROST_PORT}'"
 
 if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
-  ExecStartCmd="bash -c 'source ${EnvFile}; exec ${BinaryPath} -port \${BIFROST_PORT}'"
+  ExecStartCmd="bash -c 'source ${EnvFile}; exec ${BinaryPath} -host \${BIFROST_HOST} -port \${BIFROST_PORT}'"
 fi
 
 # ---------------------------------------------------------------------------

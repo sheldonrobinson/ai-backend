@@ -14,6 +14,7 @@ LogPath="${HOME}/.local/state/llama/llama-server.log"
 RestartMode="on-failure"
 RestartSeconds="5"
 SystemDeployment=false
+SYSTEM_DEPLOYMENT=false
 
 # ---------------------------------------------------------------------------
 # Parse command line arguments
@@ -50,7 +51,14 @@ if [ "${SystemDeployment}" = true ] || [ "$(id -u)" -eq 0 ] || [ -n "${SUDO_USER
   LogPath="/var/log/llama/llama-server.log"
 fi
 
-echo "llama-server installation mode: ${SYSTEM_DEPLOYMENT:+system}"
+# Use sudo only when not already running as root (containers often lack sudo)
+if [ "$(id -u)" -eq 0 ]; then
+  SUDO=""
+else
+  SUDO="sudo"
+fi
+
+echo "llama-server installation mode: $( [ "${SYSTEM_DEPLOYMENT}" = true ] && echo system || echo user )"
 
 # ---------------------------------------------------------------------------
 # Detect OS and architecture
@@ -79,12 +87,23 @@ REPO="https://huggingface.co/buckets/${LLAMA_BUCKET}/resolve"
 dl_bin() {
   local dest="$1"
   local url="$2"
+  local decomp
   [ -x "$dest" ] && return 0
   command -v curl >/dev/null 2>&1 || { echo "Error: curl not found" >&2; return 1; }
   echo "Downloading $(basename "$dest")..."
   if [[ "$url" == *.zst ]]; then
-    command -v zstd >/dev/null 2>&1 || { echo "Error: zstd not found" >&2; return 1; }
-    curl -fsSL "$url" 2>/dev/null | zstd -d > "${dest}.tmp" 2>/dev/null &&
+    # Prefer system zstd; fall back to the static unzstd shipped in the bucket
+    if command -v zstd >/dev/null 2>&1; then
+      decomp="zstd -d"
+    else
+      echo "zstd not found, downloading bundled unzstd..."
+      if [ ! -x "./unzstd" ]; then
+        curl -fsSL -o ./unzstd "${REPO}/${LLAMA_VERSION}/${ARCH}/${OS}/unzstd" 2>/dev/null &&
+          chmod +x ./unzstd || { echo "Error: could not obtain unzstd (install zstd and retry)" >&2; return 1; }
+      fi
+      decomp="./unzstd"
+    fi
+    curl -fsSL "$url" 2>/dev/null | ${decomp} > "${dest}.tmp" 2>/dev/null &&
       chmod +x "${dest}.tmp" && mv "${dest}.tmp" "$dest" && return 0
   else
     curl -fsSL "$url" > "${dest}.tmp" 2>/dev/null &&
@@ -92,12 +111,6 @@ dl_bin() {
   fi
   echo "Failed to download $dest" >&2
   return 1
-}
-
-unzstd() {
-  command -v zstd >/dev/null 2>&1 && exec zstd -d
-  dl_bin "./unzstd" "${REPO}/${LLAMA_VERSION}/${ARCH}/${OS}/unzstd" || return 1
-  exec ./unzstd
 }
 
 probe_cuda() {
@@ -221,9 +234,9 @@ if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   BinaryPath="${InstallDir}/llama"
   echo "Installing llama-app binary (superuser) to ${BinaryPath}..."
   if [ ! -x "${BinaryPath}" ]; then
-    sudo mkdir -p "${InstallDir}"
-    sudo cp "./llama-app" "${BinaryPath}"
-    sudo chmod +x "${BinaryPath}"
+    ${SUDO} mkdir -p "${InstallDir}"
+    ${SUDO} cp "./llama-app" "${BinaryPath}"
+    ${SUDO} chmod +x "${BinaryPath}"
   else
     echo "  Binary already exists at ${BinaryPath}, keeping existing."
   fi
@@ -290,7 +303,7 @@ chmod 644 "${EnvFile}"
 # Build extra args string if provided
 LlamaArgsStr="${LlamaArgs:-}"
 
-ExecStartCmd="bash -c 'source ${EnvFile}; ${BinaryPath} serve --host \"\${LLAMA_ARG_HOST:-127.0.0.1}\" --port \"\${LLAMA_ARG_PORT:-9931}\" -ngl \"\${NGL_LEVEL}\" --ctx-size \"\${CONTEXT_SIZE}\" --log-file \"${LogPath}\" --log-timestamps \$([ \"\${JINJA_ENABLED}\" = \"true\" ] && echo \"--jinja\" || true) \$([ \"\${AGENT_MODE_ENABLED}\" = \"true\" ] && echo \"--agent\" || true) \$([ \"\${ALLOW_UNAUTHENTICATED}\" = \"true\" ] && echo \"--allow-unauthenticated-tools\" || true) \$([ \"\${EMBEDDINGS_ENABLED}\" = \"true\" ] && echo \"--embeddings\" || true) \$([ \"\${EMBEDDINGS_ENABLED}\" = \"true\" ] && [ -n \"\${EMBEDDINGS_POOLING_TYPE}\" ] && echo \"--pooling \${EMBEDDINGS_POOLING_TYPE}\" || true) \$([ -n \"\${SLEEP_IDLE_SECONDS}\" ] && echo \"--sleep-idle-seconds \${SLEEP_IDLE_SECONDS}\"  || true) ${LlamaArgsStr}'"
+ExecStartCmd="bash -c 'source ${EnvFile}; exec ${BinaryPath} serve --host \"\${LLAMA_ARG_HOST}\" --port \"\${LLAMA_ARG_PORT}\" -ngl \"\${NGL_LEVEL}\" --ctx-size \"\${CONTEXT_SIZE}\" --log-file \"${LogPath}\" --log-timestamps \$([ \"\${JINJA_ENABLED}\" = \"true\" ] && echo \"--jinja\" || true) \$([ \"\${AGENT_MODE_ENABLED}\" = \"true\" ] && echo \"--agent\" || true) \$([ \"\${ALLOW_UNAUTHENTICATED}\" = \"true\" ] && echo \"--allow-unauthenticated-tools\" || true) \$([ \"\${EMBEDDINGS_ENABLED}\" = \"true\" ] && echo \"--embeddings\" || true) \$([ \"\${EMBEDDINGS_ENABLED}\" = \"true\" ] && [ -n \"\${EMBEDDINGS_POOLING_TYPE}\" ] && echo \"--pooling \${EMBEDDINGS_POOLING_TYPE}\" || true) \$([ -n \"\${SLEEP_IDLE_SECONDS}\" ] && echo \"--sleep-idle-seconds \${SLEEP_IDLE_SECONDS}\"  || true) ${LlamaArgsStr}'"
 
 # ---------------------------------------------------------------------------
 # Create systemd service file (only if it doesn't exist)
@@ -306,11 +319,12 @@ else
 fi
 
 echo "Creating service file at ${ServiceFile}"
+mkdir -p "$(dirname "${ServiceFile}")"
 
 # Write service file using quoted heredoc (no bash expansion), then sed for simple replacements
 if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   if [ ! -f "${ServiceFile}" ]; then
-    sudo tee "${ServiceFile}" > /dev/null << EOF
+    ${SUDO} tee "${ServiceFile}" > /dev/null << EOF
 [Unit]
 Description=${ServerName}
 After=network.target
@@ -365,7 +379,7 @@ LOGROTATE_FILE="/etc/logrotate.d/${ServerName}"
 
 if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   if [ ! -f "${LOGROTATE_FILE}" ]; then
-    sudo tee "${LOGROTATE_FILE}" > /dev/null << EOF
+    ${SUDO} tee "${LOGROTATE_FILE}" > /dev/null << EOF
 ${LogPath} {
     daily
     rotate 7
@@ -394,22 +408,22 @@ fi
 if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   echo "Creating system user ${ServiceUser} and setting ownership..."
   if ! id "${ServiceUser}" >/dev/null 2>&1; then
-    sudo useradd -r -s /bin/false -m -d /srv/llama "${ServiceUser}" 2>/dev/null || true
+    ${SUDO} useradd -r -s /bin/false -m -d /srv/llama "${ServiceUser}" 2>/dev/null || true
   fi
 
-  sudo mkdir -p "${WorkingDir}"
-  sudo chown -R "${ServiceUser}:${ServiceGroup}" "${WorkingDir}" 2>/dev/null || true
-  sudo chown "${ServiceUser}:${ServiceGroup}" "$(dirname "${LogPath}")" 2>/dev/null || true
-  sudo touch "${LogPath}" 2>/dev/null || true
-  sudo chown "${ServiceUser}:${ServiceGroup}" "${LogPath}" 2>/dev/null || true
+  ${SUDO} mkdir -p "${WorkingDir}"
+  ${SUDO} chown -R "${ServiceUser}:${ServiceGroup}" "${WorkingDir}" 2>/dev/null || true
+  ${SUDO} chown "${ServiceUser}:${ServiceGroup}" "$(dirname "${LogPath}")" 2>/dev/null || true
+  ${SUDO} touch "${LogPath}" 2>/dev/null || true
+  ${SUDO} chown "${ServiceUser}:${ServiceGroup}" "${LogPath}" 2>/dev/null || true
   if [ -f "${EnvFile}" ]; then
-    sudo chown "${ServiceUser}:${ServiceGroup}" "${EnvFile}" 2>/dev/null || true
+    ${SUDO} chown "${ServiceUser}:${ServiceGroup}" "${EnvFile}" 2>/dev/null || true
   fi
 else
   if [ "$(id -u)" -eq 0 ] || [ -n "${SUDO_USER:-}" ]; then
     echo "Creating system user ${ServiceUser} (running with privileges)"
     if ! id "${ServiceUser}" >/dev/null 2>&1; then
-        useradd -r -s /bin/false -m -d /srv/llama "${ServiceUser}" 2>/dev/null || true
+        ${SUDO} useradd -r -s /bin/false -m -d /srv/llama "${ServiceUser}" 2>/dev/null || true
     fi
 
     mkdir -p "${WorkingDir}"
@@ -437,9 +451,9 @@ fi
 echo "Enabling and starting service..."
 
 if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
-  sudo systemctl --system daemon-reload
-  sudo systemctl enable "${ServerName}.service"
-  sudo systemctl start "${ServerName}.service"
+  ${SUDO} systemctl --system daemon-reload
+  ${SUDO} systemctl enable "${ServerName}.service"
+  ${SUDO} systemctl start "${ServerName}.service"
 else
   systemctl --user daemon-reload
   systemctl --user enable "${ServerName}.service"
@@ -464,7 +478,7 @@ echo "  Backend:     ${BACKEND}"
 echo ""
 echo "Status check:"
 if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
-  sudo systemctl status "${ServerName}.service" --no-pager 2>/dev/null || echo "Could not retrieve service status"
+  ${SUDO} systemctl status "${ServerName}.service" --no-pager 2>/dev/null || echo "Could not retrieve service status"
 else
   systemctl --user status "${ServerName}.service" --no-pager 2>/dev/null || echo "Could not retrieve service status"
 fi

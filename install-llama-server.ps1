@@ -124,39 +124,45 @@ New-Item -ItemType Directory -Path $TempDir -Force | Out-Null
 try {
   
   #==============================================================================
-  # Platform probes - on Windows, default to CPU backend
-  # CUDA/ROCm/Vulkan probes are Linux-only; Windows uses DirectML or CPU
+  # Platform probes - on Windows, use the CPU backend
+  # Assets are zstd-compressed and keyed by a machine-specific CPU config:
+  #   1. download featcode.exe and run it to get the config name
+  #   2. download cpu/<config>/llama-app.exe.zst
+  #   3. decompress with the static unzstd.exe shipped in the bucket
   #==============================================================================
   $Backend = "cpu"
-  $Downloaded = $false
-  
-  # Try CPU backend first (most reliable on Windows)
-  $CpuUrl = "$LlamaRepo/$LlamaVersion/$LlamaArch/$LlamaOs/cpu/llama-app.exe"
   $CpuDest = Join-Path $TempDir "llama-app.exe"
-  
-  if (Download-File -Url $CpuUrl -Destination $CpuDest) {
-    $Backend = "cpu"
-    $Downloaded = $true
+
+  $FeatcodeUrl = "$LlamaRepo/$LlamaVersion/$LlamaArch/$LlamaOs/featcode.exe"
+  $FeatcodeDest = Join-Path $TempDir "featcode.exe"
+  if (-not (Download-File -Url $FeatcodeUrl -Destination $FeatcodeDest)) {
+    throw "Error: Failed to download featcode.exe from $FeatcodeUrl"
   }
-  
-  if (-not $Downloaded) {
-    # Try to find any available backend by probing
-    $Backends = @("cuda", "rocm", "vulkan", "cpu", "metal")
-    foreach ($b in $Backends) {
-      $ProbeUrl = "$LlamaRepo/$LlamaVersion/$LlamaArch/$LlamaOs/$b/llama-app.exe"
-      $ProbeDest = Join-Path $TempDir "llama-app-$b.exe"
-      if (Download-File -Url $ProbeUrl -Destination $ProbeDest) {
-        if (Test-Path $ProbeDest) {
-          Move-Item -Path $ProbeDest -Destination $CpuDest -Force
-          $Backend = $b
-          $Downloaded = $true
-          break
-        }
-      }
-    }
+
+  $FeatcodeOutput = & $FeatcodeDest 2>$null
+  if ($LASTEXITCODE -ne 0 -or -not $FeatcodeOutput) {
+    throw "Error: featcode.exe failed to determine the CPU configuration"
   }
-  
-  if (-not $Downloaded -or -not (Test-Path $CpuDest)) {
+  $CpuConfig = ($FeatcodeOutput | Select-Object -First 1).ToString().Trim()
+  Write-Host "CPU config: $CpuConfig"
+
+  $CpuUrl = "$LlamaRepo/$LlamaVersion/$LlamaArch/$LlamaOs/cpu/$CpuConfig/llama-app.exe.zst"
+  $CpuDestZst = Join-Path $TempDir "llama-app.exe.zst"
+  if (-not (Download-File -Url $CpuUrl -Destination $CpuDestZst)) {
+    throw "Error: Failed to download llama-app from $CpuUrl"
+  }
+
+  $UnzstdUrl = "$LlamaRepo/$LlamaVersion/$LlamaArch/$LlamaOs/unzstd.exe"
+  $UnzstdDest = Join-Path $TempDir "unzstd.exe"
+  if (-not (Download-File -Url $UnzstdUrl -Destination $UnzstdDest)) {
+    throw "Error: Failed to download unzstd.exe from $UnzstdUrl"
+  }
+  & cmd /c "`"$UnzstdDest`" < `"$CpuDestZst`" > `"$CpuDest`""
+  if ($LASTEXITCODE -ne 0 -or -not (Test-Path $CpuDest)) {
+    throw "Error: Failed to decompress llama-app.exe.zst (unzstd.exe exit code: $LASTEXITCODE)"
+  }
+
+  if (-not (Test-Path $CpuDest)) {
     throw "Error: No prebuilt llama-app binary available for $LlamaArch/$LlamaOs"
   }
   

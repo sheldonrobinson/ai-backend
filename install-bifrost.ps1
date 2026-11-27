@@ -235,13 +235,16 @@ GOVERNANCE_CHANGE_ON_LOGON=true
 #==============================================================================
 $BifrostArgsStr = if ($BifrostArgs) { " $BifrostArgs" } else { "" }
 
+$BifrostHostEnv = $env:BIFROST_HOST
+if (-not $BifrostHostEnv) { $BifrostHostEnv = $BifrostHost }
+
 $BifrostPortEnv = $env:BIFROST_PORT
 if (-not $BifrostPortEnv) { $BifrostPortEnv = $BifrostPort }
 
 if ($IsSystem) {
-  $ExecStartCmd = """$BinaryPath"" -port $BifrostPortEnv --app-dir $AppDir$BifrostArgsStr"
+  $ExecStartCmd = """$BinaryPath"" -host $BifrostHostEnv -port $BifrostPortEnv --app-dir $AppDir $BifrostArgsStr"
 } else {
-  $ExecStartCmd = """$BinaryPath"" -port $BifrostPortEnv$BifrostArgsStr"
+  $ExecStartCmd = """$BinaryPath"" -host $BifrostHostEnv -port $BifrostPortEnv $BifrostArgsStr"
 }
 
 #==============================================================================
