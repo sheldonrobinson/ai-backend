@@ -66,7 +66,7 @@ done
 # ---------------------------------------------------------------------------
 RAW_BASE="https://raw.githubusercontent.com/sheldonrobinson/ai-backend/main"
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd)"
 
 # Detect if running from a URL download (curl | bash) where BASH_SOURCE is empty
 # or the directory doesn't contain the sibling scripts

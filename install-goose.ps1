@@ -135,17 +135,44 @@ if (-not $GooseBinaryFound) {
   }
   
   $GooseOs = "windows"
-  $GooseUrl = "https://github.com/aaif-goose/goose/releases/download/stable/goose-$GooseOs-$GooseArch.exe"
-  
+
+  # Map arch to the release target triple (no 'stable' tag exists on the repo;
+  # resolve the latest release tag from the GitHub API instead)
+  $GooseTarget = switch ($GooseArch) {
+    "x86_64"  { "x86_64-pc-windows-msvc" }
+    default   { throw "Error: No published Windows release asset for architecture: $GooseArch (only x86_64 is published)" }
+  }
+
+  $GooseRepo = "aaif-goose/goose"
+  try {
+    $LatestRelease = Invoke-RestMethod -Uri "https://api.github.com/repos/$GooseRepo/releases/latest" -ErrorAction Stop
+    $GooseTag = $LatestRelease.tag_name
+  } catch {
+    $GooseTag = $null
+  }
+  if (-not $GooseTag) {
+    Write-Host "Warning: Could not detect latest goose release, falling back to pinned version v1.61.1" -ForegroundColor Yellow
+    $GooseTag = "v1.61.1"
+  }
+
+  $GooseUrl = "https://github.com/$GooseRepo/releases/download/$GooseTag/goose-$GooseTarget.zip"
+
   $TempDir = Join-Path $env:TEMP "goose-install-$(Get-Random)"
   New-Item -ItemType Directory -Path $TempDir -Force | Out-Null
-  
-  $GooseDownloadDest = Join-Path $TempDir "goose.exe"
-  
-  if (-not (Download-File -Url $GooseUrl -Destination $GooseDownloadDest)) {
+
+  $GooseArchiveDest = Join-Path $TempDir "goose.zip"
+
+  if (-not (Download-File -Url $GooseUrl -Destination $GooseArchiveDest)) {
     throw "Error: Failed to download goose from $GooseUrl"
   }
-  
+
+  Expand-Archive -Path $GooseArchiveDest -DestinationPath $TempDir -Force
+  $ExtractedGoose = Get-ChildItem -Path $TempDir -Recurse -Filter "goose.exe" | Select-Object -First 1
+  if (-not $ExtractedGoose) {
+    throw "Error: 'goose.exe' not found inside downloaded archive $GooseArchiveDest"
+  }
+  $GooseDownloadDest = $ExtractedGoose.FullName
+
   $BinaryPathForInstall = $GooseDownloadDest
 } else {
   $BinaryPathForInstall = $BinaryPath
@@ -246,7 +273,7 @@ if (-not $BifrostVk) {
 Write-Host "BIFROST_VK: $BifrostVk"
 
 # Discover llama-server model from /v1/models endpoint
-$LlamaModel = "JetBrains/Mellum2.1-12B-A2.5B-Thinking-GGUF:Q4_K_M"
+$LlamaModel = "ggml-org/gemma-4-E2B-it-GGUF:Q4_0"
 Write-Host "Discovering llama-server model from $LlamaBaseUrl/v1/models..."
 
 try {
@@ -337,7 +364,7 @@ extensions:
     description: Bifrost AI Gateway as MCP server (Gateway mode)
     url: http://127.0.0.1:$BifrostPort/mcp
     headers:
-      X-Bifrost-Setup-Token: "$BifrostVk"
+      x-bf-vk: "$BifrostVk"
     timeout: 300
     bundled: null
 

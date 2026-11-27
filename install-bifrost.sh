@@ -99,6 +99,13 @@ if [ "${SystemDeployment}" = true ] || [ "$(id -u)" -eq 0 ] || [ -n "${SUDO_USER
   EnvFile="${WorkingDir}/service.env"
 fi
 
+# Use sudo only when not already running as root (containers often lack sudo)
+if [ "$(id -u)" -eq 0 ]; then
+  SUDO=""
+else
+  SUDO="sudo"
+fi
+
 
 # ---------------------------------------------------------------------------
 # Detect bifrost version from latest-release endpoint
@@ -106,14 +113,25 @@ fi
 echo "Detecting latest bifrost release version..."
 if command -v curl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
   DetectedVersion=$(curl -fsSL "https://getbifrost.ai/latest-release" 2>/dev/null | jq -r '.name // "latest"' 2>/dev/null) || DetectedVersion="latest"
-  if [ -n "${DetectedVersion}" ] && [ "${DetectedVersion}" != "null" ]; then
-    BifrostVersion="${DetectedVersion}"
-    BifrostHttpVersion="${DetectedVersion}"
-  fi
 else
-  BifrostVersion="latest"
-  BifrostHttpVersion="latest"
+  DetectedVersion=""
 fi
+
+# Resolve the download version for an artifact: only use the pinned release tag
+# if it is actually published on the CDN (the CLI is not always published under
+# the same tag as bifrost-http); otherwise fall back to 'latest'.
+resolve_version() {
+  local artifact="$1" binary="$2" version="$3"
+  if [ -n "${version}" ] && [ "${version}" != "latest" ] \
+     && curl -fsSI --max-time 15 "${BASE_URL}/${artifact}/${version}/${PlatformDir}/${ARCH}/${binary}" >/dev/null 2>&1; then
+    echo "${version}"
+  else
+    echo "latest"
+  fi
+}
+
+BifrostVersion=$(resolve_version "bifrost-cli" "${BifrostBinaryName}" "${DetectedVersion}")
+BifrostHttpVersion=$(resolve_version "bifrost" "${BifrostHttpBinaryName}" "${DetectedVersion}")
 echo "Using bifrost version: ${BifrostVersion}"
 echo "Using bifrost-http version: ${BifrostHttpVersion}"
 
@@ -125,6 +143,7 @@ echo "Downloading bifrost binaries..."
 # Create installation directories
 mkdir -p "${BinaryDir}"
 mkdir -p "$(dirname "${LogPath}")"
+mkdir -p "${WorkingDir}"
 
 # Download bifrost CLI
 BifrostUrl="${BASE_URL}/bifrost-cli/${BifrostVersion}/${PlatformDir}/${ARCH}/${BifrostBinaryName}"
@@ -202,7 +221,7 @@ GOVERNANCE_CHANGE_ON_LOGON=true
 EOF
 fi
 
-chmod 644 "${EnvFile}"
+chmod 600 "${EnvFile}"
 
 # ---------------------------------------------------------------------------
 # Build ExecStart command
@@ -210,10 +229,13 @@ chmod 644 "${EnvFile}"
 # Build extra args string if provided
 BifrostArgsStr="${BifrostArgs:-}"
 
-ExecStartCmd="bash -c 'source ${EnvFile}; ${BinaryPath} -port \${BIFROST_PORT:-8080}'"
+# Build ExecStart command
+# Note: systemd expands ${VAR} from the unit's environment (EnvironmentFile
+# provides BIFROST_PORT); shell-style ${VAR:-default} is not supported.
+ExecStartCmd="bash -c 'source ${EnvFile}; exec ${BinaryPath} -port \${BIFROST_PORT}'"
 
 if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
-  ExecStartCmd="bash -c 'source ${EnvFile}; ${BinaryPath} -port \${BIFROST_PORT:-8080}'"
+  ExecStartCmd="bash -c 'source ${EnvFile}; exec ${BinaryPath} -port \${BIFROST_PORT}'"
 fi
 
 # ---------------------------------------------------------------------------
@@ -230,6 +252,7 @@ else
 fi
 
 echo "Creating service file at ${ServiceFile}"
+mkdir -p "$(dirname "${ServiceFile}")"
 
 if [ ! -f "${ServiceFile}" ] && [ -f "${TemplateDir}/service.template" ]; then
   cp "${TemplateDir}/service.template" "${ServiceFile}.tmp"
@@ -261,7 +284,7 @@ else
   # Create basic service file from scratch (only if it doesn't exist)
   if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
     if [ ! -f "${ServiceFile}" ]; then
-      sudo tee "${ServiceFile}" > /dev/null << EOF
+      ${SUDO} tee "${ServiceFile}" > /dev/null << EOF
 [Unit]
 Description=${ServerName}
 After=network.target
@@ -318,13 +341,13 @@ LOGROTATE_FILE="/etc/logrotate.d/${ServerName}"
 if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   if [ ! -f "${LOGROTATE_FILE}" ]; then
     if [ -f "${TemplateDir}/logrotate.template" ]; then
-      sudo cp "${TemplateDir}/logrotate.template" "${LOGROTATE_FILE}"
-      sudo sed -i "s|__LOG_PATH__|${LogPath}|g" "${LOGROTATE_FILE}"
-      sudo sed -i "s|__SERVICE_NAME__|${ServerName}|g" "${LOGROTATE_FILE}"
-      sudo sed -i "s|__SERVICE_USER__|${ServiceUser}|g" "${LOGROTATE_FILE}"
-      sudo sed -i "s|__SERVICE_GROUP__|${ServiceGroup}|g" "${LOGROTATE_FILE}"
+      ${SUDO} cp "${TemplateDir}/logrotate.template" "${LOGROTATE_FILE}"
+      ${SUDO} sed -i "s|__LOG_PATH__|${LogPath}|g" "${LOGROTATE_FILE}"
+      ${SUDO} sed -i "s|__SERVICE_NAME__|${ServerName}|g" "${LOGROTATE_FILE}"
+      ${SUDO} sed -i "s|__SERVICE_USER__|${ServiceUser}|g" "${LOGROTATE_FILE}"
+      ${SUDO} sed -i "s|__SERVICE_GROUP__|${ServiceGroup}|g" "${LOGROTATE_FILE}"
     else
-      sudo tee "${LOGROTATE_FILE}" > /dev/null << EOF
+      ${SUDO} tee "${LOGROTATE_FILE}" > /dev/null << EOF
 ${LogPath} {
     daily
     rotate 7
@@ -354,14 +377,15 @@ fi
 if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   echo "Creating service account..."
   if ! id "${ServiceUser}" >/dev/null 2>&1; then
-    sudo useradd -r -s /bin/false -m -d /srv/bifrost "${ServiceUser}" 2>/dev/null || true
+    ${SUDO} useradd -r -s /bin/false -m -d /srv/bifrost "${ServiceUser}" 2>/dev/null || true
   fi
 
-  sudo chown "${ServiceUser}:${ServiceGroup}" "$(dirname "${LogPath}")" 2>/dev/null || true
-  sudo touch "${LogPath}" 2>/dev/null || true
-  sudo chown "${ServiceUser}:${ServiceGroup}" "${LogPath}" 2>/dev/null || true
+  ${SUDO} chown "${ServiceUser}:${ServiceGroup}" "${WorkingDir}" 2>/dev/null || true
+  ${SUDO} chown "${ServiceUser}:${ServiceGroup}" "$(dirname "${LogPath}")" 2>/dev/null || true
+  ${SUDO} touch "${LogPath}" 2>/dev/null || true
+  ${SUDO} chown "${ServiceUser}:${ServiceGroup}" "${LogPath}" 2>/dev/null || true
   if [ -f "${EnvFile}" ]; then
-    sudo chown "${ServiceUser}:${ServiceGroup}" "${EnvFile}" 2>/dev/null || true
+    ${SUDO} chown "${ServiceUser}:${ServiceGroup}" "${EnvFile}" 2>/dev/null || true
   fi
 else
   if [ "$(id -u)" -eq 0 ] || [ -n "${SUDO_USER:-}" ]; then
@@ -370,6 +394,7 @@ else
       useradd -r -s /bin/false -m -d /srv/bifrost "${ServiceUser}" 2>/dev/null || true
     fi
 
+    chown "${ServiceUser}:${ServiceGroup}" "${WorkingDir}" 2>/dev/null || true
     chown "${ServiceUser}:${ServiceGroup}" "$(dirname "${LogPath}")" 2>/dev/null || true
     touch "${LogPath}" 2>/dev/null || true
     chown "${ServiceUser}:${ServiceGroup}" "${LogPath}" 2>/dev/null || true
@@ -392,9 +417,9 @@ fi
 echo "Enabling and starting service..."
 
 if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
-  sudo systemctl --system daemon-reload
-  sudo systemctl enable "${ServerName}.service"
-  sudo systemctl start "${ServerName}.service"
+  ${SUDO} systemctl --system daemon-reload
+  ${SUDO} systemctl enable "${ServerName}.service"
+  ${SUDO} systemctl start "${ServerName}.service"
 else
   systemctl --user daemon-reload
   systemctl --user enable "${ServerName}.service"
@@ -445,6 +470,7 @@ CONFIG_PAYLOAD=$(cat << EOF
     "type": "sqlite",
     "config": {
       "path": "./logs.db"
+    }
   },
   "governance": {
     "auth_config": {
@@ -655,7 +681,7 @@ echo ""
 if command -v systemctl >/dev/null 2>&1; then
   echo "Service status:"
   if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
-    sudo systemctl status "${ServerName}" --no-pager 2>/dev/null || echo "Could not retrieve service status"
+    ${SUDO} systemctl status "${ServerName}" --no-pager 2>/dev/null || echo "Could not retrieve service status"
   else
     systemctl --user status "${ServerName}" --no-pager 2>/dev/null || echo "Could not retrieve service status"
   fi

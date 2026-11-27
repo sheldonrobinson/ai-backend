@@ -14,6 +14,7 @@ ConfigDir="${HOME}/.config/goose"
 ConfigFile="${ConfigDir}/config.yaml"
 LogPath="${HOME}/.local/state/goose/goose.log"
 SystemDeployment=false
+SYSTEM_DEPLOYMENT=false
 
 # Service ports
 GoosePort="3284"
@@ -70,13 +71,20 @@ done
 # ---------------------------------------------------------------------------
 if [ "${SystemDeployment}" = true ] || [ "$(id -u)" -eq 0 ] || [ -n "${SUDO_USER:-}" ]; then
   SYSTEM_DEPLOYMENT=true
-  WorkingDir="/srv/goose/.local/share/goose/"
+  WorkingDir="/srv/goose/.local/share/goose"
   ConfigDir="/srv/goose/.config/goose"
   ConfigFile="${ConfigDir}/config.yaml"
   LogPath="/var/log/goose/goose.log"
 fi
 
-echo "Goose installation mode: ${SYSTEM_DEPLOYMENT:+system}"
+# Use sudo only when not already running as root (containers often lack sudo)
+if [ "$(id -u)" -eq 0 ]; then
+  SUDO=""
+else
+  SUDO="sudo"
+fi
+
+echo "Goose installation mode: $( [ "${SYSTEM_DEPLOYMENT}" = true ] && echo system || echo user )"
 echo "Config file: ${ConfigFile}"
 echo "Working dir: ${WorkingDir}"
 
@@ -117,15 +125,45 @@ if [ -z "${GOOSE_BINARY}" ]; then
     *) echo "Unsupported OS: ${OS}" >&2; exit 1 ;;
   esac
 
-  # Download from GitHub releases
-  GOOSE_URL="https://github.com/aaif-goose/goose/releases/download/stable/goose-${Platform}-${ARCH}"
+  # Map platform/arch to the release target triple
+  case "${Platform}/${ARCH}" in
+    linux/x86_64)   Target="x86_64-unknown-linux-gnu" ;;
+    linux/aarch64)  Target="aarch64-unknown-linux-gnu" ;;
+    darwin/aarch64) Target="aarch64-apple-darwin" ;;
+    darwin/x86_64)  Target="x86_64-apple-darwin" ;;
+    *) echo "Error: Unsupported platform/arch: ${Platform}/${ARCH}" >&2; exit 1 ;;
+  esac
+
+  # Resolve the latest release tag from the GitHub API (no 'stable' tag exists)
+  GOOSE_REPO="aaif-goose/goose"
+  LatestJson=$(curl -fsSL "https://api.github.com/repos/${GOOSE_REPO}/releases/latest" 2>/dev/null) || LatestJson=""
+  if command -v jq >/dev/null 2>&1; then
+    GOOSE_TAG=$(echo "${LatestJson}" | jq -r '.tag_name // ""' 2>/dev/null) || GOOSE_TAG=""
+  else
+    GOOSE_TAG=$(echo "${LatestJson}" | grep -m1 '"tag_name"' | sed 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/') || GOOSE_TAG=""
+  fi
+  if [ -z "${GOOSE_TAG}" ]; then
+    echo "Warning: Could not detect latest goose release, falling back to pinned version v1.61.1"
+    GOOSE_TAG="v1.61.1"
+  fi
+
+  GOOSE_URL="https://github.com/${GOOSE_REPO}/releases/download/${GOOSE_TAG}/goose-${Target}.tar.gz"
   TMP_DL_DIR=$(mktemp -d)
   trap 'rm -rf "${TMP_DL_DIR}"' EXIT
 
   echo "Downloading goose from ${GOOSE_URL}..."
-  if ! curl -fsSL -o "${TMP_DL_DIR}/goose" "${GOOSE_URL}"; then
+  if ! curl -fsSL -o "${TMP_DL_DIR}/goose.tar.gz" "${GOOSE_URL}"; then
     echo "Error: Failed to download goose from ${GOOSE_URL}" >&2
     exit 1
+  fi
+  tar -xzf "${TMP_DL_DIR}/goose.tar.gz" -C "${TMP_DL_DIR}"
+  if [ ! -f "${TMP_DL_DIR}/goose" ]; then
+    FoundBinary=$(find "${TMP_DL_DIR}" -type f -name goose | head -n1)
+    if [ -z "${FoundBinary}" ]; then
+      echo "Error: 'goose' binary not found inside downloaded archive" >&2
+      exit 1
+    fi
+    mv "${FoundBinary}" "${TMP_DL_DIR}/goose"
   fi
   chmod +x "${TMP_DL_DIR}/goose"
   GOOSE_BINARY="${TMP_DL_DIR}/goose"
@@ -149,9 +187,9 @@ if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   BinaryPath="${InstallDir}/goose"
   echo "Installing goose (superuser) to ${BinaryPath}..."
   if [ ! -x "${BinaryPath}" ]; then
-    sudo mkdir -p "${InstallDir}"
-    sudo cp "${GOOSE_BINARY}" "${BinaryPath}"
-    sudo chmod +x "${BinaryPath}"
+    ${SUDO} mkdir -p "${InstallDir}"
+    ${SUDO} cp "${GOOSE_BINARY}" "${BinaryPath}"
+    ${SUDO} chmod +x "${BinaryPath}"
   else
     echo "  Binary already exists at ${BinaryPath}, keeping existing."
   fi
@@ -186,10 +224,23 @@ mkdir -p "$(dirname "${LogPath}")"
 # Discover bifrost virtual key and llama-server model dynamically
 # ---------------------------------------------------------------------------
 
+# Load BIFROST_SETUP_TOKEN from the bifrost service env file if not in
+# the environment (mirrors install-goose.ps1 behavior)
+if [ -z "${BIFROST_SETUP_TOKEN:-}" ]; then
+  for BifrostEnvCandidate in /var/lib/bifrost/service.env "${HOME}/.config/bifrost/service.env"; do
+    if [ -f "${BifrostEnvCandidate}" ]; then
+      BIFROST_SETUP_TOKEN="$(grep -E '^BIFROST_SETUP_TOKEN=' "${BifrostEnvCandidate}" | tail -n1 | cut -d= -f2- || true)"
+      if [ -n "${BIFROST_SETUP_TOKEN}" ]; then
+        echo "Loaded BIFROST_SETUP_TOKEN from ${BifrostEnvCandidate}"
+        break
+      fi
+    fi
+  done
+fi
+
 # Discover BIFROST_VK from bifrost-http governance API
 BIFROST_VK=""
 BifrostBaseUrl="http://127.0.0.1:${BifrostPort}"
-
 if command -v curl >/dev/null 2>&1; then
   echo "Discovering bifrost virtual key from ${BifrostBaseUrl}..."
   VKResponse=$(curl -s "${BifrostBaseUrl}/api/v1/governance/virtual-keys" \
@@ -274,7 +325,7 @@ LOG_LEVEL=info
 EOF
 fi
 
-chmod 644 "${EnvFile}"
+chmod 600 "${EnvFile}"
 
 # ---------------------------------------------------------------------------
 # Create goose configuration YAML (only if it doesn't exist)
@@ -321,7 +372,7 @@ extensions:
     description: Bifrost AI Gateway as MCP server (Gateway mode)
     url: http://127.0.0.1:${BifrostPort}/mcp
     headers:
-      X-Bifrost-Setup-Token: "${BIFROST_VK}"
+      x-bf-vk: "${BIFROST_VK}"
     timeout: 300
     bundled: null
 
@@ -335,7 +386,7 @@ GOOSE_AUTO_COMPACT_TOKEN_LIMIT: 800000
 YAMLEOF
 fi
 
-chmod 644 "${ConfigFile}"
+chmod 600 "${ConfigFile}"
 
 echo "Goose configuration written to ${ConfigFile}"
 
@@ -353,14 +404,17 @@ else
 fi
 
 echo "Creating service file at ${ServiceFile}"
+mkdir -p "$(dirname "${ServiceFile}")"
 
 # Build ExecStart command
 # Goose serve runs ACP server over HTTP and WebSocket
-ExecStartCmd="bash -c 'source ${EnvFile}; ${BinaryPath} serve --dangerously-unauthenticated --host \${GOOSE_HOST:-127.0.0.1} --port \${GOOSE_PORT:-3284}' ${GooseArgs:-}"
+# Note: systemd expands ${VAR} from the unit's environment (EnvironmentFile
+# provides GOOSE_HOST/GOOSE_PORT); shell-style ${VAR:-default} is not supported.
+ExecStartCmd="bash -c 'source ${EnvFile}; exec ${BinaryPath} serve --dangerously-unauthenticated --host \${GOOSE_HOST} --port \${GOOSE_PORT}${GooseArgs:+ ${GooseArgs}}'"
 
 if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   if [ ! -f "${ServiceFile}" ]; then
-    sudo tee "${ServiceFile}" > /dev/null << EOF
+    ${SUDO} tee "${ServiceFile}" > /dev/null << EOF
 [Unit]
 Description=${ServerName} ACP Server
 After=network.target
@@ -415,7 +469,7 @@ LOGROTATE_FILE="/etc/logrotate.d/${ServerName}"
 
 if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   if [ ! -f "${LOGROTATE_FILE}" ]; then
-    sudo tee "${LOGROTATE_FILE}" > /dev/null << EOF
+    ${SUDO} tee "${LOGROTATE_FILE}" > /dev/null << EOF
 ${LogPath} {
     daily
     rotate 7
@@ -444,23 +498,35 @@ fi
 if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   echo "Creating system user ${ServiceUser} and setting ownership..."
   if ! id "${ServiceUser}" >/dev/null 2>&1; then
-    sudo useradd -r -s /bin/false -m -d /srv/goose "${ServiceUser}" 2>/dev/null || true
+    ${SUDO} useradd -r -s /bin/false -m -d /srv/goose "${ServiceUser}" 2>/dev/null || true
   fi
 
-  sudo mkdir -p "${ConfigDir}"
-  sudo chown -R "${ServiceUser}:${ServiceGroup}" "${ConfigDir}" 2>/dev/null || true
-  sudo chown "${ServiceUser}:${ServiceGroup}" "$(dirname "${LogPath}")" 2>/dev/null || true
-  sudo touch "${LogPath}" 2>/dev/null || true
-  sudo chown "${ServiceUser}:${ServiceGroup}" "${LogPath}" 2>/dev/null || true
+  ${SUDO} mkdir -p "${WorkingDir}"
+  ${SUDO} chown -R "${ServiceUser}:${ServiceGroup}" "${WorkingDir}" 2>/dev/null || true
+  ${SUDO} mkdir -p "${ConfigDir}"
+  ${SUDO} chown -R "${ServiceUser}:${ServiceGroup}" "${ConfigDir}" 2>/dev/null || true
+  GooseHome="$(getent passwd "${ServiceUser}" 2>/dev/null | cut -d: -f6 || true)"
+  if [ -n "${GooseHome}" ]; then
+    ${SUDO} chown "${ServiceUser}:${ServiceGroup}" "${GooseHome}" 2>/dev/null || true
+  fi
+  ${SUDO} chown "${ServiceUser}:${ServiceGroup}" "$(dirname "${LogPath}")" 2>/dev/null || true
+  ${SUDO} touch "${LogPath}" 2>/dev/null || true
+  ${SUDO} chown "${ServiceUser}:${ServiceGroup}" "${LogPath}" 2>/dev/null || true
 else
   if [ "$(id -u)" -eq 0 ] || [ -n "${SUDO_USER:-}" ]; then
     echo "Creating system user ${ServiceUser} (running with privileges)"
     if ! id "${ServiceUser}" >/dev/null 2>&1; then
-      useradd -r -s /bin/false -m -d /srv/goose "${ServiceUser}" 2>/dev/null || true
+      ${SUDO} useradd -r -s /bin/false -m -d /srv/goose "${ServiceUser}" 2>/dev/null || true
     fi
 
+    mkdir -p "${WorkingDir}"
+    chown -R "${ServiceUser}:${ServiceGroup}" "${WorkingDir}" 2>/dev/null || true
     mkdir -p "${ConfigDir}"
     chown -R "${ServiceUser}:${ServiceGroup}" "${ConfigDir}" 2>/dev/null || true
+    GooseHome="$(getent passwd "${ServiceUser}" 2>/dev/null | cut -d: -f6 || true)"
+    if [ -n "${GooseHome}" ]; then
+      chown "${ServiceUser}:${ServiceGroup}" "${GooseHome}" 2>/dev/null || true
+    fi
     chown "${ServiceUser}:${ServiceGroup}" "$(dirname "${LogPath}")" 2>/dev/null || true
     touch "${LogPath}" 2>/dev/null || true
     chown "${ServiceUser}:${ServiceGroup}" "${LogPath}" 2>/dev/null || true
@@ -481,9 +547,9 @@ fi
 echo "Enabling and starting service..."
 
 if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
-  sudo systemctl --system daemon-reload
-  sudo systemctl enable "${ServerName}.service"
-  sudo systemctl start "${ServerName}.service"
+  ${SUDO} systemctl --system daemon-reload
+  ${SUDO} systemctl enable "${ServerName}.service"
+  ${SUDO} systemctl start "${ServerName}.service"
 else
   systemctl --user daemon-reload
   systemctl --user enable "${ServerName}.service"
@@ -538,7 +604,7 @@ echo ""
 if command -v systemctl >/dev/null 2>&1; then
   echo "Service status:"
   if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
-    sudo systemctl status "${ServerName}" --no-pager 2>/dev/null || echo "Could not retrieve service status"
+    ${SUDO} systemctl status "${ServerName}" --no-pager 2>/dev/null || echo "Could not retrieve service status"
   else
     systemctl --user status "${ServerName}" --no-pager 2>/dev/null || echo "Could not retrieve service status"
   fi
