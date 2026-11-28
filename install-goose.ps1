@@ -11,16 +11,26 @@ param(
   [switch]$System,
   [string]$GooseBinary,
   [string]$GooseArgs,
+  [string]$BifrostHost,
+  [string]$BifrostPort,
+  [string]$LlamaHost,
+  [string]$LlamaPort,
   [switch]$Help
 )
 
 if ($Help) {
-  Write-Host "Usage: ./install-goose.ps1 [--system] [--goose-binary <path>] [--goose-args <args>] [--help]"
+  Write-Host "Usage: ./install-goose.ps1 [--system] [--goose-binary <path>] [--goose-args <args>] [endpoint options] [--help]"
   Write-Host ""
   Write-Host "  --system         System-wide deployment (default: user deployment)"
   Write-Host "  --goose-binary   Path to existing goose binary (skip download)"
   Write-Host "  --goose-args     Extra arguments to pass to goose serve"
   Write-Host "  --help           Show this help message"
+  Write-Host ""
+  Write-Host "Endpoint options (default 127.0.0.1; env vars BIFROST_HOST/BIFROST_PORT/LLAMA_HOST/LLAMA_PORT):"
+  Write-Host "  -BifrostHost     Host where bifrost-http runs (e.g. 127.0.0.1 or a remote host)"
+  Write-Host "  -BifrostPort     Port where bifrost-http runs (default: 8080)"
+  Write-Host "  -LlamaHost       Host where llama-server runs (e.g. 127.0.0.1 or a remote host)"
+  Write-Host "  -LlamaPort       Port where llama-server runs (default: 9931)"
   Write-Host ""
   Write-Host "Ports:"
   Write-Host "  goose: 3284"
@@ -38,8 +48,13 @@ $ServerName = "goose"
 $ServiceUser = "goose"
 $ServiceGroup = "goose"
 $GoosePort = 3284
-$BifrostPort = 8080
-$LlamaPort = 9931
+# bifrost/llama endpoints (param > env var > default)
+if (-not $BifrostHost) { $BifrostHost = if ($env:BIFROST_HOST) { $env:BIFROST_HOST } else { "127.0.0.1" } }
+if (-not $BifrostPort) { $BifrostPort = if ($env:BIFROST_PORT) { $env:BIFROST_PORT } else { "8080" } }
+if (-not $LlamaHost) { $LlamaHost = if ($env:LLAMA_HOST) { $env:LLAMA_HOST } else { "127.0.0.1" } }
+if (-not $LlamaPort) { $LlamaPort = if ($env:LLAMA_PORT) { $env:LLAMA_PORT } else { "9931" } }
+Write-Host "bifrost endpoint: ${BifrostHost}:$BifrostPort"
+Write-Host "llama-server endpoint: ${LlamaHost}:$LlamaPort"
 $RestartMode = "always"
 $RestartSeconds = 10s
 
@@ -219,8 +234,8 @@ foreach ($dir in @($WorkingDir, $ConfigDir, (Split-Path -Parent $LogPath))) {
 #==============================================================================
 # Discover bifrost virtual key and llama-server model dynamically
 #==============================================================================
-$BifrostBaseUrl = "http://127.0.0.1:$BifrostPort"
-$LlamaBaseUrl = "http://127.0.0.1:$LlamaPort"
+$BifrostBaseUrl = "http://${BifrostHost}:$BifrostPort"
+$LlamaBaseUrl = "http://${LlamaHost}:$LlamaPort"
 
 # Read BIFROST_SETUP_TOKEN from bifrost env file if available
 $BifrostSetupToken = ""
@@ -311,13 +326,36 @@ GOOSE_PATH_ROOT=$WorkingDir
 GOOSE_WORKING_DIR=$WorkingDir
 GOOSE_CONFIG_DIR=$ConfigDir
 GOOSE_LOG_PATH=$LogPath
-BIFROST_HOST=127.0.0.1
+BIFROST_HOST=$BifrostHost
 BIFROST_PORT=$BifrostPort
 BIFROST_VK=$BifrostVk
-LLAMA_ARG_HOST=127.0.0.1
+LLAMA_ARG_HOST=$LlamaHost
 LLAMA_ARG_PORT=$LlamaPort
 LOG_LEVEL=info
 "@ | Out-File -FilePath $EnvFile -Encoding utf8
+}
+
+# If endpoint options were explicitly passed, apply them to an
+# already-provisioned goose.env as well (fresh installs above embed them)
+if ((($PSBoundParameters.ContainsKey("BifrostHost")) -or ($PSBoundParameters.ContainsKey("BifrostPort")) -or ($PSBoundParameters.ContainsKey("LlamaHost")) -or ($PSBoundParameters.ContainsKey("LlamaPort"))) -and (Test-Path $EnvFile)) {
+  $EnvContent = Get-Content $EnvFile -Raw
+  if ($PSBoundParameters.ContainsKey("BifrostHost")) {
+    $EnvContent = $EnvContent -replace '(?m)^BIFROST_HOST=.*$', "BIFROST_HOST=$BifrostHost"
+    Write-Host "  Updated BIFROST_HOST=$BifrostHost in $EnvFile"
+  }
+  if ($PSBoundParameters.ContainsKey("BifrostPort")) {
+    $EnvContent = $EnvContent -replace '(?m)^BIFROST_PORT=.*$', "BIFROST_PORT=$BifrostPort"
+    Write-Host "  Updated BIFROST_PORT=$BifrostPort in $EnvFile"
+  }
+  if ($PSBoundParameters.ContainsKey("LlamaHost")) {
+    $EnvContent = $EnvContent -replace '(?m)^LLAMA_ARG_HOST=.*$', "LLAMA_ARG_HOST=$LlamaHost"
+    Write-Host "  Updated LLAMA_ARG_HOST=$LlamaHost in $EnvFile"
+  }
+  if ($PSBoundParameters.ContainsKey("LlamaPort")) {
+    $EnvContent = $EnvContent -replace '(?m)^LLAMA_ARG_PORT=.*$', "LLAMA_ARG_PORT=$LlamaPort"
+    Write-Host "  Updated LLAMA_ARG_PORT=$LlamaPort in $EnvFile"
+  }
+  Set-Content -Path $EnvFile -Value $EnvContent -Encoding utf8 -NoNewline
 }
 
 #==============================================================================
@@ -341,7 +379,7 @@ providers:
   bifrost:
     enabled: true
     model: default
-    base_url: http://127.0.0.1:$BifrostPort/v1
+    base_url: http://${BifrostHost}:$BifrostPort/v1
     api_key: "$BifrostVk"
     configured: true
 
@@ -349,7 +387,7 @@ providers:
   llama-server:
     enabled: true
     model: $LlamaModel
-    base_url: http://127.0.0.1:$LlamaPort/v1
+    base_url: http://${LlamaHost}:$LlamaPort/v1
     api_key: ""
     configured: true
 
@@ -362,17 +400,17 @@ extensions:
     type: http
     name: Bifrost MCP Gateway
     description: Bifrost AI Gateway as MCP server (Gateway mode)
-    url: http://127.0.0.1:$BifrostPort/mcp
+    url: http://${BifrostHost}:$BifrostPort/mcp
     headers:
       x-bf-vk: "$BifrostVk"
     timeout: 300
     bundled: null
 
-OPENAI_BASE_URL: http://127.0.0.1:$BifrostPort/v1
-OPENAI_HOST: http://127.0.0.1:$BifrostPort
+OPENAI_BASE_URL: http://${BifrostHost}:$BifrostPort/v1
+OPENAI_HOST: http://${BifrostHost}:$BifrostPort
 OPENAI_TIMEOUT: '600'
 OPENAI_BASE_PATH: v1/chat/completions
-LLAMA_HOST: http://127.0.0.1:$LlamaPort
+LLAMA_HOST: http://${LlamaHost}:$LlamaPort
 GOOSE_THINKING_EFFORT: max
 GOOSE_AUTO_COMPACT_TOKEN_LIMIT: 800000
 "@
@@ -421,7 +459,7 @@ if ($NssmPath) {
   & $NssmPath set $ServerName RotateOnline 1
   
   # Set environment variables
-  $EnvExtra = "GOOSE_PORT=$GoosePort;GOOSE_HOST=127.0.0.1;GOOSE_PATH_ROOT=$WorkingDir;BIFROST_HOST=127.0.0.1;BIFROST_PORT=$BifrostPort;BIFROST_VK=$BifrostVk;LLAMA_ARG_HOST=127.0.0.1;LLAMA_ARG_PORT=$LlamaPort;LOG_LEVEL=info"
+  $EnvExtra = "GOOSE_PORT=$GoosePort;GOOSE_HOST=127.0.0.1;GOOSE_PATH_ROOT=$WorkingDir;BIFROST_HOST=$BifrostHost;BIFROST_PORT=$BifrostPort;BIFROST_VK=$BifrostVk;LLAMA_ARG_HOST=$LlamaHost;LLAMA_ARG_PORT=$LlamaPort;LOG_LEVEL=info"
   & $NssmPath set $ServerName EnvExtra $EnvExtra
   
   # Start the service
@@ -479,11 +517,11 @@ Write-Host "  BIFROST_VK:   $BifrostVk"
 Write-Host "  Llama Model:  $LlamaModel"
 Write-Host ""
 Write-Host "Providers configured:"
-Write-Host "  - bifrost (AI Gateway): http://127.0.0.1:$BifrostPort/v1"
-Write-Host "  - llama-server: http://127.0.0.1:$LlamaPort/v1 (model: $LlamaModel)"
+Write-Host "  - bifrost (AI Gateway): http://${BifrostHost}:$BifrostPort/v1"
+Write-Host "  - llama-server: http://${LlamaHost}:$LlamaPort/v1 (model: $LlamaModel)"
 Write-Host ""
 Write-Host "MCP servers configured:"
-Write-Host "  - bifrost-mcp: http://127.0.0.1:$BifrostPort/mcp (Gateway mode)"
+Write-Host "  - bifrost-mcp: http://${BifrostHost}:$BifrostPort/mcp (Gateway mode)"
 Write-Host ""
 Write-Host "To start manually:"
 Write-Host "  & `"$BinaryPath`" serve --dangerously-unauthenticated --host 127.0.0.1 --port $GoosePort"

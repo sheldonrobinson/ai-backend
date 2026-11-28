@@ -10,6 +10,8 @@ param(
   [switch]$System,
   [string]$LlamaBinary,
   [string]$LlamaArgs,
+  [ValidateSet("local", "network")]
+  [string]$HostMode = "local",
   [switch]$Help
 )
 
@@ -19,6 +21,7 @@ if ($Help) {
   Write-Host "  --system         System-wide deployment (default: user deployment)"
   Write-Host "  --llama-binary   Path to existing llama binary (skip download)"
   Write-Host "  --llama-args     Extra arguments to pass to llama serve"
+  Write-Host "  -HostMode        local (bind 127.0.0.1, default) or network (bind 0.0.0.0)"
   Write-Host "  --help           Show this help message"
   Write-Host ""
   Write-Host "Ports:"
@@ -56,6 +59,8 @@ if ($IsSystem) {
 }
 
 Write-Host "llama-server installation mode: $($IsSystem ? "system" : "user")"
+$BindHost = if ($HostMode -eq "network") { "0.0.0.0" } else { "127.0.0.1" }
+Write-Host "Bind host: $BindHost ($HostMode)"
 Write-Host "Binary path: $BinaryPath"
 Write-Host "Working dir: $WorkingDir"
 
@@ -212,7 +217,7 @@ try {
 # Service environment variables for llama-server
 # These are sourced by the Windows service wrapper
 
-LLAMA_ARG_HOST=127.0.0.1
+LLAMA_ARG_HOST=$BindHost
 LLAMA_ARG_PORT=$LlamaPort
 NGL_LEVEL=auto
 CONTEXT_SIZE=0
@@ -223,6 +228,15 @@ EMBEDDINGS_POOLING_TYPE=mean
 SLEEP_IDLE_SECONDS=
 LOG_LEVEL=info
 "@ | Out-File -FilePath $EnvFile -Encoding utf8
+  }
+
+  # If -HostMode was explicitly passed, apply it to an already-provisioned
+  # service.env as well (fresh installs above already embed $BindHost)
+  if ($PSBoundParameters.ContainsKey("HostMode") -and (Test-Path $EnvFile)) {
+    $EnvContent = Get-Content $EnvFile -Raw
+    $EnvContent = $EnvContent -replace '(?m)^LLAMA_ARG_HOST=.*$', "LLAMA_ARG_HOST=$BindHost"
+    Set-Content -Path $EnvFile -Value $EnvContent -Encoding utf8 -NoNewline
+    Write-Host "  Updated LLAMA_ARG_HOST=$BindHost in $EnvFile"
   }
   
   #==============================================================================
@@ -269,7 +283,7 @@ LOG_LEVEL=info
     & $NssmPath remove $ServerName -confirm 2>$null
     
     # Create service
-    & $NssmPath install $ServerName $BinaryPath "serve --host 127.0.0.1 --port $LlamaPort --agent -ngl auto --ctx-size 0 --log-file $LogPath --log-timestamps $LlamaArgsStr"
+    & $NssmPath install $ServerName $BinaryPath "serve --host $BindHost --port $LlamaPort --agent -ngl auto --ctx-size 0 --log-file $LogPath --log-timestamps $LlamaArgsStr"
     & $NssmPath set $ServerName DisplayName "llama-server"
     & $NssmPath set $ServerName Description "llama.cpp server (llama-app) - local inference endpoint"
     & $NssmPath set $ServerName Start SERVICE_AUTO_START
@@ -281,7 +295,7 @@ LOG_LEVEL=info
     & $NssmPath set $ServerName RotateOnline 1
     
     # Set environment variables via registry
-    & $NssmPath set $ServerName EnvExtra "LLAMA_ARG_HOST=127.0.0.1;LLAMA_ARG_PORT=$LlamaPort;NGL_LEVEL=auto;CONTEXT_SIZE=0;LOG_LEVEL=info"
+    & $NssmPath set $ServerName EnvExtra "LLAMA_ARG_HOST=$BindHost;LLAMA_ARG_PORT=$LlamaPort;NGL_LEVEL=auto;CONTEXT_SIZE=0;LOG_LEVEL=info"
     
     # Start the service
     try {
@@ -293,7 +307,7 @@ LOG_LEVEL=info
   } else {
     Write-Host "  NSSM not available. Service not created automatically." -ForegroundColor Yellow
     Write-Host "  To create the service manually, install NSSM (winget install nssm) and run:"
-    Write-Host "    nssm install $ServerName `"$BinaryPath`" serve --host 127.0.0.1 --port $LlamaPort"
+    Write-Host "    nssm install $ServerName `"$BinaryPath`" serve --host $BindHost --port $LlamaPort"
     Write-Host "    nssm start $ServerName"
   }
   

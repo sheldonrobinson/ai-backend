@@ -16,10 +16,16 @@ LogPath="${HOME}/.local/state/goose/goose.log"
 SystemDeployment=false
 SYSTEM_DEPLOYMENT=false
 
-# Service ports
+# Service ports / endpoints (CLI option > env var > default)
 GoosePort="3284"
-BifrostPort="8080"
-LlamaPort="9931"
+BifrostHost="${BIFROST_HOST:-127.0.0.1}"
+BifrostPort="${BIFROST_PORT:-8080}"
+LlamaHost="${LLAMA_HOST:-127.0.0.1}"
+LlamaPort="${LLAMA_PORT:-9931}"
+BifrostHostSet=false
+BifrostPortSet=false
+LlamaHostSet=false
+LlamaPortSet=false
 
 # Service restart settings
 RestartMode="always"
@@ -29,12 +35,18 @@ RestartSeconds="10s"
 # Parse command line arguments
 # ---------------------------------------------------------------------------
 usage() {
-  echo "Usage: $0 [--system] [--goose-binary <path>] [--goose-args <args>] [--help]"
+  echo "Usage: $0 [--system] [--goose-binary <path>] [--goose-args <args>] [endpoint options] [--help]"
   echo ""
   echo "  --system         System-wide deployment (default: user deployment)"
   echo "  --goose-binary   Path to existing goose binary (skip download)"
   echo "  --goose-args     Extra arguments to pass to goose serve"
   echo "  --help           Show this help message"
+  echo ""
+  echo "Endpoint options (default 127.0.0.1; env vars BIFROST_HOST/BIFROST_PORT/LLAMA_HOST/LLAMA_PORT):"
+  echo "  --bifrost-host   Host where bifrost-http runs (e.g. 127.0.0.1 or a remote host)"
+  echo "  --bifrost-port   Port where bifrost-http runs (default: 8080)"
+  echo "  --llama-host     Host where llama-server runs (e.g. 127.0.0.1 or a remote host)"
+  echo "  --llama-port     Port where llama-server runs (default: 9931)"
   echo ""
   echo "Ports:"
   echo "  goose:        3284"
@@ -54,6 +66,22 @@ while [[ $# -gt 0 ]]; do
       ;;
     --goose-args)
       GooseArgs="$2"
+      shift 2
+      ;;
+    --bifrost-host)
+      BifrostHost="$2"; BifrostHostSet=true
+      shift 2
+      ;;
+    --bifrost-port)
+      BifrostPort="$2"; BifrostPortSet=true
+      shift 2
+      ;;
+    --llama-host)
+      LlamaHost="$2"; LlamaHostSet=true
+      shift 2
+      ;;
+    --llama-port)
+      LlamaPort="$2"; LlamaPortSet=true
       shift 2
       ;;
     --help|-h)
@@ -240,7 +268,7 @@ fi
 
 # Discover BIFROST_VK from bifrost-http governance API
 BIFROST_VK=""
-BifrostBaseUrl="http://127.0.0.1:${BifrostPort}"
+BifrostBaseUrl="http://${BifrostHost}:${BifrostPort}"
 if command -v curl >/dev/null 2>&1; then
   echo "Discovering bifrost virtual key from ${BifrostBaseUrl}..."
   VKResponse=$(curl -s "${BifrostBaseUrl}/api/v1/governance/virtual-keys" \
@@ -272,7 +300,7 @@ echo "BIFROST_VK: ${BIFROST_VK}"
 
 # Discover llama-server model from /v1/models endpoint
 LlamaModel="ggml-org/gemma-4-E2B-it-GGUF:Q4_0"
-LlamaBaseUrl="http://127.0.0.1:${LlamaPort}"
+LlamaBaseUrl="http://${LlamaHost}:${LlamaPort}"
 
 if command -v curl >/dev/null 2>&1; then
   echo "Discovering llama-server model from ${LlamaBaseUrl}/v1/models..."
@@ -316,16 +344,37 @@ GOOSE_PORT=${GoosePort}
 GOOSE_HOST=127.0.0.1
 GOOSE_WORKING_DIR=${WorkingDir}
 GOOSE_LOG_PATH=${LogPath}
-BIFROST_HOST=127.0.0.1
+BIFROST_HOST=${BifrostHost}
 BIFROST_PORT=${BifrostPort}
 BIFROST_VK=${BIFROST_VK}
-LLAMA_ARG_HOST=127.0.0.1
+LLAMA_ARG_HOST=${LlamaHost}
 LLAMA_ARG_PORT=${LlamaPort}
 LOG_LEVEL=info
 EOF
 fi
 
 chmod 600 "${EnvFile}"
+
+# If bifrost/llama endpoint options were explicitly passed, apply them to an
+# already-provisioned goose.env as well (fresh installs above embed them)
+if [ -f "${EnvFile}" ]; then
+  if [ "${BifrostHostSet}" = true ]; then
+    sed -i "s|^BIFROST_HOST=.*|BIFROST_HOST=${BifrostHost}|" "${EnvFile}"
+    echo "  Updated BIFROST_HOST=${BifrostHost} in ${EnvFile}"
+  fi
+  if [ "${BifrostPortSet}" = true ]; then
+    sed -i "s|^BIFROST_PORT=.*|BIFROST_PORT=${BifrostPort}|" "${EnvFile}"
+    echo "  Updated BIFROST_PORT=${BifrostPort} in ${EnvFile}"
+  fi
+  if [ "${LlamaHostSet}" = true ]; then
+    sed -i "s|^LLAMA_ARG_HOST=.*|LLAMA_ARG_HOST=${LlamaHost}|" "${EnvFile}"
+    echo "  Updated LLAMA_ARG_HOST=${LlamaHost} in ${EnvFile}"
+  fi
+  if [ "${LlamaPortSet}" = true ]; then
+    sed -i "s|^LLAMA_ARG_PORT=.*|LLAMA_ARG_PORT=${LlamaPort}|" "${EnvFile}"
+    echo "  Updated LLAMA_ARG_PORT=${LlamaPort} in ${EnvFile}"
+  fi
+fi
 
 # ---------------------------------------------------------------------------
 # Create goose configuration YAML (only if it doesn't exist)
@@ -349,7 +398,7 @@ providers:
   bifrost:
     enabled: true
     model: default
-    base_url: http://127.0.0.1:${BifrostPort}/v1
+    base_url: http://${BifrostHost}:${BifrostPort}/v1
     api_key: "${BIFROST_VK}"
     configured: true
 
@@ -357,7 +406,7 @@ providers:
   llama-server:
     enabled: true
     model: ${LlamaModel}
-    base_url: http://127.0.0.1:${LlamaPort}/v1
+    base_url: http://${LlamaHost}:${LlamaPort}/v1
     api_key: ""
     configured: true
 
@@ -370,17 +419,17 @@ extensions:
     type: http
     name: Bifrost MCP Gateway
     description: Bifrost AI Gateway as MCP server (Gateway mode)
-    url: http://127.0.0.1:${BifrostPort}/mcp
+    url: http://${BifrostHost}:${BifrostPort}/mcp
     headers:
       x-bf-vk: "${BIFROST_VK}"
     timeout: 300
     bundled: null
 
-OPENAI_BASE_URL: http://127.0.0.1:${BifrostPort}/v1
-OPENAI_HOST: http://127.0.0.1:${BifrostPort}
+OPENAI_BASE_URL: http://${BifrostHost}:${BifrostPort}/v1
+OPENAI_HOST: http://${BifrostHost}:${BifrostPort}
 OPENAI_TIMEOUT: '600'
 OPENAI_BASE_PATH: v1/chat/completions
-LLAMA_HOST: http://127.0.0.1:${LlamaPort}
+LLAMA_HOST: http://${LlamaHost}:${LlamaPort}
 GOOSE_THINKING_EFFORT: max
 GOOSE_AUTO_COMPACT_TOKEN_LIMIT: 800000
 YAMLEOF
@@ -549,11 +598,11 @@ echo "Enabling and starting service..."
 if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   ${SUDO} systemctl --system daemon-reload
   ${SUDO} systemctl enable "${ServerName}.service"
-  ${SUDO} systemctl start "${ServerName}.service"
+  ${SUDO} systemctl restart "${ServerName}.service"
 else
   systemctl --user daemon-reload
   systemctl --user enable "${ServerName}.service"
-  systemctl --user start "${ServerName}.service"
+  systemctl --user restart "${ServerName}.service"
 fi
 
 # ---------------------------------------------------------------------------
@@ -592,11 +641,11 @@ echo "  BIFROST_VK:   ${BIFROST_VK}"
 echo "  Llama Model:  ${LlamaModel}"
 echo ""
 echo "Providers configured:"
-echo "  - bifrost (AI Gateway): http://127.0.0.1:${BifrostPort}/v1"
-echo "  - llama-server: http://127.0.0.1:${LlamaPort}/v1 (model: ${LlamaModel})"
+echo "  - bifrost (AI Gateway): http://${BifrostHost}:${BifrostPort}/v1"
+echo "  - llama-server: http://${LlamaHost}:${LlamaPort}/v1 (model: ${LlamaModel})"
 echo ""
 echo "MCP servers configured:"
-echo "  - bifrost-mcp: http://127.0.0.1:${BifrostPort}/mcp (Gateway mode)"
+echo "  - bifrost-mcp: http://${BifrostHost}:${BifrostPort}/mcp (Gateway mode)"
 echo ""
 echo "To start manually:"
 echo "  ${BinaryPath} serve --dangerously-unauthenticated --host 127.0.0.1 --port ${GoosePort}"

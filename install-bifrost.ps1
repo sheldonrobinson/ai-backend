@@ -15,6 +15,10 @@ param(
   [string]$BifrostArgs,
   [string]$BifrostVersion = "latest",
   [string]$BifrostHttpVersion = "latest",
+  [ValidateSet("local", "network")]
+  [string]$HostMode = "local",
+  [string]$LlamaHost,
+  [string]$LlamaPort,
   [switch]$Help
 )
 
@@ -28,6 +32,9 @@ if ($Help) {
   Write-Host "  --bifrost-args      Extra arguments to pass to bifrost-http"
   Write-Host "  --bifrost-version   Bifrost CLI version (default: latest)"
   Write-Host "  --bifrost-http-version Bifrost-http version (default: latest)"
+  Write-Host "  -HostMode           local (bind 127.0.0.1, default) or network (bind 0.0.0.0)"
+  Write-Host "  -LlamaHost          Host where llama-server runs (default: 127.0.0.1 or `$env:LLAMA_HOST)"
+  Write-Host "  -LlamaPort          Port where llama-server runs (default: 9931 or `$env:LLAMA_PORT)"
   Write-Host "  --help              Show this help message"
   Write-Host ""
   Write-Host "Ports:"
@@ -45,6 +52,13 @@ $ServiceUser = "bifrost"
 $ServiceGroup = "bifrost"
 $DefaultAdminPassword = "ChangeMe"
 $BifrostPort = 8080
+# Resolve bind host from host mode: local binds 127.0.0.1, network binds 0.0.0.0
+$BifrostHost = if ($HostMode -eq "network") { "0.0.0.0" } else { "127.0.0.1" }
+# llama-server endpoint used for provider registration (param > env var > default)
+if (-not $LlamaHost) { $LlamaHost = if ($env:LLAMA_HOST) { $env:LLAMA_HOST } else { "127.0.0.1" } }
+if (-not $LlamaPort) { $LlamaPort = if ($env:LLAMA_PORT) { $env:LLAMA_PORT } else { "9931" } }
+Write-Host "Bifrost bind host: $BifrostHost ($HostMode)"
+Write-Host "llama-server endpoint: ${LlamaHost}:$LlamaPort"
 $RestartMode = "always"
 $RestartSeconds = 10s
 $BaseUrl = "https://downloads.getmaxim.ai"
@@ -214,8 +228,8 @@ BIFROST_SETUP_TOKEN=$BifrostSetupToken
 BIFROST_ADMIN_USERNAME="bifrost"
 BIFROST_ADMIN_PASSWORD="$DefaultAdminPassword"
 BIFROST_APP_DIR=$BifrostAppDir
-LLAMA_ARG_HOST=127.0.0.1
-LLAMA_ARG_PORT=9931
+LLAMA_ARG_HOST=$LlamaHost
+LLAMA_ARG_PORT=$LlamaPort
 LOG_LEVEL=info
 BINARY_PATH=$BinaryPath
 HTTP_BINARY_PATH=$BinaryPath
@@ -228,6 +242,25 @@ GOVERNANCE_ADMIN_USERNAME="bifrost"
 GOVERNANCE_ADMIN_PASSWORD="$DefaultAdminPassword"
 GOVERNANCE_CHANGE_ON_LOGON=true
 "@ | Out-File -FilePath $EnvFile -Encoding utf8
+}
+
+# If -HostMode/-LlamaHost/-LlamaPort were explicitly passed, apply them to an
+# already-provisioned service.env as well (fresh installs above embed them)
+if ((($PSBoundParameters.ContainsKey("HostMode")) -or ($PSBoundParameters.ContainsKey("LlamaHost")) -or ($PSBoundParameters.ContainsKey("LlamaPort"))) -and (Test-Path $EnvFile)) {
+  $EnvContent = Get-Content $EnvFile -Raw
+  if ($PSBoundParameters.ContainsKey("HostMode")) {
+    $EnvContent = $EnvContent -replace '(?m)^BIFROST_HOST=.*$', "BIFROST_HOST=$BifrostHost"
+    Write-Host "  Updated BIFROST_HOST=$BifrostHost in $EnvFile"
+  }
+  if ($PSBoundParameters.ContainsKey("LlamaHost")) {
+    $EnvContent = $EnvContent -replace '(?m)^LLAMA_ARG_HOST=.*$', "LLAMA_ARG_HOST=$LlamaHost"
+    Write-Host "  Updated LLAMA_ARG_HOST=$LlamaHost in $EnvFile"
+  }
+  if ($PSBoundParameters.ContainsKey("LlamaPort")) {
+    $EnvContent = $EnvContent -replace '(?m)^LLAMA_ARG_PORT=.*$', "LLAMA_ARG_PORT=$LlamaPort"
+    Write-Host "  Updated LLAMA_ARG_PORT=$LlamaPort in $EnvFile"
+  }
+  Set-Content -Path $EnvFile -Value $EnvContent -Encoding utf8 -NoNewline
 }
 
 #==============================================================================
@@ -274,7 +307,7 @@ if ($NssmPath) {
   & $NssmPath remove $ServerName -confirm 2>$null
   
   # Create service
-  & $NssmPath install $ServerName $BinaryPath "-port 8080 --app-dir $AppDir $BifrostArgsStr"
+  & $NssmPath install $ServerName $BinaryPath "-host $BifrostHost -port $BifrostPort --app-dir $AppDir $BifrostArgsStr"
   & $NssmPath set $ServerName DisplayName "bifrost-http"
   & $NssmPath set $ServerName Description "Bifrost AI Gateway HTTP service"
   & $NssmPath set $ServerName Start SERVICE_AUTO_START
@@ -286,7 +319,7 @@ if ($NssmPath) {
   & $NssmPath set $ServerName RotateOnline 1
   
   # Set environment variables
-  $EnvExtra = "BIFROST_HOST=localhost;BIFROST_PORT=$BifrostPort;BIFROST_SETUP_TOKEN=$BifrostSetupToken;BIFROST_APP_DIR=$BifrostAppDir;LLAMA_ARG_HOST=127.0.0.1;LLAMA_ARG_PORT=9931;LOG_LEVEL=info"
+  $EnvExtra = "BIFROST_HOST=$BifrostHost;BIFROST_PORT=$BifrostPort;BIFROST_SETUP_TOKEN=$BifrostSetupToken;BIFROST_APP_DIR=$BifrostAppDir;LLAMA_ARG_HOST=$LlamaHost;LLAMA_ARG_PORT=$LlamaPort;LOG_LEVEL=info"
   & $NssmPath set $ServerName EnvExtra $EnvExtra
   
   # Start the service
@@ -299,7 +332,7 @@ if ($NssmPath) {
 } else {
   Write-Host "  NSSM not available. Service not created automatically." -ForegroundColor Yellow
   Write-Host "  To create the service manually, install NSSM (winget install nssm) and run:"
-  Write-Host "    nssm install $ServerName `"$BinaryPath`" -port 8080 --app-dir $AppDir"
+  Write-Host "    nssm install $ServerName `"$BinaryPath`" -host $BifrostHost -port $BifrostPort --app-dir $AppDir"
   Write-Host "    nssm start $ServerName"
 }
 
@@ -432,7 +465,7 @@ if ($ProviderExists) {
   $ProviderPayload = @{
     "name" = "llama-server"
     "type" = "openai"
-    "base_url" = "http://127.0.0.1:9931/v1"
+    "base_url" = "http://${LlamaHost}:$LlamaPort/v1"
     "api_key" = ""
     "status" = "active"
     "description" = "Llama.cpp server registered via install script"
@@ -473,7 +506,7 @@ if ($KeyExists) {
 Write-Host "Discovering llama-server models..."
 $LlamaModels = @{}
 try {
-  $ModelsResponse = Invoke-WebRequest -Uri "http://localhost:9931/v1/models" -UseBasicParsing -ErrorAction Stop
+  $ModelsResponse = Invoke-WebRequest -Uri "http://${LlamaHost}:$LlamaPort/v1/models" -UseBasicParsing -ErrorAction Stop
   $LlamaModels = $ModelsResponse.Content | ConvertFrom-Json -AsHashtable -ErrorAction SilentlyContinue
 } catch {
   Write-Host "  Warning: Could not discover models from llama-server (not running yet?)" -ForegroundColor Yellow

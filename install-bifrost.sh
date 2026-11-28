@@ -20,6 +20,16 @@ RestartMode="always"
 RestartSeconds="10s"
 TemplateDir="/resources/inference-serving/localai-services/bifrost"
 
+# Bind host: local binds 127.0.0.1, network binds 0.0.0.0
+HostMode="local"
+HostModeSet=false
+
+# llama-server endpoint used for provider registration (CLI option > env var > default)
+LlamaHost="${LLAMA_HOST:-127.0.0.1}"
+LlamaPort="${LLAMA_PORT:-9931}"
+LlamaHostSet=false
+LlamaPortSet=false
+
 BASE_URL="https://downloads.getmaxim.ai"
 BifrostVersion="latest"
 BifrostHttpVersion="latest"
@@ -79,6 +89,21 @@ while [[ $# -gt 0 ]]; do
       BifrostArgs="$2"
       shift 2
       ;;
+    --host-mode)
+      case "$2" in
+        local|network) HostMode="$2"; HostModeSet=true ;;
+        *) echo "Error: --host-mode must be 'local' or 'network'" >&2; exit 1 ;;
+      esac
+      shift 2
+      ;;
+    --llama-host)
+      LlamaHost="$2"; LlamaHostSet=true
+      shift 2
+      ;;
+    --llama-port)
+      LlamaPort="$2"; LlamaPortSet=true
+      shift 2
+      ;;
     *)
       shift
       ;;
@@ -105,6 +130,15 @@ if [ "$(id -u)" -eq 0 ]; then
 else
   SUDO="sudo"
 fi
+
+# Resolve bifrost bind host from host mode
+if [ "${HostMode}" = "network" ]; then
+  BindHost="0.0.0.0"
+else
+  BindHost="127.0.0.1"
+fi
+echo "Bifrost bind host: ${BindHost} (${HostMode})"
+echo "llama-server endpoint: ${LlamaHost}:${LlamaPort}"
 
 
 # ---------------------------------------------------------------------------
@@ -211,13 +245,13 @@ else
 # Environment variables for ${ServerName}
 # These are sourced by the systemd service ExecStart
 
-BIFROST_HOST=localhost
+BIFROST_HOST=${BindHost}
 BIFROST_PORT=8080
 BIFROST_SETUP_TOKEN=${BIFROST_SETUP_TOKEN}
 BIFROST_ADMIN_USERNAME="bifrost"
 BIFROST_ADMIN_PASSWORD="ChangeMe"
-LLAMA_ARG_HOST=127.0.0.1
-LLAMA_ARG_PORT=9931
+LLAMA_ARG_HOST=${LlamaHost}
+LLAMA_ARG_PORT=${LlamaPort}
 LOG_LEVEL=info
 BINARY_PATH=${BinaryPath}
 HTTP_BINARY_PATH=${BinaryPath}
@@ -230,6 +264,23 @@ EOF
 fi
 
 chmod 600 "${EnvFile}"
+
+# If host/llama options were explicitly passed, apply them to an
+# already-provisioned service.env as well (fresh installs above embed them)
+if [ -f "${EnvFile}" ]; then
+  if [ "${HostModeSet}" = true ]; then
+    sed -i "s|^BIFROST_HOST=.*|BIFROST_HOST=${BindHost}|" "${EnvFile}"
+    echo "  Updated BIFROST_HOST=${BindHost} in ${EnvFile}"
+  fi
+  if [ "${LlamaHostSet}" = true ]; then
+    sed -i "s|^LLAMA_ARG_HOST=.*|LLAMA_ARG_HOST=${LlamaHost}|" "${EnvFile}"
+    echo "  Updated LLAMA_ARG_HOST=${LlamaHost} in ${EnvFile}"
+  fi
+  if [ "${LlamaPortSet}" = true ]; then
+    sed -i "s|^LLAMA_ARG_PORT=.*|LLAMA_ARG_PORT=${LlamaPort}|" "${EnvFile}"
+    echo "  Updated LLAMA_ARG_PORT=${LlamaPort} in ${EnvFile}"
+  fi
+fi
 
 # ---------------------------------------------------------------------------
 # Build ExecStart command
@@ -427,7 +478,7 @@ echo "Enabling and starting service..."
 if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   ${SUDO} systemctl --system daemon-reload
   ${SUDO} systemctl enable "${ServerName}.service"
-  ${SUDO} systemctl start "${ServerName}.service"
+  ${SUDO} systemctl restart "${ServerName}.service"
 else
   systemctl --user daemon-reload
   systemctl --user enable "${ServerName}.service"
@@ -440,7 +491,7 @@ fi
 echo "Waiting for bifrost-http to be ready on port ${BIFROST_PORT:-8080}..."
 BifrostPort="${BIFROST_PORT:-8080}"
 for i in $(seq 1 30); do
-  if curl -fsS "http://localhost:${BifrostPort}/api/config" >/dev/null 2>&1; then
+  if curl -fsS "http://127.0.0.1:${BifrostPort}/api/config" >/dev/null 2>&1; then
     echo "bifrost-http is ready"
     break
   fi
@@ -496,7 +547,7 @@ EOF
 if command -v curl >/dev/null 2>&1; then
   echo "Sending PUT /api/config with X-Bifrost-Setup-Token header..."
 
-  SetupResponse=$(curl -s -w "\n%{http_code}" -X PUT "http://localhost:${BifrostPort}/api/config" \
+  SetupResponse=$(curl -s -w "\n%{http_code}" -X PUT "http://127.0.0.1:${BifrostPort}/api/config" \
     -H "X-Bifrost-Setup-Token: ${SETUP_TOKEN}" \
     -H "Content-Type: application/json" \
     -d "${CONFIG_PAYLOAD}" 2>/dev/null) || true
@@ -521,7 +572,7 @@ fi
 # ---------------------------------------------------------------------------
 echo "Registering llama-server as a provider in bifrost-http via API..."
 
-BifrostUrl="http://localhost:${BifrostPort}"
+BifrostUrl="http://127.0.0.1:${BifrostPort}"
 
 # Generate virtual key value
 VK_VALUE="sk-vk-llama-server-$(openssl rand -hex 16 2>/dev/null || head -c 16 /dev/urandom | base64 | tr -dc 'a-z0-9' | head -c 16)"
@@ -544,7 +595,7 @@ ProviderPayload=$(cat << EOF
 {
   "name": "llama-server",
   "type": "openai",
-  "base_url": "http://127.0.0.1:9931/v1",
+  "base_url": "http://${LlamaHost}:${LlamaPort}/v1",
   "api_key": "",
   "status": "active",
   "description": "Llama.cpp server registered via install script"
@@ -569,7 +620,7 @@ api_call "POST" "/api/v1/keys" "${KeyPayload}" || echo "  Warning: Key registrat
 
 # 3. Discover and register models from llama-server
 echo "  Discovering llama-server models..."
-LlamaModels=$(curl -fsS "http://localhost:9931/v1/models" 2>/dev/null || echo "{}")
+LlamaModels=$(curl -fsS "http://${LlamaHost}:${LlamaPort}/v1/models" 2>/dev/null || echo "{}")
 
 if command -v jq >/dev/null 2>&1; then
   ModelNames=$(echo "${LlamaModels}" | jq -r '.data[].id // empty' 2>/dev/null || echo "")
@@ -661,7 +712,7 @@ api_call "POST" "/api/v1/governance/virtual-key-provider-configs" "${VkProviderP
 
 echo "llama-server provider registration attempted via bifrost-http API"
 echo "  Virtual key: ${VK_VALUE}"
-echo "  Provider: llama-server (http://${LLAMA_ARG_HOST:-127.0.0.1}:${LLAMA_ARG_PORT:-9931}/v1)"
+echo "  Provider: llama-server (http://${LlamaHost}:${LlamaPort}/v1)"
 echo "  Models: ${ModelNames} discovered and registered"
 
 # ---------------------------------------------------------------------------
@@ -682,7 +733,7 @@ echo "  Admin User:      bifrost"
 echo "  Admin Password:  ChangeMe"
 echo ""
 echo "To complete setup manually (if not done above):"
-echo "  curl -X PUT http://localhost:${BifrostPort}/api/config \\"
+echo "  curl -X PUT http://127.0.0.1:${BifrostPort}/api/config \\"
 echo "    -H \"X-Bifrost-Setup-Token: ${BIFROST_SETUP_TOKEN}\" \\"
 echo "    -H \"Content-Type: application/json\" \\"
 echo "    -d '{\"\$schema\": \"https://www.getbifrost.ai/schema\", \"setup_token\": \"${BIFROST_SETUP_TOKEN}\", \"client\": {\"enforce_auth_on_inference\": true}, \"governance\": {\"auth_config\": {\"setup_token\": \"${BIFROST_SETUP_TOKEN}\", \"admin_username\": \"bifrost\", \"admin_password\": \"ChangeMe\", \"is_enabled\": true}}}'"

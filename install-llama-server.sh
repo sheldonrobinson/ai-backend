@@ -16,6 +16,10 @@ RestartSeconds="5"
 SystemDeployment=false
 SYSTEM_DEPLOYMENT=false
 
+# Bind host: local binds 127.0.0.1, network binds 0.0.0.0
+HostMode="local"
+HostModeSet=false
+
 # ---------------------------------------------------------------------------
 # Parse command line arguments
 # ---------------------------------------------------------------------------
@@ -31,6 +35,13 @@ while [[ $# -gt 0 ]]; do
       ;;
     --llama-args)
       LlamaArgs="$2"
+      shift 2
+      ;;
+    --host-mode)
+      case "$2" in
+        local|network) HostMode="$2"; HostModeSet=true ;;
+        *) echo "Error: --host-mode must be 'local' or 'network'" >&2; exit 1 ;;
+      esac
       shift 2
       ;;
     *)
@@ -59,6 +70,14 @@ else
 fi
 
 echo "llama-server installation mode: $( [ "${SYSTEM_DEPLOYMENT}" = true ] && echo system || echo user )"
+
+# Resolve bind host from host mode
+if [ "${HostMode}" = "network" ]; then
+  BindHost="0.0.0.0"
+else
+  BindHost="127.0.0.1"
+fi
+echo "Bind host: ${BindHost} (${HostMode})"
 
 # ---------------------------------------------------------------------------
 # Detect OS and architecture
@@ -281,7 +300,7 @@ else
 # Service environment variables for llama-server
 # These are sourced by the systemd service ExecStart
 
-LLAMA_ARG_HOST=127.0.0.1
+LLAMA_ARG_HOST=${BindHost}
 LLAMA_ARG_PORT=9931
 NGL_LEVEL=auto
 CONTEXT_SIZE=0
@@ -296,6 +315,13 @@ EOF
 fi
 
 chmod 644 "${EnvFile}"
+
+# If --host-mode was explicitly passed, apply it to an already-provisioned
+# service.env as well (fresh installs above already embed BindHost)
+if [ "${HostModeSet}" = true ] && [ -f "${EnvFile}" ]; then
+  sed -i "s|^LLAMA_ARG_HOST=.*|LLAMA_ARG_HOST=${BindHost}|" "${EnvFile}"
+  echo "  Updated LLAMA_ARG_HOST=${BindHost} in ${EnvFile}"
+fi
 
 # ---------------------------------------------------------------------------
 # Build ExecStart command (modeled after llama-server pattern)
@@ -453,7 +479,7 @@ echo "Enabling and starting service..."
 if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
   ${SUDO} systemctl --system daemon-reload
   ${SUDO} systemctl enable "${ServerName}.service"
-  ${SUDO} systemctl start "${ServerName}.service"
+  ${SUDO} systemctl restart "${ServerName}.service"
 else
   systemctl --user daemon-reload
   systemctl --user enable "${ServerName}.service"
@@ -475,6 +501,7 @@ echo "  Service File: ${ServiceFile}"
 echo "  Service User: ${ServiceUser}"
 echo "  Service Group: ${ServiceGroup}"
 echo "  Backend:     ${BACKEND}"
+echo "  Bind Host:   ${BindHost} (${HostMode})"
 echo ""
 echo "Status check:"
 if [ "${SYSTEM_DEPLOYMENT}" = true ]; then
