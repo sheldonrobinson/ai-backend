@@ -208,7 +208,7 @@ if (Test-Path $EnvFile) {
 # Environment variables for $ServerName
 # These are sourced by the Windows service wrapper
 
-BIFROST_HOST=localhost
+BIFROST_HOST=$BifrostHost
 BIFROST_PORT=$BifrostPort
 BIFROST_SETUP_TOKEN=$BifrostSetupToken
 BIFROST_ADMIN_USERNAME="bifrost"
@@ -392,6 +392,7 @@ $ConfigPayload = @{
     }
     "governance" = @{
         "auth_config" = @{
+            "setup_token" = $BifrostSetupToken
             "admin_username" = $AdminUsername
             "admin_password" = $AdminPassword
             "is_enabled" = $true
@@ -647,6 +648,7 @@ $setupBody = @{
     }
     governance = @{
         auth_config = @{
+            setup_token = $BifrostSetupToken
             admin_username = "bifrost"
             admin_password = $DefaultAdminPassword
             is_enabled = $true

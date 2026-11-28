@@ -180,16 +180,24 @@ chmod +x "${BinaryPath}"
 echo "Installed bifrost-http to ${BinaryPath}"
 
 # ---------------------------------------------------------------------------
-# Generate setup token
+# Configure setup token (reuse the one already provisioned in the service env
+# file on re-runs, so the PUT /api/config call matches the running service)
 # ---------------------------------------------------------------------------
-echo "Generating BIFROST_SETUP_TOKEN..."
-if command -v openssl >/dev/null 2>&1; then
-  BIFROST_SETUP_TOKEN=$(openssl rand -hex 32)
+echo "Configuring BIFROST_SETUP_TOKEN..."
+if [ -f "${EnvFile}" ]; then
+  BIFROST_SETUP_TOKEN="$(grep -E '^BIFROST_SETUP_TOKEN=' "${EnvFile}" | tail -n1 | cut -d= -f2- || true)"
+fi
+if [ -z "${BIFROST_SETUP_TOKEN:-}" ]; then
+  if command -v openssl >/dev/null 2>&1; then
+    BIFROST_SETUP_TOKEN=$(openssl rand -hex 32)
+  else
+    BIFROST_SETUP_TOKEN=$(head -c 32 /dev/urandom | base64 | tr -dc 'a-z0-9' | head -c 32)
+  fi
+  echo "BIFROST_SETUP_TOKEN generated (length: ${#BIFROST_SETUP_TOKEN})"
 else
-  BIFROST_SETUP_TOKEN=$(head -c 32 /dev/urandom | base64 | tr -dc 'a-z0-9' | head -c 32)
+  echo "BIFROST_SETUP_TOKEN reused from existing service.env (length: ${#BIFROST_SETUP_TOKEN})"
 fi
 export BIFROST_SETUP_TOKEN
-echo "BIFROST_SETUP_TOKEN generated (length: ${#BIFROST_SETUP_TOKEN})"
 
 # ---------------------------------------------------------------------------
 # Create service environment file (only if it doesn't exist)
@@ -474,6 +482,7 @@ CONFIG_PAYLOAD=$(cat << EOF
   },
   "governance": {
     "auth_config": {
+      "setup_token": "${SETUP_TOKEN}",
       "admin_username": "${ADMIN_USERNAME}",
       "admin_password": "${ADMIN_PASSWORD}",
       "is_enabled": true
@@ -676,7 +685,7 @@ echo "To complete setup manually (if not done above):"
 echo "  curl -X PUT http://localhost:${BifrostPort}/api/config \\"
 echo "    -H \"X-Bifrost-Setup-Token: ${BIFROST_SETUP_TOKEN}\" \\"
 echo "    -H \"Content-Type: application/json\" \\"
-echo "    -d '{\"\$schema\": \"https://www.getbifrost.ai/schema\", \"setup_token\": \"${BIFROST_SETUP_TOKEN}\", \"client\": {\"enforce_auth_on_inference\": true}, \"governance\": {\"auth_config\": {\"admin_username\": \"bifrost\", \"admin_password\": \"ChangeMe\", \"is_enabled\": true}}}'"
+echo "    -d '{\"\$schema\": \"https://www.getbifrost.ai/schema\", \"setup_token\": \"${BIFROST_SETUP_TOKEN}\", \"client\": {\"enforce_auth_on_inference\": true}, \"governance\": {\"auth_config\": {\"setup_token\": \"${BIFROST_SETUP_TOKEN}\", \"admin_username\": \"bifrost\", \"admin_password\": \"ChangeMe\", \"is_enabled\": true}}}'"
 echo ""
 if command -v systemctl >/dev/null 2>&1; then
   echo "Service status:"
